@@ -15,7 +15,7 @@ export default function ProductsPage() {
       <SiteHeader />
       <main>
         <section className="page-hero">
-          <div className="page-hero-bg"><Image src="/images/catalog/pages/page-01.png" alt="" fill priority sizes="100vw" /></div>
+          <div className="page-hero-bg"><Image src="/images/catalog/pages/page-01.webp" alt="" fill priority sizes="100vw" /></div>
           <div className="container page-hero-inner">
             <div className="breadcrumbs"><Link href="/">Ana sayfa</Link><span>/</span><span>Ürünler</span></div>
             <p className="eyebrow light">Marel ürün ailesi</p>
