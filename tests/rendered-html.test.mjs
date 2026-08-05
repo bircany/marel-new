@@ -16,7 +16,9 @@ test("Marel ana sayfasını sunucu tarafında üretir", async () => {
   const response = await render();
   assert.equal(response.status, 200);
   const html = await response.text();
-  assert.match(html, /Ölçünüze özel/);
+  assert.match(html, /En Çok Satanlar/);
+  assert.match(html, /Sepete Ekle/);
+  assert.match(html, /Sipariş Takip/);
   assert.match(html, /Plise Perde/);
   assert.match(html, /Diamond/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
