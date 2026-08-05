@@ -7,27 +7,29 @@ import { StorefrontHero } from "./components/storefront-hero";
 
 export const metadata = {
   title: "Marel | Online Perde ve Sineklik Mağazası",
-  description: "Plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemlerini inceleyin; ölçünüze özel hızlı teklif alın.",
+  description: "Plise perde, Honeycomb, jaluzi, zip perde ve sineklik sistemlerini gerçek seri ve renkleriyle inceleyin; WhatsApp'tan teklif alın.",
 };
 
+const neutral = ["#f4f2ec", "#d8d3c8", "#adb0b1", "#53575a", "#232527"];
+
 const bestSellers: StoreProduct[] = [
-  { name: "Diamond 100 Beyaz Plise Perde", category: "Marel / Plise Perde", image: "/images/catalog/diamond.webp", badge: "Çok Satan", feature: "%50 ışık filtrasyonu", colors: 10, href: "/urunler/plise-perde/diamond-serisi" },
-  { name: "Diamond 110 Antrasit Plise Perde", category: "Marel / Plise Perde", image: "/images/catalog/pages/page-02.webp", badge: "Yeni", feature: "UV dayanımlı kumaş", colors: 10, href: "/urunler/plise-perde/diamond-serisi" },
-  { name: "Blackout Tam Karartma Perde", category: "Marel / Blackout", image: "/images/catalog/blackout.webp", badge: "Tam Karartma", feature: "%100 ışık kontrolü", colors: 5, href: "/urunler/plise-perde/diamond-serisi" },
-  { name: "Silver Isı Kontrollü Plise Perde", category: "Marel / Silver", image: "/images/catalog/silver.webp", feature: "Isı ve güneş kontrolü", colors: 6, href: "/urunler/plise-perde/diamond-serisi" },
+  { name: "Honeycomb 003 Gri Isı Yalıtımlı Plise Perde", code: "HC-003", category: "Marel / Honeycomb Series", image: "/images/real/honeycomb-gri-detay.png", badge: "Çok Satan", feature: "%100 ışık filtrasyonu · Isı yalıtımlı hücresel yapı", colors: neutral, price: "1.166,00 ₺'den", href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 38%" },
+  { name: "Diamond 100 Beyaz Plise Perde", code: "DIA-100", category: "Marel / Diamond Series", image: "/images/real/diamond-beyaz.jpeg", badge: "Gerçek Ürün", feature: "%50 ışık filtrasyonu · UV dayanımlı kumaş", colors: ["#f7f6f1", "#e6dfce", "#bec1c2", "#4d5052", "#1d1f21", "#7b6c58"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 42%" },
+  { name: "Diamond 102 Gri Plise Perde", code: "DIA-102", category: "Marel / Diamond Series", image: "/images/real/diamond-gri.jpeg", badge: "Yeni", feature: "110 gr/m² polyester · Kolay yıkanabilir yapı", colors: ["#f7f6f1", "#ddd6c6", "#a4a7a8", "#55585b", "#252729", "#8a745a"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 43%" },
+  { name: "Blackout 05 Siyah Tam Karartma", code: "BLK-05", category: "Marel / Blackout Series", image: "/images/catalog/blackout.webp", badge: "Tam Karartma", feature: "%100 ışık kontrolü · 250 gr/m² kumaş", colors: ["#eee8dc", "#9a9a98", "#2a2a2a", "#5d5148", "#484a4b"], href: "/urunler/plise-perde/diamond-serisi" },
 ];
 
-const newProducts: StoreProduct[] = [
-  { name: "Reina Krem Plise Perde", category: "Marel / Reina", image: "/images/catalog/reina.webp", badge: "Yeni Sezon", feature: "Yumuşak ışık geçişi", colors: 8, href: "/urunler/plise-perde/diamond-serisi" },
-  { name: "Diamond Krem Cam Balkon Perdesi", category: "Marel / Diamond", image: "/images/catalog/pages/page-03.webp", feature: "Cam balkona özel", colors: 10, href: "/urunler/plise-perde/diamond-serisi" },
-  { name: "Antrasit Pencere Sinekliği", category: "Marel / Sineklik", image: "/images/configurator/diamond-100-beyaz-antrasit-1.webp", badge: "Pratik Montaj", feature: "Ölçüye özel üretim", colors: 5, href: "/urunler#sineklik" },
-  { name: "Bronz Profil Plise Sistem", category: "Marel / Özel Seri", image: "/images/configurator/diamond-110-antrasit-bronz-3.webp", feature: "Kumaş ve profil seçimi", colors: 12, href: "/urunler/plise-perde/diamond-serisi" },
+const catalogProducts: StoreProduct[] = [
+  { name: "Honeycomb 001 Beyaz Isı Yalıtımlı Perde", code: "HC-001", category: "Marel / Honeycomb Series", image: "/images/real/diamond-beyaz-siyah-ip.jpeg", badge: "Isı Yalıtımlı", feature: "Hücresel doku · %100 polyester · 2 yıl garanti", colors: neutral, price: "1.166,00 ₺'den", href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 43%" },
+  { name: "Diamond 108 Krem Plise Perde", code: "DIA-108", category: "Marel / Diamond Series", image: "/images/real/diamond-krem.jpeg", feature: "%50 ışık filtrasyonu · Yumuşak gün ışığı", colors: ["#f7f6f1", "#e8dfca", "#d0c3aa", "#a8aaab", "#4d5052", "#222426"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 40%" },
+  { name: "Diamond 109 Açık Gri Plise Perde", code: "DIA-109", category: "Marel / Diamond Series", image: "/images/real/diamond-acik-gri.jpeg", badge: "Gerçek Doku", feature: "UV dayanımlı · Kolay temizlenebilir polyester", colors: ["#f8f7f2", "#dfdcd3", "#b8bbbc", "#777a7b", "#47494a", "#202224"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 36%" },
+  { name: "Silver 7002 Gri Plise Perde", code: "SLV-7002", category: "Marel / Silver Series", image: "/images/catalog/silver.webp", badge: "%70 Filtrasyon", feature: "150 gr/m² kumaş · UV dayanımlı yapı", colors: ["#f6f5f0", "#ddd6c8", "#aeb1b1", "#77797a", "#484a4b"], href: "/urunler/plise-perde/diamond-serisi" },
 ];
 
 const categoryTiles = [
-  { title: "Plise Perdeler", image: "/images/catalog/diamond.webp", href: "/urunler#plise-perde", text: "Tüm serileri keşfet" },
-  { title: "Sineklik Sistemleri", image: "/images/configurator/diamond-100-beyaz-antrasit-1.webp", href: "/urunler#sineklik", text: "Pencere ve kapı çözümleri" },
-  { title: "Zip Perdeler", image: "/images/catalog/blackout.webp", href: "/urunler#zip-perde", text: "Dış mekân güneş kontrolü" },
+  { title: "Plise Perdeler", image: "/images/catalog/diamond.webp", href: "/urunler#plise-perde", text: "Diamond, Silver, Gold ve tüm seriler" },
+  { title: "Honeycomb Perdeler", image: "/images/hero/marel-honeycomb-hero-v3.png", href: "/urunler/plise-perde/diamond-serisi#teklif", text: "Isı yalıtımlı hücresel koleksiyon" },
+  { title: "Sineklik Sistemleri", image: "/images/configurator/diamond-100-beyaz-antrasit-1.webp", href: "/urunler#sineklik", text: "Pencere ve kapıya özel üretim" },
 ];
 
 export default function Home() {
@@ -37,73 +39,50 @@ export default function Home() {
       <main>
         <StorefrontHero />
 
-        <section className="shop-section" id="cok-satanlar">
-          <div className="shop-container">
-            <div className="shop-section-title"><div><span>MAREL SEÇKİSİ</span><h2>En Çok Satanlar</h2></div><Link href="/urunler">Tümünü Gör →</Link></div>
-            <ProductShelf products={bestSellers} />
-          </div>
-        </section>
+        <section className="shop-section" id="cok-satanlar"><div className="shop-container">
+          <div className="shop-section-title"><div><span>GERÇEK ÜRÜNLER · GERÇEK DOKULAR</span><h2>En Çok Satanlar</h2></div><Link href="/urunler">Tümünü Gör →</Link></div>
+          <ProductShelf products={bestSellers} />
+        </div></section>
 
         <section className="shop-container promo-tile-grid" id="indirimdekiler">
           <Link className="promo-tile promo-tile-wide" href="/urunler/plise-perde/diamond-serisi#teklif">
-            <Image unoptimized src="/images/catalog/pages/page-02.webp" alt="Diamond plise perde kampanyası" fill sizes="66vw" />
-            <div><span>SEZON FIRSATI</span><h2>Diamond Serisi</h2><p>Adetli alımlarda proje avantajlarını öğren.</p><b>Teklif al →</b></div>
+            <Image unoptimized src="/images/hero/marel-honeycomb-hero-v3.png" alt="Gri Honeycomb ısı yalıtımlı perde" fill sizes="66vw" />
+            <div><span>ISI YALITIMLI KOLEKSİYON</span><h2>Honeycomb Series</h2><p>Hücresel dokusu, %100 ışık filtrasyonu ve beş doğal rengiyle.</p><b>WhatsApp&apos;tan teklif al →</b></div>
           </Link>
-          <Link className="promo-tile" href="/urunler#sineklik">
-            <Image unoptimized src="/images/configurator/diamond-100-beyaz-antrasit-1.webp" alt="Sineklik sistemleri" fill sizes="34vw" />
-            <div><span>ÖZEL ÖLÇÜ</span><h2>Sineklik</h2><b>İncele →</b></div>
+          <Link className="promo-tile" href="/urunler/plise-perde/diamond-serisi">
+            <Image unoptimized src="/images/real/diamond-gri.jpeg" alt="Diamond gri gerçek kumaş dokusu" fill sizes="34vw" />
+            <div><span>YENİ KOLEKSİYON</span><h2>Diamond</h2><b>Renkleri incele →</b></div>
           </Link>
         </section>
 
-        <section className="shop-feature-row">
-          <div className="shop-container">
-            <article><b>01</b><div><strong>Sipariş bilgilendirmesi</strong><p>Tekliften üretime tüm süreçte bilgi alın.</p></div></article>
-            <article><b>02</b><div><strong>WhatsApp desteği</strong><p>Ölçü ve ürün seçimi için bize ulaşın.</p></div></article>
-            <article><b>03</b><div><strong>Doğru ürün garantisi</strong><p>İhtiyacınıza uygun sistemi birlikte seçin.</p></div></article>
-          </div>
-        </section>
+        <section className="shop-feature-row"><div className="shop-container">
+          <article><b>01</b><div><strong>Gerçek katalog kodları</strong><p>Seri ve renkleri katalogdaki ürün kodlarıyla inceleyin.</p></div></article>
+          <article><b>02</b><div><strong>WhatsApp ürün danışmanı</strong><p>Ürünü seçin, mesajınız hazır şekilde doğrudan bize ulaşsın.</p></div></article>
+          <article><b>03</b><div><strong>Ölçüye özel üretim</strong><p>Kumaş, profil, genişlik ve yüksekliği ihtiyacınıza göre belirleyin.</p></div></article>
+        </div></section>
 
-        <section className="shop-section shop-section-soft">
-          <div className="shop-container">
-            <div className="shop-section-title"><div><span>YENİ KOLEKSİYON</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler#plise-perde">Tüm plise perdeler →</Link></div>
-            <ProductShelf products={newProducts} />
-          </div>
-        </section>
+        <section className="shop-section shop-section-soft"><div className="shop-container">
+          <div className="shop-section-title"><div><span>KATALOG KOLEKSİYONU</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler#plise-perde">Tüm plise perdeler →</Link></div>
+          <ProductShelf products={catalogProducts} />
+        </div></section>
 
-        <section className="shop-section" id="galeri">
-          <div className="shop-container">
-            <div className="shop-section-title center-title"><div><span>KATEGORİLER</span><h2>İhtiyacına Göre Seç</h2></div></div>
-            <div className="shop-category-grid">
-              {categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><Image unoptimized src={tile.image} alt={tile.title} fill sizes="33vw" /><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Alışverişe başla →</b></div></Link>)}
-            </div>
-          </div>
-        </section>
+        <section className="shop-section" id="galeri"><div className="shop-container">
+          <div className="shop-section-title center-title"><div><span>KATEGORİLER</span><h2>İhtiyacına Göre Seç</h2></div></div>
+          <div className="shop-category-grid">{categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><Image unoptimized src={tile.image} alt={tile.title} fill sizes="33vw" /><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Alışverişe başla →</b></div></Link>)}</div>
+        </div></section>
 
-        <section className="store-reviews" id="duyurular">
-          <div className="shop-container">
-            <div className="shop-section-title center-title"><div><span>MAREL FARKI</span><h2>Alışverişi Kolaylaştıran Detaylar</h2></div></div>
-            <div className="review-grid">
-              <article><div>★★★★★</div><p>Ölçü bilgisini düzenli bir teklif mesajına dönüştüren kolay sipariş akışı.</p><strong>Doğru ölçü desteği</strong></article>
-              <article><div>★★★★★</div><p>Kumaş ve kasa rengini aynı ekranda seçerek kararı hızlandıran ürün deneyimi.</p><strong>Renk danışmanlığı</strong></article>
-              <article><div>★★★★★</div><p>Plise perde, sineklik ve zip sistemlerini tek mağazada karşılaştırma kolaylığı.</p><strong>Geniş ürün ailesi</strong></article>
-            </div>
+        <section className="store-reviews" id="duyurular"><div className="shop-container">
+          <div className="shop-section-title center-title"><div><span>MAREL FARKI</span><h2>Alışverişi Kolaylaştıran Detaylar</h2></div></div>
+          <div className="review-grid">
+            <article><div>★★★★★</div><p>Katalogdaki gerçek seri, renk ve teknik bilgilerle ne aldığınızı net biçimde görün.</p><strong>Şeffaf ürün bilgisi</strong></article>
+            <article><div>★★★★★</div><p>Kumaş ve kasa rengini seçin; ölçünüzü WhatsApp üzerinden danışmana iletin.</p><strong>Renk ve ölçü desteği</strong></article>
+            <article><div>★★★★★</div><p>Plise perde, Honeycomb, sineklik ve zip sistemlerini tek mağazada karşılaştırın.</p><strong>Geniş ürün ailesi</strong></article>
           </div>
-        </section>
+        </div></section>
 
-        <section className="shop-trust-row">
-          <div className="shop-container">
-            <article><span>▣</span><h3>1.000 TL üzeri kargo bedava</h3></article>
-            <article><span>♢</span><h3>Ölçüye özel güvenli üretim</h3></article>
-            <article><span>↻</span><h3>15 gün içinde iade desteği</h3></article>
-          </div>
-        </section>
+        <section className="shop-trust-row"><div className="shop-container"><article><span>▣</span><h3>Katalogla doğrulanmış ürünler</h3></article><article><span>◇</span><h3>Ölçüye özel güvenli üretim</h3></article><article><span>◉</span><h3>Doğrudan WhatsApp desteği</h3></article></div></section>
 
-        <section className="order-track" id="takip">
-          <div className="shop-container">
-            <h2>Sipariş Takip</h2><p>Siparişinizin güncel durumunu kontrol edin.</p>
-            <form><label><span>E-posta</span><input type="email" placeholder="ornek@email.com" /></label><label><span>Sipariş No</span><input type="text" placeholder="Örn. MRL-1024" /></label><button type="button">Kontrol Et</button></form>
-          </div>
-        </section>
+        <section className="order-track" id="takip"><div className="shop-container"><h2>Sipariş Takip</h2><p>Siparişinizin güncel durumunu kontrol edin.</p><form><label><span>E-posta</span><input type="email" placeholder="ornek@email.com" /></label><label><span>Sipariş No</span><input type="text" placeholder="Örn. MRL-1024" /></label><button type="button">Kontrol Et</button></form></div></section>
       </main>
       <SiteFooter />
     </>

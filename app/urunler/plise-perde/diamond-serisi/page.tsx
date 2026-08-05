@@ -19,10 +19,9 @@ export default function DiamondProductPage() {
             <div className="breadcrumbs"><Link href="/">Ana sayfa</Link><span>/</span><Link href="/urunler">Ürünler</Link><span>/</span><span>Diamond Series</span></div>
             <div className="product-layout">
               <div className="product-gallery">
-                <div className="product-main-image"><Image src="/images/catalog/pages/page-02.webp" alt="Diamond Series krem plise perde uygulaması" fill priority sizes="(max-width: 1040px) 100vw, 55vw" /></div>
+                <div className="product-main-image"><Image unoptimized src="/images/real/diamond-gri.jpeg" alt="Diamond 102 gri plise perdenin gerçek kumaş dokusu" fill priority sizes="(max-width: 1040px) 100vw, 55vw" style={{ objectFit: "cover", objectPosition: "center 43%" }} /></div>
                 <div className="product-thumbs">
-                  {["page-02.webp", "page-03.webp", "page-04.webp"].map((image, index) => <div className="product-thumb" key={image}><Image src={`/images/catalog/pages/${image}`} alt={`Diamond Series detay görünümü ${index + 1}`} fill sizes="150px" /></div>)}
-                  <div className="product-thumb"><Image src="/images/configurator/diamond-100-beyaz-antrasit-1.webp" alt="Diamond profil renk seçenekleri" fill sizes="150px" /></div>
+                  {["diamond-beyaz.jpeg", "diamond-krem.jpeg", "diamond-acik-gri.jpeg", "diamond-beyaz-siyah-ip.jpeg"].map((image, index) => <div className="product-thumb" key={image}><Image unoptimized src={`/images/real/${image}`} alt={`Diamond Series gerçek kumaş görünümü ${index + 1}`} fill sizes="150px" style={{ objectFit: "cover" }} /></div>)}
                 </div>
               </div>
               <div className="product-summary">
@@ -52,7 +51,7 @@ export default function DiamondProductPage() {
         </section>
 
         <section className="fabric-showcase">
-          <Image src="/images/catalog/pages/page-02.webp" alt="Diamond Series kumaş ve renk koleksiyonu" fill sizes="100vw" />
+          <Image unoptimized src="/images/real/diamond-beyaz-siyah-ip.jpeg" alt="Diamond Series beyaz kumaşın gerçek doku detayı" fill sizes="100vw" />
           <div className="container fabric-showcase-content"><div className="fabric-showcase-card"><p className="eyebrow light">Kumaş koleksiyonu</p><h2>Beyazdan antrasite, aynı teknik performans.</h2><p>Renk seçerken yalnız fotoğrafa değil; cephe ışığına, duvar tonuna ve seçtiğiniz kasa rengine birlikte bakın. Teklif aşamasında seçimlerinizi netleştirmenize yardımcı oluyoruz.</p></div></div>
         </section>
 
