@@ -4,7 +4,10 @@ import { useEffect, useState } from "react";
 
 export function ConsentBanner() {
   const [visible, setVisible] = useState(false);
-  useEffect(() => setVisible(window.localStorage.getItem("marel-google-consent") === null), []);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setVisible(window.localStorage.getItem("marel-google-consent") === null));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   const choose = (granted: boolean) => {
     window.localStorage.setItem("marel-google-consent", granted ? "granted" : "denied");
     window.gtag?.("consent", "update", { ad_storage: granted ? "granted" : "denied", analytics_storage: granted ? "granted" : "denied", ad_user_data: granted ? "granted" : "denied", ad_personalization: granted ? "granted" : "denied" });

@@ -11,7 +11,10 @@ export function CartClient({ defaultName = "", defaultEmail = "" }: { defaultNam
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [order, setOrder] = useState<{ orderNumber: string; total: number } | null>(null);
-  useEffect(() => setLines(readCart()), []);
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => setLines(readCart()));
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
   const subtotal = useMemo(() => lines.reduce((sum, line) => sum + line.price * line.quantity, 0), [lines]);
   const shipping = subtotal >= 100000 || subtotal === 0 ? 0 : 9900;
 
