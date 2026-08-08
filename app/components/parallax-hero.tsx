@@ -25,7 +25,7 @@ export function ParallaxHero() {
   return (
     <section className="hero">
       <div className="hero-media" ref={imageRef} aria-hidden="true">
-        <Image src="/images/catalog/pages/page-02.webp" alt="" fill priority sizes="100vw" />
+        <Image src="/images/catalog/diamond.webp" alt="" fill priority sizes="100vw" />
       </div>
       <div className="hero-shade" />
       <div className="container hero-inner">

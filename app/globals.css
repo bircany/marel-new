@@ -106,7 +106,7 @@ button, a, input, select { -webkit-tap-highlight-color: transparent; }
 .category-card:hover .category-visual img { transform: scale(1.055); }
 
 .parallax-promo { position: relative; min-height: 820px; display: flex; align-items: center; overflow: hidden; color: white; background: var(--navy); }
-.parallax-promo-bg { position: absolute; inset: -80px 0; background: linear-gradient(90deg, rgba(11,19,35,.92), rgba(11,19,35,.2)), url('/images/catalog/pages/page-02.webp') center 22% / cover no-repeat fixed; }
+.parallax-promo-bg { position: absolute; inset: -80px 0; background: linear-gradient(90deg, rgba(11,19,35,.92), rgba(11,19,35,.2)), url('/images/catalog/diamond.webp') center 22% / cover no-repeat fixed; }
 .parallax-promo-inner { position: relative; display: grid; grid-template-columns: 1fr 300px; align-items: end; gap: 80px; }
 .promo-card { max-width: 700px; padding: 54px; background: rgba(24,35,58,.78); border: 1px solid rgba(255,255,255,.16); backdrop-filter: blur(16px); }
 .promo-card h2 { margin: 0; font-size: clamp(2.5rem, 5vw, 5.5rem); line-height: .98; letter-spacing: -.06em; }

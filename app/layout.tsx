@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   },
   description:
     "Plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemlerinde ölçüye özel çözümler.",
-  icons: { icon: "/images/marel-logo.png" },
   openGraph: {
     title: "Marel | Online Perde ve Sineklik Mağazası",
     description: "Plise perde, sineklik ve zip sistemlerini inceleyin; kumaş, kasa ve ölçü bilgileriyle hızlı teklif alın.",

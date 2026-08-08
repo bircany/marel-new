@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Marel">
+  <defs>
+    <linearGradient id="marel-gold" x1="10" y1="8" x2="54" y2="56" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f4e4a4"/>
+      <stop offset="0.48" stop-color="#cfad57"/>
+      <stop offset="1" stop-color="#9b7430"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="14" fill="#101827"/>
+  <path d="M11 49V15l10 7 11-10 11 10 10-7v34l-10-7-11 10-11-10-10 7Z" fill="url(#marel-gold)"/>
+  <path d="m17 19 4 3v20l-4 3V19Zm10 0 5-5v36l-5-5V19Zm10-5 5 5v26l-5 5V14Zm11 5-5 3v20l5 3V19Z" fill="#fff" fill-opacity=".16"/>
+</svg>

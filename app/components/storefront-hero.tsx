@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 const slides = [
   { eyebrow: "Honeycomb Series · 003 Gri", title: "Isıyı içeride, konforu evinde tut.", text: "%100 ışık filtrasyonu, hücresel ısı yalıtımı ve ölçüye özel üretim.", image: "/images/hero/marel-honeycomb-hero-v3.png", href: "/urunler/plise-perde/diamond-serisi#teklif", button: "Honeycomb teklifini hazırla", position: "center" },
   { eyebrow: "Diamond Series", title: "Kumaşın gerçek dokusunu gör.", text: "%50 ışık filtrasyonu, UV dayanımı ve katalogdaki gerçek renk seçenekleri.", image: "/images/real/diamond-gri.jpeg", href: "/urunler/plise-perde/diamond-serisi", button: "Diamond renklerini incele", position: "center 43%" },
-  { eyebrow: "WhatsApp Destek", title: "Ölçünü gönder, doğru ürünü birlikte seçelim.", text: "Kumaş, kasa rengi, genişlik, yükseklik ve adet bilgilerini doğrudan danışmanımıza iletin.", image: "/images/catalog/pages/page-02.webp", href: "https://wa.me/905467356602?text=Merhaba%2C%20%C3%B6l%C3%A7%C3%BCye%20%C3%B6zel%20perde%20teklifi%20almak%20istiyorum.", button: "WhatsApp'ta görüş", position: "center 22%" },
+  { eyebrow: "WhatsApp Destek", title: "Ölçünü gönder, doğru ürünü birlikte seçelim.", text: "Kumaş, kasa rengi, genişlik, yükseklik ve adet bilgilerini doğrudan danışmanımıza iletin.", image: "/images/catalog/diamond.webp", href: "https://wa.me/905467356602?text=Merhaba%2C%20%C3%B6l%C3%A7%C3%BCye%20%C3%B6zel%20perde%20teklifi%20almak%20istiyorum.", button: "WhatsApp'ta görüş", position: "center 22%" },
 ];
 
 export function StorefrontHero() {

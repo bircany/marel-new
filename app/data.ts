@@ -13,8 +13,8 @@ export const collections = [
 ];
 
 export const galleryItems = [
-  { title: "Diamond / doğal ışık dengesi", image: "/images/catalog/pages/page-02.webp" },
-  { title: "Blackout / derin mahremiyet", image: "/images/catalog/pages/page-08.webp" },
+  { title: "Diamond / doğal ışık dengesi", image: "/images/catalog/diamond.webp" },
+  { title: "Blackout / derin mahremiyet", image: "/images/catalog/blackout.webp" },
   { title: "Kumaş dokuları / yakın plan", image: "/images/catalog/pages/page-03.webp" },
   { title: "Profil ve renk kombinasyonları", image: "/images/configurator/diamond-110-antrasit-bronz-3.webp" },
 ];
