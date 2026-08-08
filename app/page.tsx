@@ -4,6 +4,8 @@ import { ProductShelf, type StoreProduct } from "./components/product-shelf";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { StorefrontHero } from "./components/storefront-hero";
+import { Reveal } from "./components/motion-media";
+import { listAnnouncements, listApprovedReviews } from "@/db";
 
 export const metadata = {
   title: "Marel | Online Perde ve Sineklik Mağazası",
@@ -32,7 +34,8 @@ const categoryTiles = [
   { title: "Sineklik Sistemleri", image: "/images/configurator/diamond-100-beyaz-antrasit-1.webp", href: "/urunler#sineklik", text: "Pencere ve kapıya özel üretim" },
 ];
 
-export default function Home() {
+export default async function Home() {
+  const [reviews, announcements] = await Promise.all([listApprovedReviews(3), listAnnouncements(true)]);
   return (
     <>
       <SiteHeader />
@@ -44,7 +47,7 @@ export default function Home() {
           <ProductShelf products={bestSellers} />
         </div></section>
 
-        <section className="shop-container promo-tile-grid" id="indirimdekiler">
+        <Reveal id="indirimdekiler" className="shop-container promo-tile-grid" direction="up">
           <Link className="promo-tile promo-tile-wide" href="/urunler/plise-perde/diamond-serisi#teklif">
             <Image unoptimized src="/images/hero/marel-honeycomb-hero-v3.png" alt="Gri Honeycomb ısı yalıtımlı perde" fill sizes="66vw" />
             <div><span>ISI YALITIMLI KOLEKSİYON</span><h2>Honeycomb Series</h2><p>Hücresel dokusu, %100 ışık filtrasyonu ve beş doğal rengiyle.</p><b>WhatsApp&apos;tan teklif al →</b></div>
@@ -53,13 +56,13 @@ export default function Home() {
             <Image unoptimized src="/images/real/diamond-gri.jpeg" alt="Diamond gri gerçek kumaş dokusu" fill sizes="34vw" />
             <div><span>YENİ KOLEKSİYON</span><h2>Diamond</h2><b>Renkleri incele →</b></div>
           </Link>
-        </section>
+        </Reveal>
 
-        <section className="shop-feature-row"><div className="shop-container">
+        <section className="shop-feature-row"><Reveal className="shop-container" direction="up">
           <article><b>01</b><div><strong>Gerçek katalog kodları</strong><p>Seri ve renkleri katalogdaki ürün kodlarıyla inceleyin.</p></div></article>
           <article><b>02</b><div><strong>WhatsApp ürün danışmanı</strong><p>Ürünü seçin, mesajınız hazır şekilde doğrudan bize ulaşsın.</p></div></article>
           <article><b>03</b><div><strong>Ölçüye özel üretim</strong><p>Kumaş, profil, genişlik ve yüksekliği ihtiyacınıza göre belirleyin.</p></div></article>
-        </div></section>
+        </Reveal></section>
 
         <section className="shop-section shop-section-soft"><div className="shop-container">
           <div className="shop-section-title"><div><span>KATALOG KOLEKSİYONU</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler#plise-perde">Tüm plise perdeler →</Link></div>
@@ -68,16 +71,23 @@ export default function Home() {
 
         <section className="shop-section" id="galeri"><div className="shop-container">
           <div className="shop-section-title center-title"><div><span>KATEGORİLER</span><h2>İhtiyacına Göre Seç</h2></div></div>
-          <div className="shop-category-grid">{categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><Image unoptimized src={tile.image} alt={tile.title} fill sizes="33vw" /><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Alışverişe başla →</b></div></Link>)}</div>
+          <Reveal className="shop-category-grid" direction="up">{categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><Image unoptimized src={tile.image} alt={tile.title} fill sizes="33vw" /><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Alışverişe başla →</b></div></Link>)}</Reveal>
         </div></section>
 
-        <section className="store-reviews" id="duyurular"><div className="shop-container">
-          <div className="shop-section-title center-title"><div><span>MAREL FARKI</span><h2>Alışverişi Kolaylaştıran Detaylar</h2></div></div>
-          <div className="review-grid">
-            <article><div>★★★★★</div><p>Katalogdaki gerçek seri, renk ve teknik bilgilerle ne aldığınızı net biçimde görün.</p><strong>Şeffaf ürün bilgisi</strong></article>
-            <article><div>★★★★★</div><p>Kumaş ve kasa rengini seçin; ölçünüzü WhatsApp üzerinden danışmana iletin.</p><strong>Renk ve ölçü desteği</strong></article>
-            <article><div>★★★★★</div><p>Plise perde, Honeycomb, sineklik ve zip sistemlerini tek mağazada karşılaştırın.</p><strong>Geniş ürün ailesi</strong></article>
-          </div>
+        {announcements.length ? <section className="home-announcements" id="duyurular"><div className="shop-container">
+          <div className="shop-section-title"><div><span>MAREL&apos;DEN</span><h2>Duyurular ve rehberler</h2></div><Link href="/duyurular">Tüm duyurular →</Link></div>
+          <div className="home-announcement-grid">{announcements.slice(0, 3).map((item, index) => <Reveal key={item.id} direction={index % 2 ? "right" : "left"}><article><div className="home-announcement-media"><Image unoptimized src={item.imageUrl} alt="" fill sizes="33vw" /></div><div><small>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString("tr-TR") : "Marel"}</small><h3>{item.title}</h3><p>{item.summary}</p><Link href={`/duyurular#${item.slug}`}>Devamını oku →</Link></div></article></Reveal>)}</div>
+        </div></section> : null}
+
+        <section className="store-reviews"><div className="shop-container">
+          <div className="shop-section-title center-title"><div><span>MÜŞTERİ DENEYİMİ</span><h2>Marel kullananlar anlatıyor</h2></div></div>
+          <Reveal className="review-grid" direction="up">
+            {reviews.length ? reviews.map((review) => <article key={review.id}><div>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</div><h3>{review.title}</h3><p>{review.body}</p><strong>{review.authorName}{review.productName ? ` · ${review.productName}` : ""}</strong>{review.adminReply ? <small><b>Marel:</b> {review.adminReply}</small> : null}</article>) : <>
+              <article><div>★★★★★</div><h3>Şeffaf ürün bilgisi</h3><p>Katalogdaki gerçek seri, renk ve teknik bilgilerle ne aldığınızı net biçimde görün.</p><strong>Marel ürün deneyimi</strong></article>
+              <article><div>★★★★★</div><h3>Renk ve ölçü desteği</h3><p>Kumaş ve kasa rengini seçin; ölçünüzü WhatsApp üzerinden danışmana iletin.</p><strong>Marel danışman desteği</strong></article>
+              <article><div>★★★★★</div><h3>Deneyiminizi paylaşın</h3><p>Hesabınıza giriş yapın, Marel ürün deneyiminizi yazın; onaylanan yorumunuz burada yayınlansın.</p><Link href="/hesabim#yorumlar">Yorum yaz →</Link></article>
+            </>}
+          </Reveal>
         </div></section>
 
         <section className="shop-trust-row"><div className="shop-container"><article><span>▣</span><h3>Katalogla doğrulanmış ürünler</h3></article><article><span>◇</span><h3>Ölçüye özel güvenli üretim</h3></article><article><span>◉</span><h3>Doğrudan WhatsApp desteği</h3></article></div></section>

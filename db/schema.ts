@@ -95,3 +95,49 @@ export const orderEvents = sqliteTable("order_events", {
   actorUserId: text("actor_user_id").references(() => users.id, { onDelete: "set null" }),
   createdAt: text("created_at").notNull(),
 }, (table) => [index("idx_order_events_order_created").on(table.orderId, table.createdAt)]);
+
+export const reviews = sqliteTable("reviews", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  productId: text("product_id").references(() => products.id, { onDelete: "set null" }),
+  rating: integer("rating").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  status: text("status").notNull().default("pending"),
+  adminReply: text("admin_reply").notNull().default(""),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [
+  index("idx_reviews_status_created").on(table.status, table.createdAt),
+  index("idx_reviews_user_created").on(table.userId, table.createdAt),
+  index("idx_reviews_product_status").on(table.productId, table.status),
+]);
+
+export const announcements = sqliteTable("announcements", {
+  id: text("id").primaryKey(),
+  slug: text("slug").notNull(),
+  title: text("title").notNull(),
+  summary: text("summary").notNull(),
+  body: text("body").notNull(),
+  imageUrl: text("image_url").notNull().default("/images/hero/marel-honeycomb-hero-v3.png"),
+  published: integer("published", { mode: "boolean" }).notNull().default(false),
+  featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+  publishedAt: text("published_at"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [
+  uniqueIndex("idx_announcements_slug").on(table.slug),
+  index("idx_announcements_published_date").on(table.published, table.publishedAt),
+]);
+
+export const contactMessages = sqliteTable("contact_messages", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone").notNull().default(""),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("new"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [index("idx_contact_messages_status_created").on(table.status, table.createdAt)]);

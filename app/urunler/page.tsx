@@ -5,6 +5,7 @@ import { SiteHeader } from "../components/site-header";
 import { productGroups } from "../data";
 import { ProductShelf, type StoreProduct } from "../components/product-shelf";
 import { listProducts } from "@/db";
+import { ParallaxImage, Reveal } from "../components/motion-media";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +34,7 @@ export default async function ProductsPage() {
       <SiteHeader />
       <main>
         <section className="page-hero">
-          <div className="page-hero-bg"><Image src="/images/catalog/pages/page-01.webp" alt="" fill priority sizes="100vw" /></div>
+          <div className="page-hero-bg"><Image unoptimized src="/images/catalog/pages/page-01.webp" alt="" fill priority sizes="100vw" /></div>
           <div className="container page-hero-inner">
             <div className="breadcrumbs"><Link href="/">Ana sayfa</Link><span>/</span><span>Ürünler</span></div>
             <p className="eyebrow light">Marel ürün ailesi</p>
@@ -45,14 +46,14 @@ export default async function ProductsPage() {
         <section aria-label="Ürün grupları">
           {productGroups.map((group, index) => (
             <article className="product-group" id={group.id} key={group.id}>
-              <div className="product-group-media"><Image src={group.image} alt={`${group.title} ürün görünümü`} fill sizes="(max-width: 760px) 100vw, 50vw" /></div>
-              <div className="product-group-copy">
+              <Reveal className="product-group-media" direction={index % 2 === 0 ? "left" : "right"}><ParallaxImage src={group.image} alt={`${group.title} ürün görünümü`} sizes="(max-width: 760px) 100vw, 50vw" /></Reveal>
+              <Reveal className="product-group-copy" direction={index % 2 === 0 ? "right" : "left"}>
                 <span className="product-group-index">0{index + 1} / 05</span>
                 <h2>{group.title}</h2>
                 <p>{group.description}</p>
                 <ul className="tag-list">{group.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
                 <div><Link className="button button-gold" href={group.href}>{index === 0 ? "Serileri incele" : "Bilgi ve teklif al"}</Link></div>
-              </div>
+              </Reveal>
             </article>
           ))}
         </section>

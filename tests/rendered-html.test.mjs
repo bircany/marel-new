@@ -36,3 +36,17 @@ test("ürün vitrini ve Diamond sayfası erişilebilir", async () => {
   assert.match(html, /Diamond Series/);
   assert.match(html, /WhatsApp(?:&#x27;|')tan teklif al/);
 });
+
+test("kurumsal ve müşteri destek sayfaları erişilebilir", async () => {
+  const contact = await render("/iletisim");
+  assert.equal(contact.status, 200);
+  assert.match(await contact.text(), /Doğru sistemi birlikte seçelim/);
+
+  const legal = await render("/gizlilik-ve-iade-kosullari");
+  assert.equal(legal.status, 200);
+  assert.match(await legal.text(), /Ölçüye özel ürünler/);
+
+  const tracking = await render("/siparis-takip");
+  assert.equal(tracking.status, 200);
+  assert.match(await tracking.text(), /Üretimden teslimata/);
+});

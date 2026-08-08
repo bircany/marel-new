@@ -2,8 +2,9 @@ import Link from "next/link";
 import { chatGPTSignInPath, chatGPTSignOutPath, getChatGPTUser } from "@/app/chatgpt-auth";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { CustomerReviews } from "@/app/components/customer-reviews";
 import { formatMoney } from "@/app/lib/commerce";
-import { listOrdersForUser, upsertUser, type OrderRecord } from "@/db";
+import { listOrdersForUser, listProducts, listReviewsForUser, upsertUser, type OrderRecord } from "@/db";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Hesabım" };
@@ -90,7 +91,7 @@ export default async function AccountPage() {
   if (!user) return <><SiteHeader /><GuestAccount /><SiteFooter /></>;
 
   await upsertUser(user);
-  const orders = await listOrdersForUser(user.userId);
+  const [orders, products, reviews] = await Promise.all([listOrdersForUser(user.userId), listProducts(false), listReviewsForUser(user.userId)]);
   const activeOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status)).length;
   const deliveredOrders = orders.filter((order) => order.status === "delivered").length;
   const initials = user.displayName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toLocaleUpperCase("tr-TR")).join("") || "M";
@@ -106,7 +107,7 @@ export default async function AccountPage() {
         <aside className="account-profile-card">
           <div className="account-avatar" aria-hidden="true">{initials}</div>
           <h2>{user.displayName}</h2><p>{user.email}</p>
-          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><Link href="/siparis-takip">Sipariş takip <span>↗</span></Link><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
+          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><a href="#yorumlar">Yorumlarım <span>{reviews.length}</span></a><Link href="/siparis-takip">Sipariş takip <span>↗</span></Link><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
           <small>Hesap bilgileriniz güvenli oturumunuz üzerinden alınır.</small>
         </aside>
 
@@ -121,6 +122,7 @@ export default async function AccountPage() {
           <div className="account-order-list">
             {orders.length ? orders.map((order) => <OrderCard key={order.id} order={order} />) : <div className="account-empty-orders"><div aria-hidden="true">M</div><h3>Henüz bir siparişiniz yok.</h3><p>Ölçünüze özel Marel ürünlerini keşfedin; ilk siparişiniz burada adım adım görünsün.</p><Link className="account-primary-action" href="/urunler"><span>Ürünleri keşfet</span><b aria-hidden="true">→</b></Link></div>}
           </div>
+          <CustomerReviews products={products.map(({ id, name }) => ({ id, name }))} reviews={reviews} />
         </section>
       </div>
     </main><SiteFooter /></>

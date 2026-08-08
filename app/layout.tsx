@@ -7,6 +7,7 @@ import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
 import { GoogleTag } from "./components/google-tag";
 import { ConsentBanner } from "./components/consent-banner";
 import "./commerce.css";
+import "./content-pages.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",
