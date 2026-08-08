@@ -225,7 +225,7 @@ export async function listReviewsForUser(userId: string): Promise<ReviewRecord[]
 
 export async function listAllReviews(): Promise<ReviewRecord[]> {
   await ensureDatabase();
-  const { results } = await getDb().prepare("SELECT r.id, r.user_id AS userId, r.product_id AS productId, p.name AS productName, COALESCE(NULLIF(u.full_name, ''), u.email) AS authorName, r.rating, r.title, r.body, r.status, r.admin_reply AS adminReply, r.created_at AS createdAt, r.updated_at AS updatedAt FROM reviews r JOIN users u ON u.id = r.user_id LEFT JOIN products p ON p.id = r.product_id ORDER BY r.created_at DESC LIMIT 300").all<ReviewRecord>();
+  const { results } = await getDb().prepare("SELECT r.id, r.user_id AS userId, r.product_id AS productId, p.name AS productName, COALESCE(NULLIF(u.full_name, ''), u.email) AS authorName, r.rating, r.title, r.body, r.status, r.admin_reply AS adminReply, r.created_at AS createdAt, r.updated_at AS updatedAt FROM reviews r JOIN users u ON u.id = r.user_id LEFT JOIN products p ON p.id = r.product_id ORDER BY CASE r.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, r.created_at DESC LIMIT 300").all<ReviewRecord>();
   return results;
 }
 

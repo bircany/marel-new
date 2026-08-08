@@ -22,6 +22,7 @@ test("Marel ana sayfasını sunucu tarafında üretir", async () => {
   assert.match(html, /Sipariş Takip/);
   assert.match(html, /Plise Perde/);
   assert.match(html, /Diamond/);
+  assert.doesNotMatch(html, /Fotoğraf Galerisi/);
   assert.doesNotMatch(html, /codex-preview|SkeletonPreview|Your site is taking shape/i);
 });
 

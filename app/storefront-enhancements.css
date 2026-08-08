@@ -130,6 +130,30 @@
 .footer-payment img.payment-troy { height: 27px; }
 .footer-payment .payment-security { margin-left: 3px; padding-left: 18px; border-left: 1px solid #d7d9dd; }
 
+.home-announcements {
+  background: #f3efe6;
+  color: #111827;
+}
+
+.home-announcements .shop-section-title span,
+.home-announcement-grid small { color: #c6291d; }
+.home-announcements .shop-section-title > a { border-color: #111827; color: #111827; }
+.home-announcement-grid article { border: 1px solid #ddd7ca; background: #fff; box-shadow: 0 12px 32px #2b24170b; transition: transform .3s, box-shadow .3s; }
+.home-announcement-grid article:hover { transform: translateY(-5px); box-shadow: 0 20px 42px #2b241716; }
+.home-announcement-grid p { color: #68707b; }
+.home-announcement-grid a { display: inline-block; padding-bottom: 4px; border-bottom: 1px solid #c9a44e; color: #111827; }
+
+.store-reviews { background: #f8f5ee; }
+.review-grid { gap: 18px; }
+.review-grid article { min-height: 270px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 34px 28px; border: 1px solid #e1ddd3; background: #fff; box-shadow: 0 12px 30px #201a1009; }
+.review-grid p { color: #59616d; }
+.review-grid article > a { color: #111827; }
+
+.admin-review-list > article.is-pending { border-left: 4px solid #d4a72c; background: #fffdf7; }
+.admin-review-top { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.admin-review-top > span { color: #e46d23; font-size: .7rem; }
+.admin-review-top > strong { border-radius: 20px; padding: 6px 9px; background: #fff0cf; color: #8a5a00; font-size: .55rem; text-transform: uppercase; }
+
 @media (max-width: 700px) {
   .shop-category-grid { grid-template-columns: 1fr; }
   .shop-category-grid > a, .shop-category-grid > a:nth-child(-n+2) { min-height: 260px; grid-column: auto; }
