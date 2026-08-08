@@ -29,11 +29,11 @@ const catalogProducts: StoreProduct[] = [
 ];
 
 const categoryTiles = [
-  { index: "01", title: "Plise Perde", href: "/urunler#plise-perde", text: "Zengin kumaş ve renk seçenekleri", motif: "PLİSE" },
-  { index: "02", title: "Jaluzi Perde", href: "/urunler#jaluzi-perde", text: "Hassas ışık ve gölge kontrolü", motif: "JALUZİ" },
-  { index: "03", title: "Zip Perde", href: "/urunler#zip-perde", text: "Teras ve cepheler için güçlü koruma", motif: "ZIP" },
-  { index: "04", title: "Sineklik", href: "/urunler#sineklik", text: "Pencere ve kapıya özel üretim", motif: "SİNEKLİK" },
-  { index: "05", title: "Sürgülü Kapılar", href: "/urunler#surgulu-kapilar", text: "Geniş açıklıklara modern geçiş", motif: "SÜRGÜ" },
+  { index: "01", title: "Plise Perde", href: "/urunler/plise-perde", text: "Zengin kumaş ve renk seçenekleri", motif: "PLİSE" },
+  { index: "02", title: "Jaluzi Perde", href: "/urunler/jaluzi-perde", text: "Hassas ışık ve gölge kontrolü", motif: "JALUZİ" },
+  { index: "03", title: "Zip Perde", href: "/urunler/zip-perde", text: "Teras ve cepheler için güçlü koruma", motif: "ZIP" },
+  { index: "04", title: "Sineklik", href: "/urunler/sineklik", text: "Pencere ve kapıya özel üretim", motif: "SİNEKLİK" },
+  { index: "05", title: "Sürgülü Kapılar", href: "/urunler/surgulu-kapilar", text: "Geniş açıklıklara modern geçiş", motif: "SÜRGÜ" },
 ];
 
 export default async function Home() {
@@ -67,7 +67,7 @@ export default async function Home() {
         </Reveal></section>
 
         <section className="shop-section shop-section-soft"><div className="shop-container">
-          <div className="shop-section-title"><div><span>KATALOG KOLEKSİYONU</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler#plise-perde">Tüm plise perdeler →</Link></div>
+          <div className="shop-section-title"><div><span>KATALOG KOLEKSİYONU</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler/plise-perde">Tüm plise perdeler →</Link></div>
           <ProductShelf products={catalogProducts} />
         </div></section>
 

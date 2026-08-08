@@ -5,13 +5,25 @@ import { ProductShelf } from "@/app/components/product-shelf";
 import { ProductViewTracker } from "@/app/components/product-view-tracker";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { CategoryLanding } from "@/app/components/category-landing";
+import { getCategoryPage } from "@/app/data";
 import { formatMoney } from "@/app/lib/commerce";
 import { getProductBySlug } from "@/db";
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const category = getCategoryPage(slug);
+  if (category) return { title: category.title, description: category.description };
+  const product = await getProductBySlug(slug);
+  return product ? { title: product.name, description: product.description } : { title: "Ürün bulunamadı" };
+}
+
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  const category = getCategoryPage(slug);
+  if (category) return <CategoryLanding config={category} />;
   const product = await getProductBySlug(slug);
   if (!product) notFound();
   const effectivePrice = product.salePrice ?? product.price;

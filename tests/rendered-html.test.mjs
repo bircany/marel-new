@@ -37,6 +37,23 @@ test("ürün vitrini ve Diamond sayfası erişilebilir", async () => {
   assert.match(html, /WhatsApp(?:&#x27;|')tan teklif al/);
 });
 
+test("beş kategori endpoint sayfası erişilebilir", async () => {
+  const endpoints = [
+    ["/urunler/plise-perde", /Işığı, mahremiyeti/],
+    ["/urunler/jaluzi-perde", /tek bir hareketle/],
+    ["/urunler/zip-perde", /güneşi ve rüzgârı/],
+    ["/urunler/sineklik", /Temiz hava içeride/],
+    ["/urunler/surgulu-kapilar", /akıcı geçişler/],
+  ];
+  for (const [path, heading] of endpoints) {
+    const response = await render(path);
+    assert.equal(response.status, 200);
+    const html = await response.text();
+    assert.match(html, heading);
+    assert.match(html, /Fiyat ve ölçü desteği al/);
+  }
+});
+
 test("kurumsal ve müşteri destek sayfaları erişilebilir", async () => {
   const contact = await render("/iletisim");
   assert.equal(contact.status, 200);

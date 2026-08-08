@@ -3,6 +3,7 @@ import { Manrope } from "next/font/google";
 import "./globals.css";
 import "./storefront.css";
 import "./storefront-enhancements.css";
+import "./category-pages.css";
 import "./product-refresh.css";
 import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
 import { GoogleTag } from "./components/google-tag";

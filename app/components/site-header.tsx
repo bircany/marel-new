@@ -52,20 +52,20 @@ export function SiteHeader() {
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>
             <nav>
-              <Link href="/urunler#plise-perde">Plise Perde</Link>
-              <Link href="/urunler#jaluzi-perde">Jaluzi Perde</Link>
-              <Link href="/urunler#zip-perde">Zip Perde</Link>
-              <Link href="/urunler#sineklik">Sineklik</Link>
-              <Link href="/urunler#surgulu-kapilar">Sürgülü Kapılar</Link>
+              <Link href="/urunler/plise-perde">Plise Perde</Link>
+              <Link href="/urunler/jaluzi-perde">Jaluzi Perde</Link>
+              <Link href="/urunler/zip-perde">Zip Perde</Link>
+              <Link href="/urunler/sineklik">Sineklik</Link>
+              <Link href="/urunler/surgulu-kapilar">Sürgülü Kapılar</Link>
             </nav>
           </details>
         </div>
         <nav className="category-nav shop-container" aria-label="Ürün kategorileri">
-          <Link href="/urunler#plise-perde">Plise Perde <i>⌄</i></Link>
-          <Link href="/urunler#jaluzi-perde">Jaluzi Perde <i>⌄</i></Link>
-          <Link href="/urunler#zip-perde">Zip Perde <i>⌄</i></Link>
-          <Link href="/urunler#sineklik">Sineklik <i>⌄</i></Link>
-          <Link href="/urunler#surgulu-kapilar">Sürgülü Kapılar</Link>
+          <Link href="/urunler/plise-perde">Plise Perde <i>⌄</i></Link>
+          <Link href="/urunler/jaluzi-perde">Jaluzi Perde <i>⌄</i></Link>
+          <Link href="/urunler/zip-perde">Zip Perde <i>⌄</i></Link>
+          <Link href="/urunler/sineklik">Sineklik <i>⌄</i></Link>
+          <Link href="/urunler/surgulu-kapilar">Sürgülü Kapılar</Link>
           <Link href="/#indirimdekiler">İndirimdekiler</Link>
           <Link href="/siparis-takip">Sipariş Takip</Link>
         </nav>
