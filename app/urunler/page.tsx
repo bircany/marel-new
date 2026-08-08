@@ -3,13 +3,31 @@ import Link from "next/link";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { productGroups } from "../data";
+import { ProductShelf, type StoreProduct } from "../components/product-shelf";
+import { listProducts } from "@/db";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Ürünler",
   description: "Marel plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri.",
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const products = await listProducts(false);
+  const storeProducts: StoreProduct[] = products.map((product) => ({
+    id: product.id,
+    name: product.name,
+    code: product.sku,
+    category: `Marel / ${product.category}`,
+    image: product.image,
+    feature: product.description,
+    colors: [],
+    href: `/urunler/${product.slug}`,
+    priceKurus: product.stock > 0 ? product.salePrice ?? product.price : undefined,
+    currency: product.currency,
+    badge: product.featured ? "Öne Çıkan" : undefined,
+  }));
   return (
     <>
       <SiteHeader />
@@ -23,6 +41,7 @@ export default function ProductsPage() {
             <p>İhtiyacınızı, kullanım alanınızı ve ölçünüzü birlikte değerlendirerek kumaştan kasaya kadar size özel bir çözüm hazırlıyoruz.</p>
           </div>
         </section>
+        <section className="shop-section"><div className="shop-container"><div className="shop-section-title"><div><span>GÜNCEL FİYAT VE STOK</span><h2>Online Mağaza</h2></div></div><ProductShelf products={storeProducts} /></div></section>
         <section aria-label="Ürün grupları">
           {productGroups.map((group, index) => (
             <article className="product-group" id={group.id} key={group.id}>

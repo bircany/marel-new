@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { addCartLine, formatMoney } from "@/app/lib/commerce";
+import { trackCommerceEvent } from "@/app/lib/google-ads";
 
 export type StoreProduct = {
+  id?: string;
   name: string;
   code: string;
   category: string;
@@ -13,6 +16,8 @@ export type StoreProduct = {
   colors: string[];
   href: string;
   price?: string;
+  priceKurus?: number;
+  currency?: string;
   imagePosition?: string;
 };
 
@@ -22,6 +27,20 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
   const askOnWhatsApp = (product: StoreProduct) => {
     const message = `Merhaba, ${product.name} (${product.code}) hakkında bilgi ve ölçüye göre fiyat almak istiyorum.`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+  };
+
+  const addToCart = (product: StoreProduct) => {
+    if (!product.priceKurus || product.priceKurus <= 0) return askOnWhatsApp(product);
+    addCartLine({
+      productId: product.id ?? product.code,
+      slug: product.href.split("/").filter(Boolean).at(-1) ?? product.code,
+      sku: product.code,
+      name: product.name,
+      image: product.image,
+      price: product.priceKurus,
+      currency: product.currency ?? "TRY",
+    });
+    trackCommerceEvent("add_to_cart", product.priceKurus / 100, [{ item_id: product.code, item_name: product.name, item_brand: "Marel", item_category: product.category, price: product.priceKurus / 100, quantity: 1, google_business_vertical: "retail" }]);
   };
 
   return (
@@ -50,12 +69,12 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
               <span>{product.colors.length} renk</span>
             </div>
             <div className="shop-product-price">
-              <strong>{product.price ?? "Ölçüye göre fiyat"}</strong>
+              <strong>{product.priceKurus ? formatMoney(product.priceKurus, product.currency) : product.price ?? "Ölçüye göre fiyat"}</strong>
               <em>Kişiye özel üretim</em>
             </div>
             <div className="shop-card-actions">
               <Link href={`${product.href}#teklif`}>Ürünü incele</Link>
-              <button type="button" onClick={() => askOnWhatsApp(product)}>WhatsApp&apos;tan sor</button>
+              <button type="button" onClick={() => addToCart(product)}>{product.priceKurus ? "Sepete ekle" : "WhatsApp'tan sor"}</button>
             </div>
           </div>
         </article>

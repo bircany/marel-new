@@ -13,10 +13,10 @@ export const metadata = {
 const neutral = ["#f4f2ec", "#d8d3c8", "#adb0b1", "#53575a", "#232527"];
 
 const bestSellers: StoreProduct[] = [
-  { name: "Honeycomb 003 Gri Isı Yalıtımlı Plise Perde", code: "HC-003", category: "Marel / Honeycomb Series", image: "/images/real/honeycomb-gri-detay.png", badge: "Çok Satan", feature: "%100 ışık filtrasyonu · Isı yalıtımlı hücresel yapı", colors: neutral, price: "1.166,00 ₺'den", href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 38%" },
-  { name: "Diamond 100 Beyaz Plise Perde", code: "DIA-100", category: "Marel / Diamond Series", image: "/images/real/diamond-beyaz.jpeg", badge: "Gerçek Ürün", feature: "%50 ışık filtrasyonu · UV dayanımlı kumaş", colors: ["#f7f6f1", "#e6dfce", "#bec1c2", "#4d5052", "#1d1f21", "#7b6c58"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 42%" },
-  { name: "Diamond 102 Gri Plise Perde", code: "DIA-102", category: "Marel / Diamond Series", image: "/images/real/diamond-gri.jpeg", badge: "Yeni", feature: "110 gr/m² polyester · Kolay yıkanabilir yapı", colors: ["#f7f6f1", "#ddd6c6", "#a4a7a8", "#55585b", "#252729", "#8a745a"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 43%" },
-  { name: "Blackout 05 Siyah Tam Karartma", code: "BLK-05", category: "Marel / Blackout Series", image: "/images/catalog/blackout.webp", badge: "Tam Karartma", feature: "%100 ışık kontrolü · 250 gr/m² kumaş", colors: ["#eee8dc", "#9a9a98", "#2a2a2a", "#5d5148", "#484a4b"], href: "/urunler/plise-perde/diamond-serisi" },
+  { id: "HC-003", name: "Honeycomb 003 Gri Isı Yalıtımlı Plise Perde", code: "HC-003", category: "Marel / Honeycomb Series", image: "/images/real/honeycomb-gri-detay.png", badge: "Çok Satan", feature: "%100 ışık filtrasyonu · Isı yalıtımlı hücresel yapı", colors: neutral, priceKurus: 116600, currency: "TRY", href: "/urunler/honeycomb-003-gri", imagePosition: "center 38%" },
+  { id: "DIA-100", name: "Diamond 100 Beyaz Plise Perde", code: "DIA-100", category: "Marel / Diamond Series", image: "/images/real/diamond-beyaz.jpeg", badge: "Gerçek Ürün", feature: "%50 ışık filtrasyonu · UV dayanımlı kumaş", colors: ["#f7f6f1", "#e6dfce", "#bec1c2", "#4d5052", "#1d1f21", "#7b6c58"], priceKurus: 116600, currency: "TRY", href: "/urunler/diamond-100-beyaz", imagePosition: "center 42%" },
+  { id: "DIA-102", name: "Diamond 102 Gri Plise Perde", code: "DIA-102", category: "Marel / Diamond Series", image: "/images/real/diamond-gri.jpeg", badge: "Yeni", feature: "110 gr/m² polyester · Kolay yıkanabilir yapı", colors: ["#f7f6f1", "#ddd6c6", "#a4a7a8", "#55585b", "#252729", "#8a745a"], priceKurus: 116600, currency: "TRY", href: "/urunler/diamond-102-gri", imagePosition: "center 43%" },
+  { id: "BLK-05", name: "Blackout 05 Siyah Tam Karartma", code: "BLK-05", category: "Marel / Blackout Series", image: "/images/catalog/blackout.webp", badge: "Tam Karartma", feature: "%100 ışık kontrolü · 250 gr/m² kumaş", colors: ["#eee8dc", "#9a9a98", "#2a2a2a", "#5d5148", "#484a4b"], priceKurus: 149900, currency: "TRY", href: "/urunler/blackout-05-siyah" },
 ];
 
 const catalogProducts: StoreProduct[] = [
@@ -82,7 +82,7 @@ export default function Home() {
 
         <section className="shop-trust-row"><div className="shop-container"><article><span>▣</span><h3>Katalogla doğrulanmış ürünler</h3></article><article><span>◇</span><h3>Ölçüye özel güvenli üretim</h3></article><article><span>◉</span><h3>Doğrudan WhatsApp desteği</h3></article></div></section>
 
-        <section className="order-track" id="takip"><div className="shop-container"><h2>Sipariş Takip</h2><p>Siparişinizin güncel durumunu kontrol edin.</p><form><label><span>E-posta</span><input type="email" placeholder="ornek@email.com" /></label><label><span>Sipariş No</span><input type="text" placeholder="Örn. MRL-1024" /></label><button type="button">Kontrol Et</button></form></div></section>
+        <section className="order-track" id="takip"><div className="shop-container"><h2>Sipariş Takip</h2><p>Siparişinizin güncel durumunu kontrol edin.</p><form action="/siparis-takip"><label><span>E-posta</span><input name="email" type="email" placeholder="ornek@email.com" required /></label><label><span>Sipariş No</span><input name="orderNumber" type="text" placeholder="Örn. MRL-260808-ABC123" required /></label><button type="submit">Kontrol Et</button></form></div></section>
       </main>
       <SiteFooter />
     </>

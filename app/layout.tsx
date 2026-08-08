@@ -4,6 +4,9 @@ import "./globals.css";
 import "./storefront.css";
 import "./product-refresh.css";
 import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
+import { GoogleTag } from "./components/google-tag";
+import { ConsentBanner } from "./components/consent-banner";
+import "./commerce.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",
@@ -24,15 +27,15 @@ export const metadata: Metadata = {
     description: "Plise perde, sineklik ve zip sistemlerini inceleyin; kumaş, kasa ve ölçü bilgileriyle hızlı teklif alın.",
     locale: "tr_TR",
     type: "website",
-    images: [{ url: "/images/hero/marel-honeycomb-hero-v3.png", width: 1680, height: 945, alt: "Marel Honeycomb gri ısı yalıtımlı plise perde" }],
+    images: [{ url: "/og.png", width: 1714, height: 909, alt: "Marel ölçüye özel perde ve sineklik" }],
   },
-  twitter: { card: "summary_large_image", images: ["/images/hero/marel-honeycomb-hero-v3.png"] },
+  twitter: { card: "summary_large_image", images: ["/og.png"] },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr">
-      <body className={manrope.variable}>{children}<WhatsAppAdvisor /></body>
+      <body className={manrope.variable}>{children}<WhatsAppAdvisor /><ConsentBanner /><GoogleTag /></body>
     </html>
   );
 }

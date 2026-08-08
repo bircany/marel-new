@@ -8,9 +8,16 @@ export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
-    const add = () => setCartCount((count) => count + 1);
-    window.addEventListener("marel:add-to-cart", add);
-    return () => window.removeEventListener("marel:add-to-cart", add);
+    const update = () => {
+      try {
+        const lines = JSON.parse(window.localStorage.getItem("marel-cart-v1") ?? "[]") as Array<{ quantity?: number }>;
+        setCartCount(lines.reduce((sum, line) => sum + (line.quantity ?? 0), 0));
+      } catch { setCartCount(0); }
+    };
+    update();
+    window.addEventListener("marel:cart-updated", update);
+    window.addEventListener("storage", update);
+    return () => { window.removeEventListener("marel:cart-updated", update); window.removeEventListener("storage", update); };
   }, []);
 
   return (
@@ -31,8 +38,8 @@ export function SiteHeader() {
           </form>
           <div className="shop-actions">
             <a href="https://wa.me/905467356602" target="_blank" rel="noreferrer" aria-label="WhatsApp destek"><span>◉</span><small>Destek</small></a>
-            <Link href="/urunler" aria-label="Hesabım"><span>♙</span><small>Hesabım</small></Link>
-            <Link className="cart-action" href="#sepet" aria-label={`Sepet, ${cartCount} ürün`}><span>▱</span><small>Sepetim</small><b>{cartCount}</b></Link>
+            <Link href="/hesabim" aria-label="Hesabım"><span>♙</span><small>Hesabım</small></Link>
+            <Link className="cart-action" href="/sepet" aria-label={`Sepet, ${cartCount} ürün`}><span>▱</span><small>Sepetim</small><b>{cartCount}</b></Link>
           </div>
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>
@@ -52,7 +59,7 @@ export function SiteHeader() {
           <Link href="/urunler#sineklik">Sineklik <i>⌄</i></Link>
           <Link href="/urunler#surgulu-kapilar">Sürgülü Kapılar</Link>
           <Link href="/#indirimdekiler">İndirimdekiler</Link>
-          <Link href="#takip">Sipariş Takip</Link>
+          <Link href="/siparis-takip">Sipariş Takip</Link>
         </nav>
       </header>
       <div className="red-ticker"><div>HAVALEDE İNDİRİMLERE EK %10 İNDİRİM • PEŞİN FİYATINA 3 TAKSİT İMKANI • ÖLÇÜYE ÖZEL ÜRETİM • HIZLI WHATSAPP DESTEĞİ</div></div>
