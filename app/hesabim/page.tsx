@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { headers } from "next/headers";
 import { chatGPTSignInPath, chatGPTSignOutPath, getChatGPTUser } from "@/app/chatgpt-auth";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
@@ -27,7 +28,7 @@ const progressByStatus: Record<string, number> = {
   cancelled: 0,
 };
 
-function GuestAccount() {
+function GuestAccount({ loginHref, isLocal }: { loginHref: string; isLocal: boolean }) {
   return (
     <main className="account-guest-page">
       <section className="account-guest-shell shop-container">
@@ -47,10 +48,10 @@ function GuestAccount() {
           <span className="account-auth-kicker">Marel müşteri hesabı</span>
           <h2>Tekrar hoş geldiniz.</h2>
           <p>Hesabınıza bağlanan siparişleri görüntülemek için güvenli giriş yapın.</p>
-          <Link className="account-primary-action" href={chatGPTSignInPath("/hesabim")}>
+          <Link className="account-primary-action" href={loginHref}>
             <span>Hesabıma güvenli giriş yap</span><b aria-hidden="true">→</b>
           </Link>
-          <div className="account-auth-note"><i aria-hidden="true">✓</i><span>Ayrı bir kayıt veya yeni şifre gerekmez.</span></div>
+          <div className="account-auth-note"><i aria-hidden="true">✓</i><span>{isLocal ? "Yerel önizlemede giriş, canlı Marel sitesinde güvenle açılır." : "Ayrı bir kayıt veya yeni şifre gerekmez."}</span></div>
           <div className="account-panel-divider"><span>Yardıma mı ihtiyacınız var?</span></div>
           <a className="account-support-link" href="https://wa.me/905467356602" target="_blank" rel="noreferrer">
             <span><b>WhatsApp desteği</b><small>Marel danışmanına hızlıca ulaşın</small></span><strong aria-hidden="true">↗</strong>
@@ -88,7 +89,14 @@ function OrderCard({ order }: { order: OrderRecord }) {
 
 export default async function AccountPage() {
   const user = await getChatGPTUser();
-  if (!user) return <><SiteHeader /><GuestAccount /><SiteFooter /></>;
+  if (!user) {
+    const host = (await headers()).get("host") ?? "";
+    const isLocal = /^(localhost|127\.0\.0\.1)(:\d+)?$/i.test(host);
+    const loginHref = isLocal
+      ? "https://marel-v2-showroom.bircanyilmaz622.chatgpt.site/signin-with-chatgpt?return_to=%2Fhesabim"
+      : chatGPTSignInPath("/hesabim");
+    return <><SiteHeader /><GuestAccount loginHref={loginHref} isLocal={isLocal} /><SiteFooter /></>;
+  }
 
   await upsertUser(user);
   const [orders, products, reviews] = await Promise.all([listOrdersForUser(user.userId), listProducts(false), listReviewsForUser(user.userId)]);

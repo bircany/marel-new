@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { addCartLine, formatMoney } from "@/app/lib/commerce";
 import { trackCommerceEvent } from "@/app/lib/google-ads";
 
@@ -24,6 +25,14 @@ export type StoreProduct = {
 const phone = "905467356602";
 
 export function ProductShelf({ products }: { products: StoreProduct[] }) {
+  const [pendingCode, setPendingCode] = useState<string | null>(null);
+  const [addedProduct, setAddedProduct] = useState<StoreProduct | null>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+  }, []);
+
   const askOnWhatsApp = (product: StoreProduct) => {
     const message = `Merhaba, ${product.name} (${product.code}) hakkında bilgi ve ölçüye göre fiyat almak istiyorum.`;
     window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
@@ -31,16 +40,25 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
 
   const addToCart = (product: StoreProduct) => {
     if (!product.priceKurus || product.priceKurus <= 0) return askOnWhatsApp(product);
-    addCartLine({
-      productId: product.id ?? product.code,
-      slug: product.href.split("/").filter(Boolean).at(-1) ?? product.code,
-      sku: product.code,
-      name: product.name,
-      image: product.image,
-      price: product.priceKurus,
-      currency: product.currency ?? "TRY",
-    });
-    trackCommerceEvent("add_to_cart", product.priceKurus / 100, [{ item_id: product.code, item_name: product.name, item_brand: "Marel", item_category: product.category, price: product.priceKurus / 100, quantity: 1, google_business_vertical: "retail" }]);
+    if (pendingCode) return;
+    setPendingCode(product.code);
+    setAddedProduct(null);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      addCartLine({
+        productId: product.id ?? product.code,
+        slug: product.href.split("/").filter(Boolean).at(-1) ?? product.code,
+        sku: product.code,
+        name: product.name,
+        image: product.image,
+        price: product.priceKurus!,
+        currency: product.currency ?? "TRY",
+      });
+      trackCommerceEvent("add_to_cart", product.priceKurus! / 100, [{ item_id: product.code, item_name: product.name, item_brand: "Marel", item_category: product.category, price: product.priceKurus! / 100, quantity: 1, google_business_vertical: "retail" }]);
+      setPendingCode(null);
+      setAddedProduct(product);
+      timerRef.current = setTimeout(() => setAddedProduct(null), 2800);
+    }, 520);
   };
 
   return (
@@ -74,11 +92,12 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
             </div>
             <div className="shop-card-actions">
               <Link href={`${product.href}#teklif`}>Ürünü incele</Link>
-              <button type="button" onClick={() => addToCart(product)}>{product.priceKurus ? "Sepete ekle" : "WhatsApp'tan sor"}</button>
+              <button className={pendingCode === product.code ? "is-loading" : addedProduct?.code === product.code ? "is-success" : ""} type="button" disabled={pendingCode === product.code} onClick={() => addToCart(product)}>{pendingCode === product.code ? <><i className="button-spinner" aria-hidden="true" /> Ekleniyor…</> : addedProduct?.code === product.code ? <>✓ Sepete eklendi</> : product.priceKurus ? "Sepete ekle" : "WhatsApp'tan sor"}</button>
             </div>
           </div>
         </article>
       ))}
+      {addedProduct ? <div className="cart-success-toast" role="status" aria-live="polite"><span aria-hidden="true">✓</span><div><b>Sepete eklendi</b><small>{addedProduct.name}</small></div><Link href="/sepet">Sepete git →</Link></div> : null}
     </div>
   );
 }

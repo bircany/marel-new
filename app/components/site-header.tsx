@@ -6,18 +6,26 @@ import { useEffect, useState } from "react";
 
 export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
+  const [cartPulse, setCartPulse] = useState(false);
 
   useEffect(() => {
-    const update = () => {
+    let pulseTimer: ReturnType<typeof setTimeout> | null = null;
+    const update = (event?: Event) => {
       try {
         const lines = JSON.parse(window.localStorage.getItem("marel-cart-v1") ?? "[]") as Array<{ quantity?: number }>;
         setCartCount(lines.reduce((sum, line) => sum + (line.quantity ?? 0), 0));
       } catch { setCartCount(0); }
+      if (event?.type === "marel:cart-updated") {
+        setCartPulse(false);
+        requestAnimationFrame(() => setCartPulse(true));
+        if (pulseTimer) clearTimeout(pulseTimer);
+        pulseTimer = setTimeout(() => setCartPulse(false), 700);
+      }
     };
     update();
     window.addEventListener("marel:cart-updated", update);
     window.addEventListener("storage", update);
-    return () => { window.removeEventListener("marel:cart-updated", update); window.removeEventListener("storage", update); };
+    return () => { window.removeEventListener("marel:cart-updated", update); window.removeEventListener("storage", update); if (pulseTimer) clearTimeout(pulseTimer); };
   }, []);
 
   return (
@@ -39,7 +47,7 @@ export function SiteHeader() {
           <div className="shop-actions">
             <a href="https://wa.me/905467356602" target="_blank" rel="noreferrer" aria-label="WhatsApp destek"><span>◉</span><small>Destek</small></a>
             <Link href="/hesabim" aria-label="Hesabım"><span>♙</span><small>Hesabım</small></Link>
-            <Link className="cart-action" href="/sepet" aria-label={`Sepet, ${cartCount} ürün`}><span>▱</span><small>Sepetim</small><b>{cartCount}</b></Link>
+            <Link className={`cart-action${cartPulse ? " cart-pulse" : ""}`} href="/sepet" aria-label={`Sepet, ${cartCount} ürün`}><span>▱</span><small>Sepetim</small><b>{cartCount}</b></Link>
           </div>
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>

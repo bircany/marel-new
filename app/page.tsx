@@ -29,9 +29,11 @@ const catalogProducts: StoreProduct[] = [
 ];
 
 const categoryTiles = [
-  { title: "Plise Perdeler", image: "/images/catalog/diamond.webp", href: "/urunler#plise-perde", text: "Diamond, Silver, Gold ve tüm seriler" },
-  { title: "Honeycomb Perdeler", image: "/images/hero/marel-honeycomb-hero-v3.png", href: "/urunler/plise-perde/diamond-serisi#teklif", text: "Isı yalıtımlı hücresel koleksiyon" },
-  { title: "Sineklik Sistemleri", image: "/images/configurator/diamond-100-beyaz-antrasit-1.webp", href: "/urunler#sineklik", text: "Pencere ve kapıya özel üretim" },
+  { index: "01", title: "Plise Perde", href: "/urunler#plise-perde", text: "Zengin kumaş ve renk seçenekleri", motif: "PLİSE" },
+  { index: "02", title: "Jaluzi Perde", href: "/urunler#jaluzi-perde", text: "Hassas ışık ve gölge kontrolü", motif: "JALUZİ" },
+  { index: "03", title: "Zip Perde", href: "/urunler#zip-perde", text: "Teras ve cepheler için güçlü koruma", motif: "ZIP" },
+  { index: "04", title: "Sineklik", href: "/urunler#sineklik", text: "Pencere ve kapıya özel üretim", motif: "SİNEKLİK" },
+  { index: "05", title: "Sürgülü Kapılar", href: "/urunler#surgulu-kapilar", text: "Geniş açıklıklara modern geçiş", motif: "SÜRGÜ" },
 ];
 
 export default async function Home() {
@@ -71,7 +73,7 @@ export default async function Home() {
 
         <section className="shop-section" id="galeri"><div className="shop-container">
           <div className="shop-section-title center-title"><div><span>KATEGORİLER</span><h2>İhtiyacına Göre Seç</h2></div></div>
-          <Reveal className="shop-category-grid" direction="up">{categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><Image unoptimized src={tile.image} alt={tile.title} fill sizes="33vw" /><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Alışverişe başla →</b></div></Link>)}</Reveal>
+          <Reveal className="shop-category-grid" direction="up">{categoryTiles.map((tile) => <Link href={tile.href} key={tile.title}><span className="category-card-index">{tile.index}</span><span className="category-card-motif" aria-hidden="true">{tile.motif}</span><div><h3>{tile.title}</h3><p>{tile.text}</p><b>Kategoriyi incele <i aria-hidden="true">→</i></b></div></Link>)}</Reveal>
         </div></section>
 
         {announcements.length ? <section className="home-announcements" id="duyurular"><div className="shop-container">

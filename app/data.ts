@@ -20,9 +20,9 @@ export const galleryItems = [
 ];
 
 export const productGroups = [
-  { id: "plise-perde", title: "Plise Perde", description: "Cam balkon, pencere, ofis ve yaşam alanları için ışık filtrasyonu %25'ten %100'e uzanan kumaş serileri.", image: "/images/real/diamond-beyaz.jpeg", href: "/urunler/plise-perde/diamond-serisi", tags: ["Diamond", "Blackout", "Silver", "Reina"] },
-  { id: "jaluzi-perde", title: "Jaluzi Perde", description: "Alüminyum ve dekoratif yüzey seçenekleriyle hassas ışık yönlendirmesi ve kolay bakım.", image: "/images/catalog/silver.webp", href: "#teklif-bilgi", tags: ["Alüminyum", "Ahşap görünüm", "Motorlu opsiyon"] },
-  { id: "zip-perde", title: "Zip Perde", description: "Teras, veranda ve geniş cephelerde rüzgâr dayanımı ve güneş kontrolü sağlayan dış mekân sistemi.", image: "/images/catalog/blackout.webp", href: "#teklif-bilgi", tags: ["Dış mekân", "Güneş kontrolü", "Motorlu sistem"] },
-  { id: "sineklik", title: "Sineklik", description: "Pencere ve kapılarda sabit, sürme ve plise seçenekleriyle havalandırmadan ödün vermeyen çözüm.", image: "/images/real/diamond-beyaz-siyah-ip.jpeg", href: "#teklif-bilgi", tags: ["Pencere", "Kapı", "Sürme", "Plise"] },
-  { id: "surgulu-kapilar", title: "Sürgülü Kapılar", description: "Mekânları bölmeden tanımlayan, geniş açıklıklara uyarlanan modern geçiş sistemleri.", image: "/images/catalog/reina.webp", href: "#teklif-bilgi", tags: ["İç mekân", "Geniş açıklık", "Özel ölçü"] },
+  { id: "plise-perde", title: "Plise Perde", description: "Cam balkon, pencere, ofis ve yaşam alanları için ışık filtrasyonu %25'ten %100'e uzanan kumaş serileri.", image: "/images/ai/plise-perde.webp", href: "/urunler/plise-perde/diamond-serisi", tags: ["Diamond", "Blackout", "Silver", "Reina"] },
+  { id: "jaluzi-perde", title: "Jaluzi Perde", description: "Alüminyum ve dekoratif yüzey seçenekleriyle hassas ışık yönlendirmesi ve kolay bakım.", image: "/images/ai/jaluzi-perde.webp", href: "#teklif-bilgi", tags: ["Alüminyum", "Ahşap görünüm", "Motorlu opsiyon"] },
+  { id: "zip-perde", title: "Zip Perde", description: "Teras, veranda ve geniş cephelerde rüzgâr dayanımı ve güneş kontrolü sağlayan dış mekân sistemi.", image: "/images/ai/zip-perde.webp", href: "#teklif-bilgi", tags: ["Dış mekân", "Güneş kontrolü", "Motorlu sistem"] },
+  { id: "sineklik", title: "Sineklik", description: "Pencere ve kapılarda sabit, sürme ve plise seçenekleriyle havalandırmadan ödün vermeyen çözüm.", image: "/images/ai/sineklik.webp", href: "#teklif-bilgi", tags: ["Pencere", "Kapı", "Sürme", "Plise"] },
+  { id: "surgulu-kapilar", title: "Sürgülü Kapılar", description: "Mekânları bölmeden tanımlayan, geniş açıklıklara uyarlanan modern geçiş sistemleri.", image: "/images/ai/surgulu-kapi.webp", href: "#teklif-bilgi", tags: ["İç mekân", "Geniş açıklık", "Özel ölçü"] },
 ];

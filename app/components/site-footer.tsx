@@ -14,7 +14,13 @@ export function SiteFooter() {
         <div><h3>Hesabım</h3><Link href="/hesabim">Hesabım</Link><Link href="/sepet">Sepetim</Link><Link href="/siparis-takip">Sipariş Takip</Link><Link href="/urunler">Ürünler</Link></div>
         <div><h3>Kurumsal</h3><Link href="/duyurular">Duyurular</Link><Link href="/#galeri">Fotoğraf Galerisi</Link><Link href="/iletisim">İletişim</Link><Link href="/gizlilik-ve-iade-kosullari">Gizlilik ve İade Koşulları</Link></div>
       </div>
-      <div className="shop-container footer-payment"><span>Güvenli ödeme</span><b>VISA</b><b>mastercard.</b><b>TROY</b><span>256-bit SSL koruması</span></div>
+      <div className="shop-container footer-payment">
+        <span>Güvenli ödeme</span>
+        <Image unoptimized src="/images/payment/visa.svg" alt="Visa" width={78} height={26} />
+        <Image unoptimized className="payment-mastercard" src="/images/payment/mastercard.svg" alt="Mastercard" width={48} height={30} />
+        <Image unoptimized className="payment-troy" src="/images/payment/troy.svg" alt="TROY" width={72} height={27} />
+        <span className="payment-security">256-bit SSL koruması</span>
+      </div>
       <div className="shop-container footer-copyright">© 2026 Marel. Tüm hakları saklıdır.</div>
     </footer>
   );
