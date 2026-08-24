@@ -17,7 +17,7 @@ test("Marel ana sayfasını sunucu tarafında üretir", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /En Çok Satanlar/);
-  assert.match(html, /WhatsApp(?:&#x27;|')tan sor/);
+  assert.match(html, /WhatsApp(?:&#x27;|')tan teklif al/);
   assert.match(html, /Honeycomb 003 Gri/);
   assert.match(html, /Sipariş Takip/);
   assert.match(html, /Plise Perde/);

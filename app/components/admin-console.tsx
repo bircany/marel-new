@@ -7,8 +7,8 @@ import { useState } from "react";
 import { formatMoney } from "@/app/lib/commerce";
 import type { AnnouncementRecord, CatalogProduct, ContactMessageRecord, OrderRecord, ReviewRecord } from "@/db";
 
-const statuses = ["pending", "confirmed", "production", "shipped", "delivered", "cancelled"];
-const statusNames: Record<string, string> = { pending: "Bekliyor", confirmed: "Onaylandı", production: "Üretimde", shipped: "Kargoda", delivered: "Teslim edildi", cancelled: "İptal" };
+const statuses = ["pending", "processing", "shipped", "delivered", "cancelled", "refunded"];
+const statusNames: Record<string, string> = { pending: "Bekliyor", processing: "İşlemde", shipped: "Kargoda", delivered: "Teslim edildi", cancelled: "İptal", refunded: "İade edildi" };
 type Tab = "products" | "orders" | "reviews" | "announcements" | "contacts";
 
 export function AdminConsole({ products, orders, reviews, announcements, contacts }: { products: CatalogProduct[]; orders: OrderRecord[]; reviews: ReviewRecord[]; announcements: AnnouncementRecord[]; contacts: ContactMessageRecord[] }) {

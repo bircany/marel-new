@@ -1,39 +1,50 @@
-export type CartLine = {
-  productId: string;
-  slug: string;
-  sku: string;
-  name: string;
-  image: string;
-  price: number;
-  currency: string;
-  quantity: number;
-};
-
-export const CART_STORAGE_KEY = "marel-cart-v1";
-
 export function formatMoney(amountInKurus: number, currency = "TRY"): string {
   return new Intl.NumberFormat("tr-TR", { style: "currency", currency }).format(amountInKurus / 100);
 }
 
-export function readCart(): CartLine[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const parsed = JSON.parse(window.localStorage.getItem(CART_STORAGE_KEY) ?? "[]") as CartLine[];
-    return Array.isArray(parsed) ? parsed.filter((line) => line.productId && line.quantity > 0) : [];
-  } catch {
-    return [];
-  }
+export type ServerCartItem = {
+  id: number;
+  quantity: number;
+  product: {
+    id: number;
+    name: string;
+    slug: string;
+    sku: string;
+    cover_image: string | null;
+    stock: number;
+    in_stock: boolean;
+  } | null;
+  unit_price: number;
+  line_total: number;
+};
+
+export type ServerCart = {
+  items: ServerCartItem[];
+  summary: { item_count: number; total_quantity: number; subtotal: number };
+};
+
+export async function fetchServerCart(): Promise<ServerCart> {
+  const response = await fetch("/api/cart", { cache: "no-store" });
+  if (!response.ok) return { items: [], summary: { item_count: 0, total_quantity: 0, subtotal: 0 } };
+  return (await response.json()) as ServerCart;
 }
 
-export function writeCart(lines: CartLine[]): void {
-  window.localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(lines));
-  window.dispatchEvent(new CustomEvent("marel:cart-updated", { detail: lines }));
+export async function addToServerCart(productId: string | number, quantity = 1): Promise<ServerCart> {
+  const response = await fetch("/api/cart", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ productId, quantity }),
+  });
+  const data = (await response.json()) as ServerCart & { error?: string };
+  if (!response.ok) throw new Error(data.error ?? "Ürün sepete eklenemedi.");
+  window.dispatchEvent(new CustomEvent("marel:cart-updated", { detail: data.summary?.total_quantity ?? 0 }));
+  return data;
 }
 
-export function addCartLine(line: Omit<CartLine, "quantity">): void {
-  const lines = readCart();
-  const existing = lines.find((item) => item.productId === line.productId);
-  if (existing) existing.quantity += 1;
-  else lines.push({ ...line, quantity: 1 });
-  writeCart(lines);
+export function cartCountFromServer(cart: ServerCart): number {
+  return cart.summary?.total_quantity ?? cart.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+}
+
+export function cartSubtotalToKurus(cart: ServerCart): number {
+  return Math.round((cart.summary?.subtotal ?? 0) * 100);
 }

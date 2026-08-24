@@ -1,14 +1,10 @@
-import { getChatGPTUser, type ChatGPTUser } from "@/app/chatgpt-auth";
-import { isAdminUser, upsertUser } from "@/db";
+import { getAdminUser, type LaravelUser } from "@/app/lib/laravel-auth";
 
-export async function getAuthorizedAdmin(): Promise<ChatGPTUser | null> {
-  const user = await getChatGPTUser();
-  if (!user || !isAdminUser(user)) return null;
-  await upsertUser(user, "admin");
-  return user;
+export async function getAuthorizedAdmin(): Promise<LaravelUser | null> {
+  return getAdminUser();
 }
 
-export async function requireAdminApi(): Promise<ChatGPTUser | Response> {
-  const admin = await getAuthorizedAdmin();
+export async function requireAdminApi(): Promise<LaravelUser | Response> {
+  const admin = await getAdminUser();
   return admin ?? Response.json({ error: "Bu işlem için yönetici yetkisi gerekiyor." }, { status: 403 });
 }

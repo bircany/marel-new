@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# vercel
+.vercel
+
 # typescript
 next-env.d.ts
 *.tsbuildinfo
@@ -43,3 +46,4 @@ next-env.d.ts
 /.wrangler/
 /outputs/
 /work/
+marel-plise - Copy/

@@ -5,7 +5,8 @@ import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { StorefrontHero } from "./components/storefront-hero";
 import { Reveal } from "./components/motion-media";
-import { listAnnouncements, listApprovedReviews } from "@/db";
+import { listAnnouncements } from "@/db";
+import { stListProducts, stListApprovedReviews } from "@/app/lib/softtrade";
 
 export const metadata = {
   title: "Marel | Online Perde ve Sineklik Mağazası",
@@ -22,10 +23,10 @@ const bestSellers: StoreProduct[] = [
 ];
 
 const catalogProducts: StoreProduct[] = [
-  { name: "Honeycomb 001 Beyaz Isı Yalıtımlı Perde", code: "HC-001", category: "Marel / Honeycomb Series", image: "/images/real/diamond-beyaz-siyah-ip.jpeg", badge: "Isı Yalıtımlı", feature: "Hücresel doku · %100 polyester · 2 yıl garanti", colors: neutral, price: "1.166,00 ₺'den", href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 43%" },
-  { name: "Diamond 108 Krem Plise Perde", code: "DIA-108", category: "Marel / Diamond Series", image: "/images/real/diamond-krem.jpeg", feature: "%50 ışık filtrasyonu · Yumuşak gün ışığı", colors: ["#f7f6f1", "#e8dfca", "#d0c3aa", "#a8aaab", "#4d5052", "#222426"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 40%" },
-  { name: "Diamond 109 Açık Gri Plise Perde", code: "DIA-109", category: "Marel / Diamond Series", image: "/images/real/diamond-acik-gri.jpeg", badge: "Gerçek Doku", feature: "UV dayanımlı · Kolay temizlenebilir polyester", colors: ["#f8f7f2", "#dfdcd3", "#b8bbbc", "#777a7b", "#47494a", "#202224"], href: "/urunler/plise-perde/diamond-serisi", imagePosition: "center 36%" },
-  { name: "Silver 7002 Gri Plise Perde", code: "SLV-7002", category: "Marel / Silver Series", image: "/images/catalog/silver.webp", badge: "%70 Filtrasyon", feature: "150 gr/m² kumaş · UV dayanımlı yapı", colors: ["#f6f5f0", "#ddd6c8", "#aeb1b1", "#77797a", "#484a4b"], href: "/urunler/plise-perde/diamond-serisi" },
+  { id: "HC-001", name: "Honeycomb 001 Beyaz Isı Yalıtımlı Perde", code: "HC-001", category: "Marel / Honeycomb Series", image: "/images/real/diamond-beyaz-siyah-ip.jpeg", badge: "Isı Yalıtımlı", feature: "Hücresel doku · %100 polyester · 2 yıl garanti", colors: neutral, price: "1.166,00 ₺'den", href: "/urunler/honeycomb-001-beyaz", imagePosition: "center 43%" },
+  { id: "DIA-108", name: "Diamond 108 Krem Plise Perde", code: "DIA-108", category: "Marel / Diamond Series", image: "/images/real/diamond-krem.jpeg", feature: "%50 ışık filtrasyonu · Yumuşak gün ışığı", colors: ["#f7f6f1", "#e8dfca", "#d0c3aa", "#a8aaab", "#4d5052", "#222426"], href: "/urunler/diamond-108-krem", imagePosition: "center 40%" },
+  { id: "DIA-109", name: "Diamond 109 Açık Gri Plise Perde", code: "DIA-109", category: "Marel / Diamond Series", image: "/images/real/diamond-acik-gri.jpeg", badge: "Gerçek Doku", feature: "UV dayanımlı · Kolay temizlenebilir polyester", colors: ["#f8f7f2", "#dfdcd3", "#b8bbbc", "#777a7b", "#47494a", "#202224"], href: "/urunler/diamond-109-acik-gri", imagePosition: "center 36%" },
+  { id: "SLV-7002", name: "Silver 7002 Gri Plise Perde", code: "SLV-7002", category: "Marel / Silver Series", image: "/images/catalog/silver.webp", badge: "%70 Filtrasyon", feature: "150 gr/m² kumaş · UV dayanımlı yapı", colors: ["#f6f5f0", "#ddd6c8", "#aeb1b1", "#77797a", "#484a4b"], href: "/urunler/silver-7002-gri" },
 ];
 
 const categoryTiles = [
@@ -37,7 +38,14 @@ const categoryTiles = [
 ];
 
 export default async function Home() {
-  const [reviews, announcements] = await Promise.all([listApprovedReviews(3), listAnnouncements(true)]);
+  const [liveProducts, reviews, announcements] = await Promise.all([stListProducts(false, "Marel"), stListApprovedReviews(3), listAnnouncements(true)]);
+  const liveById = new Map(liveProducts.map((product) => [product.slug, product]));
+  const liveShelf = (shelf: StoreProduct[]): StoreProduct[] => shelf.map((item) => {
+    const slug = item.href.split("/").filter(Boolean).at(-1) ?? "";
+    const live = liveById.get(slug);
+    if (!live || live.stock <= 0) return { ...item, id: undefined, priceKurus: undefined, price: "Ölçüye göre fiyat" };
+    return { ...item, id: live.id, priceKurus: live.salePrice ?? live.price, price: undefined, currency: live.currency };
+  });
   return (
     <>
       <SiteHeader />
@@ -46,7 +54,7 @@ export default async function Home() {
 
         <section className="shop-section" id="cok-satanlar"><div className="shop-container">
           <div className="shop-section-title"><div><span>GERÇEK ÜRÜNLER · GERÇEK DOKULAR</span><h2>En Çok Satanlar</h2></div><Link href="/urunler">Tümünü Gör →</Link></div>
-          <ProductShelf products={bestSellers} />
+          <ProductShelf products={liveShelf(bestSellers)} />
         </div></section>
 
         <Reveal id="indirimdekiler" className="shop-container promo-tile-grid" direction="up">
@@ -68,7 +76,7 @@ export default async function Home() {
 
         <section className="shop-section shop-section-soft"><div className="shop-container">
           <div className="shop-section-title"><div><span>KATALOG KOLEKSİYONU</span><h2>Plise Perde Modelleri</h2></div><Link href="/urunler/plise-perde">Tüm plise perdeler →</Link></div>
-          <ProductShelf products={catalogProducts} />
+          <ProductShelf products={liveShelf(catalogProducts)} />
         </div></section>
 
         <section className="shop-section" id="galeri"><div className="shop-container">
@@ -84,7 +92,7 @@ export default async function Home() {
         <section className="store-reviews"><div className="shop-container">
           <div className="shop-section-title center-title"><div><span>MÜŞTERİ DENEYİMİ</span><h2>Marel kullananlar anlatıyor</h2></div></div>
           <Reveal className="review-grid" direction="up">
-            {reviews.length ? reviews.map((review) => <article key={review.id}><div>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</div><h3>{review.title}</h3><p>{review.body}</p><strong>{review.authorName}{review.productName ? ` · ${review.productName}` : ""}</strong>{review.adminReply ? <small><b>Marel:</b> {review.adminReply}</small> : null}</article>) : <>
+            {reviews.length ? reviews.map((review) => <article key={review.id}><div>{"★".repeat(review.rating)}{"☆".repeat(5 - review.rating)}</div><h3>{review.title}</h3><p>{review.comment}</p><strong>{review.user?.name}{review.product?.name ? ` · ${review.product.name}` : ""}</strong></article>) : <>
               <article><div>★★★★★</div><h3>Şeffaf ürün bilgisi</h3><p>Katalogdaki gerçek seri, renk ve teknik bilgilerle ne aldığınızı net biçimde görün.</p><strong>Marel ürün deneyimi</strong></article>
               <article><div>★★★★★</div><h3>Renk ve ölçü desteği</h3><p>Kumaş ve kasa rengini seçin; ölçünüzü WhatsApp üzerinden danışmana iletin.</p><strong>Marel danışman desteği</strong></article>
               <article><div>★★★★★</div><h3>Deneyiminizi paylaşın</h3><p>Hesabınıza giriş yapın, Marel ürün deneyiminizi yazın; onaylanan yorumunuz burada yayınlansın.</p><Link href="/hesabim#yorumlar">Yorum yaz →</Link></article>
@@ -94,7 +102,7 @@ export default async function Home() {
 
         <section className="shop-trust-row"><div className="shop-container"><article><span>▣</span><h3>Katalogla doğrulanmış ürünler</h3></article><article><span>◇</span><h3>Ölçüye özel güvenli üretim</h3></article><article><span>◉</span><h3>Doğrudan WhatsApp desteği</h3></article></div></section>
 
-        <section className="order-track" id="takip"><div className="shop-container"><h2>Sipariş Takip</h2><p>Siparişinizin güncel durumunu kontrol edin.</p><form action="/siparis-takip"><label><span>E-posta</span><input name="email" type="email" placeholder="ornek@email.com" required /></label><label><span>Sipariş No</span><input name="orderNumber" type="text" placeholder="Örn. MRL-260808-ABC123" required /></label><button type="submit">Kontrol Et</button></form></div></section>
+        <section className="order-track" id="takip"><div className="shop-container"><h2>Sipariş Takip</h2><p>Hesabınıza giriş yaparak siparişlerinizin güncel durumunu izleyin.</p><Link className="button button-gold" href="/siparis-takip">Siparişlerimi takip et →</Link></div></section>
       </main>
       <SiteFooter />
     </>

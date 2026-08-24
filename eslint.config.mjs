@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Laravel yedek kopyası — marel-v2 kapsamı dışı
+    "marel-plise - Copy/**",
+    "marel-plise/**",
   ]),
 ]);
 

@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { addCartLine, formatMoney } from "@/app/lib/commerce";
+import { addToServerCart, formatMoney } from "@/app/lib/commerce";
 import { trackCommerceEvent } from "@/app/lib/google-ads";
 
 export type StoreProduct = {
@@ -44,19 +44,14 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
     setPendingCode(product.code);
     setAddedProduct(null);
     if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      addCartLine({
-        productId: product.id ?? product.code,
-        slug: product.href.split("/").filter(Boolean).at(-1) ?? product.code,
-        sku: product.code,
-        name: product.name,
-        image: product.image,
-        price: product.priceKurus!,
-        currency: product.currency ?? "TRY",
-      });
-      trackCommerceEvent("add_to_cart", product.priceKurus! / 100, [{ item_id: product.code, item_name: product.name, item_brand: "Marel", item_category: product.category, price: product.priceKurus! / 100, quantity: 1, google_business_vertical: "retail" }]);
-      setPendingCode(null);
-      setAddedProduct(product);
+    timerRef.current = setTimeout(async () => {
+      try {
+        await addToServerCart(product.id ?? product.code, 1);
+        trackCommerceEvent("add_to_cart", product.priceKurus! / 100, [{ item_id: product.code, item_name: product.name, item_brand: "Marel", item_category: product.category, price: product.priceKurus! / 100, quantity: 1, google_business_vertical: "retail" }]);
+        setAddedProduct(product);
+      } finally {
+        setPendingCode(null);
+      }
       timerRef.current = setTimeout(() => setAddedProduct(null), 2800);
     }, 520);
   };

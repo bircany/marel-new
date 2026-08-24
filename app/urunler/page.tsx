@@ -4,7 +4,7 @@ import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { productGroups } from "../data";
 import { ProductShelf, type StoreProduct } from "../components/product-shelf";
-import { listProducts } from "@/db";
+import { stListProducts } from "@/app/lib/softtrade";
 import { ParallaxImage, Reveal } from "../components/motion-media";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,7 @@ export const metadata = {
 };
 
 export default async function ProductsPage() {
-  const products = await listProducts(false);
+  const products = await stListProducts(false, "Marel");
   const storeProducts: StoreProduct[] = products.map((product) => ({
     id: product.id,
     name: product.name,

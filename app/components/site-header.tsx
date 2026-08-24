@@ -10,22 +10,25 @@ export function SiteHeader() {
 
   useEffect(() => {
     let pulseTimer: ReturnType<typeof setTimeout> | null = null;
-    const update = (event?: Event) => {
+    let cancelled = false;
+    const refreshCount = async () => {
       try {
-        const lines = JSON.parse(window.localStorage.getItem("marel-cart-v1") ?? "[]") as Array<{ quantity?: number }>;
-        setCartCount(lines.reduce((sum, line) => sum + (line.quantity ?? 0), 0));
-      } catch { setCartCount(0); }
-      if (event?.type === "marel:cart-updated") {
-        setCartPulse(false);
-        requestAnimationFrame(() => setCartPulse(true));
-        if (pulseTimer) clearTimeout(pulseTimer);
-        pulseTimer = setTimeout(() => setCartPulse(false), 700);
-      }
+        const response = await fetch("/api/cart", { cache: "no-store" });
+        if (!response.ok) { if (!cancelled) setCartCount(0); return; }
+        const cart = (await response.json()) as { summary?: { total_quantity?: number }; items?: Array<{ quantity?: number }> };
+        if (!cancelled) setCartCount(cart.summary?.total_quantity ?? cart.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) ?? 0);
+      } catch { if (!cancelled) setCartCount(0); }
     };
-    update();
-    window.addEventListener("marel:cart-updated", update);
-    window.addEventListener("storage", update);
-    return () => { window.removeEventListener("marel:cart-updated", update); window.removeEventListener("storage", update); if (pulseTimer) clearTimeout(pulseTimer); };
+    const pulse = () => {
+      setCartPulse(false);
+      requestAnimationFrame(() => setCartPulse(true));
+      if (pulseTimer) clearTimeout(pulseTimer);
+      pulseTimer = setTimeout(() => setCartPulse(false), 700);
+    };
+    refreshCount();
+    const onCartUpdated = () => { refreshCount(); pulse(); };
+    window.addEventListener("marel:cart-updated", onCartUpdated);
+    return () => { cancelled = true; window.removeEventListener("marel:cart-updated", onCartUpdated); if (pulseTimer) clearTimeout(pulseTimer); };
   }, []);
 
   return (
