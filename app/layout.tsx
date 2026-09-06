@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
@@ -7,16 +7,17 @@ import "./storefront.css";
 import "./storefront-enhancements.css";
 import "./category-pages.css";
 import "./product-refresh.css";
-import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
-import { GoogleTag } from "./components/google-tag";
-import { ConsentBanner } from "./components/consent-banner";
 import "./commerce.css";
 import "./content-pages.css";
 import "./admin-panel.css";
+import "./kamatas-theme.css";
+import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
+import { GoogleTag } from "./components/google-tag";
+import { ConsentBanner } from "./components/consent-banner";
 import { absoluteUrl, siteUrl } from "./lib/site";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin", "latin-ext"],
   display: "swap",
 });
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="tr">
-      <body className={manrope.variable}>
+      <body className={inter.variable}>
         {children}
         <WhatsAppAdvisor />
         <ConsentBanner />

@@ -326,7 +326,7 @@ export async function stListOrders(): Promise<OrderRecord[]> {
     const db = getDb();
     const { results } = await db
       .prepare(
-        "SELECT id, order_number AS orderNumber, user_id AS userId, email, customer_name AS customerName, phone, status, subtotal, shipping, total, currency, shipping_address AS shippingAddress, notes, cargo_company AS cargoCompany, tracking_number AS trackingNumber, created_at AS createdAt, updated_at AS updatedAt FROM orders ORDER BY created_at DESC",
+        "SELECT id, order_number AS orderNumber, user_id AS userId, email, customer_name AS customerName, phone, status, subtotal, shipping, total, currency, shipping_address AS shippingAddress, notes, cargo_company AS cargoCompany, tracking_number AS trackingNumber, tracking_url AS trackingUrl, created_at AS createdAt, updated_at AS updatedAt FROM orders ORDER BY created_at DESC",
       )
       .all<OrderRecord>();
     return results;

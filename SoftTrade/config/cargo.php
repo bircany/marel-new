@@ -8,7 +8,7 @@ return [
     | Admin panelinde seçilmezse kullanılır. Desteklenen: mng, yurtici, aras,
     | surat, ptt, hepsijet, sendeo, other
     */
-    'default_company' => env('CARGO_DEFAULT_COMPANY', 'mng'),
+    'default_company' => env('CARGO_DEFAULT_COMPANY', 'yurtici'),
 
     /*
     |--------------------------------------------------------------------------

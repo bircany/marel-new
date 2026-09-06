@@ -15,13 +15,15 @@ type AuthUser = {
 
 export function AuthPanel({
   successRoute,
+  initialMode = "login",
 }: {
   heading?: string;
   subheading?: string;
   successRoute?: string;
+  initialMode?: "login" | "register";
 }) {
   const router = useRouter();
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register">(initialMode);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

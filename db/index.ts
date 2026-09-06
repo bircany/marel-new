@@ -145,6 +145,9 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE INDEX IF NOT EXISTS idx_contact_messages_status_created ON contact_messages(status, created_at)"),
   ]);
   try { await db.prepare("ALTER TABLE products ADD COLUMN colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN cargo_company TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_number TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_url TEXT").run(); } catch {}
   await seedCatalog(db);
   await seedAnnouncements(db);
   await seedMockOrders(db);
@@ -169,7 +172,7 @@ async function seedCatalog(db: D1Database): Promise<void> {
 
   for (const product of GENERATED_SEEDS) {
     const id = crypto.randomUUID();
-    statements.push(db.prepare("INSERT INTO products (id, slug, sku, name, category, description, price, currency, stock, availability, brand, google_product_category, active, featured, colors, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'TRY', ?, 'in_stock', 'Marel', 'Home & Garden > Decor > Window Treatments', 1, 1, ?, ?, ?)").bind(id, product.slug, product.sku, product.name, product.category, product.description, product.price, product.stock, product.colors, now, now));
+    statements.push(db.prepare("INSERT INTO products (id, slug, sku, name, category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, 'in_stock', 'Marel', 'Home & Garden > Decor > Window Treatments', 1, 1, ?, ?, ?)").bind(id, product.slug, product.sku, product.name, product.category, product.description, product.price, product.salePrice ?? null, product.stock, product.colors, now, now));
     
     let sortOrder = 0;
     for (const image of product.images) {
@@ -204,9 +207,11 @@ async function seedMockOrders(db: D1Database): Promise<void> {
     ["ord-006", "ORD-20260905-00002", "mustafa@example.com", "Mustafa Yıldız", "05389990011", "delivered", 150000, 150000, "Odunpazarı / Eskişehir", "Teslim edildi."],
   ] as const;
   for (const [id, orderNumber, email, name, phone, status, subtotal, total, address, notes] of mockOrders) {
+    const tracking = status === "shipped" ? "YK1234567890" : null;
+    const trackingUrl = tracking ? "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=YK1234567890" : null;
     await db.prepare(
-      "INSERT INTO orders (id, order_number, email, customer_name, phone, status, subtotal, shipping, total, currency, shipping_address, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 'TRY', ?, ?, ?, ?)"
-    ).bind(id, orderNumber, email, name, phone, status, subtotal, total, address, notes, now, now).run();
+      "INSERT INTO orders (id, order_number, email, customer_name, phone, status, subtotal, shipping, total, currency, shipping_address, notes, cargo_company, tracking_number, tracking_url, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 'TRY', ?, ?, 'yurtici', ?, ?, ?, ?)"
+    ).bind(id, orderNumber, email, name, phone, status, subtotal, total, address, notes, tracking, trackingUrl, now, now).run();
   }
 }
 

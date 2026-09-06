@@ -29,29 +29,31 @@ export function SiteFooter() {
 
         <div>
           <h3>Kategoriler</h3>
-          <Link href="/urunler?kategori=Plise Perde">Plise Perde Sistemleri</Link>
-          <Link href="/urunler?kategori=Jaluzi Perde">Jaluzi Perde Modelleri</Link>
-          <Link href="/urunler?kategori=Zip Perde">Dış Mekân Zip Perde</Link>
-          <Link href="/urunler?kategori=Sineklik">Pencere & Kapı Sineklik</Link>
-          <Link href="/urunler?kategori=Sürgülü Kapılar">Sürgülü Kapı Sistemleri</Link>
-          <Link href="/urunler">Tüm Ürünler & Fiyatlar</Link>
+          <Link href="/sineklikler">Sineklikler</Link>
+          <Link href="/perdeler">Perdeler</Link>
+          <Link href="/tutamaklar">Tutamaklar</Link>
+          <Link href="/profiller">Profiller</Link>
+          <Link href="/kosebentler-1">Köşebentler</Link>
+          <Link href="/aksesuarlar">Aksesuarlar</Link>
         </div>
 
         <div>
-          <h3>Müşteri Hizmetleri</h3>
-          <Link href="/siparis-takip">Sipariş & Kargo Takip</Link>
-          <Link href="/sepet">Alışveriş Sepetim</Link>
-          <Link href="/hesabim">Kullanıcı Hesabım</Link>
-          <Link href="/iletisim">İletişim & Danışma</Link>
+          <h3>Hesabım</h3>
+          <Link href="/account/login">Giriş Yap</Link>
+          <Link href="/account/register">Kayıt ol</Link>
+          <Link href="/siparis-takip">Yurtiçi Kargo Sipariş Takip</Link>
+          <Link href="/sepet">Sepetim</Link>
         </div>
 
         <div>
-          <h3>Kurumsal & Yasal</h3>
-          <Link href="/gizlilik-politikasi">Gizlilik Politikası</Link>
-          <Link href="/iade-ve-iptal-kosullari">İade ve İptal Koşulları</Link>
-          <Link href="/kvkk-aydinlatma-metni">KVKK Aydınlatma Metni</Link>
-          <Link href="/cerez-politikasi">Çerez (Cookie) Politikası</Link>
-          <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
+          <h3>Hakkımızda</h3>
+          <Link href="/pages/iletisim">İletişim</Link>
+          <Link href="/pages/gizlilikguvenlikpolitikasi">Gizlilik Güvenlik Politikası</Link>
+          <Link href="/pages/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
+          <Link href="/pages/tuketici-haklari-cayma-iptal-iade-kosullari">Tüketici Hakları Cayma İptal İade Koşulları</Link>
+          <Link href="/pages/kisisel-veriler-politikasi">Kişisel Veriler Politikası</Link>
+          <h3 className="footer-video-title">Kurulum ve Montaj Videoları için:</h3>
+          <a href="https://www.youtube.com/@KamatasAluminyum" target="_blank" rel="noreferrer">YouTube</a>
         </div>
       </div>
 
@@ -74,7 +76,7 @@ export function SiteFooter() {
           width={72}
           height={27}
         />
-        <span className="payment-security">🔒 256-Bit SSL Şifreli Güvenlik</span>
+        <span className="payment-security">256-Bit SSL Şifreli Güvenlik</span>
       </div>
 
       <div className="shop-container footer-copyright">

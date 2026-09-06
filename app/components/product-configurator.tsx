@@ -91,7 +91,6 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
 
   return (
     <div className="product-configurator-container">
-      {/* Left: Gallery & Zoom Preview */}
       <div className="product-config-gallery">
         <div className="config-main-image-wrap">
           <Image
@@ -101,13 +100,9 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
             fill
             priority
             sizes="(max-width: 900px) 100vw, 50vw"
-            className="config-main-image"
+            style={{ objectFit: "cover" }}
           />
-          {product.featured ? <span className="config-featured-badge">Öne Çıkan Seri</span> : null}
-          <span className="config-zoom-hint">🔍 Ölçüye Özel İmalat</span>
         </div>
-
-        {/* Thumbnail Color Switcher */}
         <div className="config-thumbs-strip">
           {productColors.slice(0, 5).map((color) => (
             <button
@@ -123,251 +118,137 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
                 alt={color.name}
                 fill
                 sizes="64px"
+                style={{ objectFit: "cover" }}
               />
             </button>
           ))}
         </div>
-
-        <div className="config-guarantees-grid">
-          <div className="guarantee-item">
-            <span className="g-icon">🛡️</span>
-            <div>
-              <strong>2 Yıl Garanti</strong>
-              <small>Mekanizma & kumaş garantisi</small>
-            </div>
-          </div>
-          <div className="guarantee-item">
-            <span className="g-icon">✂️</span>
-            <div>
-              <strong>Milimetrik Kesim</strong>
-              <small>Ölçünüze özel sıfır hata</small>
-            </div>
-          </div>
-          <div className="guarantee-item">
-            <span className="g-icon">🚚</span>
-            <div>
-              <strong>Ücretsiz Kargo</strong>
-              <small>1.000₺ üzeri siparişlerde</small>
-            </div>
-          </div>
-          <div className="guarantee-item">
-            <span className="g-icon">💳</span>
-            <div>
-              <strong>3 Taksit İmkanı</strong>
-              <small>Peşin fiyatına vade farksız</small>
-            </div>
-          </div>
-        </div>
       </div>
 
-      {/* Right: Customization Form & Buy Box */}
-      <div className="product-config-form-wrap">
-        <div className="config-header-meta">
-          <div className="config-breadcrumbs">
-            <Link href="/">Ana Sayfa</Link>
-            <span>/</span>
-            <Link href="/urunler">Ürünler</Link>
-            <span>/</span>
-            <span>{product.category}</span>
+      <div className="kamatas-right-panel">
+        <div>
+          <span className="kamatas-brand">{product.brand}</span>
+          <h1 className="kamatas-product-title">{product.name} {selectedColor.name}</h1>
+          <div className="kamatas-stars">
+            ★★★★★ <span style={{ color: "var(--muted)", fontSize: "0.8rem" }}>(78 Yorum)</span>
           </div>
-
-          <div className="config-brand-sku-row">
-            <span className="config-brand-tag">{product.brand}</span>
-            <span className="config-sku-tag">SKU: {product.sku}</span>
-            <span className={`config-stock-badge ${product.stock > 0 ? "in-stock" : "out-of-stock"}`}>
-              {product.stock > 0 ? `✓ Stokta (${product.stock} Adet)` : "✕ Tükendi"}
-            </span>
-          </div>
-
-          <h1 className="config-product-title">{product.name}</h1>
-
-          <div className="config-ratings-row">
-            <div className="stars-gold">★★★★★</div>
-            <strong>5.0</strong>
-            <span className="review-count">· Marel Onaylı Kalite</span>
-          </div>
-
-          <p className="config-description">{product.description}</p>
         </div>
 
-        {/* 1. KUMAŞ RENK SEÇİMİ (COLOR SWATCHES) */}
-        <div className="config-option-section">
-          <div className="config-option-title">
-            <span>1. Kumaş Rengi Seçin:</span>
-            <strong>{selectedColor.name}</strong>
-          </div>
-          <div className="config-color-swatches">
+        <div className="kamatas-price-box">
+          <span className="kamatas-badge">%32</span>
+          {product.salePrice ? (
+            <>
+              <span className="kamatas-old-price">{formatMoney(product.price, product.currency)}</span>
+              <span className="kamatas-new-price">{formatMoney(product.salePrice, product.currency)}</span>
+            </>
+          ) : (
+            <span className="kamatas-new-price">{formatMoney(product.price, product.currency)}</span>
+          )}
+        </div>
+
+        <div>
+          <div style={{ fontSize: "0.85rem", fontWeight: "600", marginBottom: "8px" }}>Renk</div>
+          <div className="config-thumbs-strip" style={{ marginTop: 0 }}>
             {productColors.map((color) => (
               <button
                 key={color.id}
                 type="button"
-                className={`config-swatch-circle ${selectedColor.id === color.id ? "active" : ""}`}
+                className={`config-thumb-btn ${selectedColor.id === color.id ? "active" : ""}`}
                 onClick={() => setSelectedColor(color)}
                 title={color.name}
-                style={{ backgroundColor: color.hex }}
+                style={{ width: "40px", height: "40px" }}
               >
-                {selectedColor.id === color.id ? <span className="swatch-check">✓</span> : null}
+                <Image
+                  unoptimized
+                  src={color.image || product.image}
+                  alt={color.name}
+                  fill
+                  sizes="40px"
+                  style={{ objectFit: "cover" }}
+                />
               </button>
             ))}
           </div>
         </div>
 
-        {/* 2. PROFİL / KASA RENGİ SEÇİMİ */}
-        <div className="config-option-section">
-          <div className="config-option-title">
-            <span>2. Kasa / Profil Rengi:</span>
-            <strong>{selectedProfile.name}</strong>
-          </div>
-          <div className="config-profile-options">
-            {PROFILE_COLORS.map((profile) => (
-              <button
-                key={profile.id}
-                type="button"
-                className={`config-profile-pill ${selectedProfile.id === profile.id ? "active" : ""}`}
-                onClick={() => setSelectedProfile(profile)}
-              >
-                <span className="profile-color-dot" style={{ backgroundColor: profile.hex }} />
-                <span>{profile.name}</span>
-              </button>
-            ))}
-          </div>
+        <div className="kamatas-input-group">
+          <label>En (CM)*</label>
+          <input type="number" min="20" max="250" value={width} onChange={(e) => setWidth(Number(e.target.value))} />
+        </div>
+        
+        <div className="kamatas-input-group">
+          <label>Boy (CM)*</label>
+          <input type="number" min="20" max="300" value={height} onChange={(e) => setHeight(Number(e.target.value))} />
         </div>
 
-        {/* 3. ÖLÇÜ GİRİŞİ (EN VE BOY CM) */}
-        <div className="config-option-section">
-          <div className="config-option-title">
-            <span>3. Ölçü Bilgilerinizi Girin (cm):</span>
-            <small className="config-area-note">Hesaplanan Alan: {areaM2.toFixed(2)} m²</small>
-          </div>
+        <div className="kamatas-input-group">
+          <label>Ölçülerinizi Görseldeki gibi mi aldınız? *</label>
+          <select>
+            <option>Evet, görseldeki gibi aldım.</option>
+            <option>Hayır, farklı aldım.</option>
+          </select>
+        </div>
 
-          <div className="config-dimensions-grid">
-            <div className="dimension-input-group">
-              <label htmlFor="dim-width">En (Genişlik / cm)</label>
-              <div className="dim-input-wrapper">
-                <input
-                  id="dim-width"
-                  type="number"
-                  min="30"
-                  max="280"
-                  value={width}
-                  onChange={(e) => setWidth(Math.max(30, Number(e.target.value) || 30))}
-                />
-                <span className="dim-unit">cm</span>
-              </div>
-              <small>Min: 30cm - Max: 280cm</small>
+        <div className="kamatas-upsell-box">
+          <div className="kamatas-upsell-title">Montajınızı Kolaylaştırmak için</div>
+          <div className="kamatas-upsell-item">
+            <input type="checkbox" style={{ width: "18px", height: "18px" }} />
+            <div className="kamatas-upsell-info">
+              Sineklik Fitil Takma Aparatı<br/>
+              <span style={{ textDecoration: "line-through", color: "var(--muted)", fontSize: "0.75rem" }}>₺267.39</span> <span className="kamatas-upsell-price">₺158.38</span>
             </div>
-
-            <div className="dimension-input-group">
-              <label htmlFor="dim-height">Boy (Yükseklik / cm)</label>
-              <div className="dim-input-wrapper">
-                <input
-                  id="dim-height"
-                  type="number"
-                  min="40"
-                  max="300"
-                  value={height}
-                  onChange={(e) => setHeight(Math.max(40, Number(e.target.value) || 40))}
-                />
-                <span className="dim-unit">cm</span>
-              </div>
-              <small>Min: 40cm - Max: 300cm</small>
+          </div>
+          <div className="kamatas-upsell-item">
+            <input type="checkbox" style={{ width: "18px", height: "18px" }} />
+            <div className="kamatas-upsell-info">
+              Yapışkanlı Sineklik Yaması Tülü Tamir Bandı 50mm x 2m<br/>
+              <span style={{ textDecoration: "line-through", color: "var(--muted)", fontSize: "0.75rem" }}>₺268.43</span> <span className="kamatas-upsell-price">₺158.43</span>
             </div>
           </div>
         </div>
 
-        {/* 4. MONTAJ TİPİ SEÇİMİ */}
-        <div className="config-option-section">
-          <div className="config-option-title">
-            <span>4. Montaj Tercihi:</span>
+        <div className="kamatas-add-cart-row">
+          <div className="kamatas-qty">
+            <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
+            <input type="number" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} />
+            <button type="button" onClick={() => setQuantity(quantity + 1)}>+</button>
           </div>
-          <div className="config-mount-grid">
-            <button
-              type="button"
-              className={`config-mount-card ${mountType === "screw" ? "active" : ""}`}
-              onClick={() => setMountType("screw")}
-            >
-              <div className="mount-card-title">
-                <strong>🔩 Vidalı Montaj</strong>
-                <span className="mount-pill">Standart</span>
-              </div>
-              <p>Cam balkon kanadına veya pencere kasasına vidalanarak en sağlam tutuşu sağlar.</p>
-            </button>
+          <button type="button" className="kamatas-btn" onClick={handleAddToCart} disabled={pending}>
+            {pending ? "Ekleniyor..." : addedSuccess ? "Eklendi!" : "Sepete Ekle"}
+          </button>
+        </div>
 
-            <button
-              type="button"
-              className={`config-mount-card ${mountType === "adhesive" ? "active" : ""}`}
-              onClick={() => setMountType("adhesive")}
-            >
-              <div className="mount-card-title">
-                <strong>🧲 Yapıştırmalı (Vidasız)</strong>
-                <span className="mount-pill green">Delmesiz</span>
-              </div>
-              <p>Çift taraflı yüksek mukavemetli özel bant ile delmeden kolay montaj yapılır.</p>
-            </button>
+        <div className="kamatas-accordion">
+          <div className="kamatas-accordion-item">
+            <div className="kamatas-accordion-title"><span>Ürün Bilgileri</span> <span>⌄</span></div>
+          </div>
+          <div className="kamatas-accordion-item">
+            <div className="kamatas-accordion-title"><span>Ölçü Nasıl Alınır?</span> <span>⌄</span></div>
+          </div>
+          <div className="kamatas-accordion-item">
+            <div className="kamatas-accordion-title"><span>Kullanım Alanları ve Avantajları</span> <span>⌄</span></div>
+          </div>
+          <div className="kamatas-accordion-item">
+            <div className="kamatas-accordion-title"><span>Montaj ve Kurulum</span> <span>⌄</span></div>
+          </div>
+          <div className="kamatas-accordion-item">
+            <div className="kamatas-accordion-title"><span>Teslimat ve İade</span> <span>⌄</span></div>
           </div>
         </div>
 
-        {/* 5. FİYAT VE SEPETE EKLEME ALANI */}
-        <div className="config-purchase-box">
-          <div className="config-price-display">
-            <div>
-              <span className="price-label">Toplam Tutar:</span>
-              <div className="price-values">
-                <strong className="current-price">{formatMoney(totalPriceKurus, product.currency)}</strong>
-                {product.salePrice && product.salePrice < product.price ? (
-                  <span className="original-price">
-                    {formatMoney(Math.round(product.price * areaM2 * quantity), product.currency)}
-                  </span>
-                ) : null}
-              </div>
-              <small className="price-tax-note">KDV Dahil · Havalede Ek %10 İndirim</small>
-            </div>
-
-            <div className="config-quantity-picker">
-              <label>Adet</label>
-              <div className="quantity-controls">
-                <button
-                  type="button"
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                >
-                  -
-                </button>
-                <span>{quantity}</span>
-                <button type="button" onClick={() => setQuantity((q) => Math.min(50, q + 1))}>
-                  +
-                </button>
-              </div>
-            </div>
+        <div className="kamatas-features">
+          <div>
+            <div>🚚</div>
+            <div>1000₺ ÜZERİ<br/>ÜCRETSİZ KARGO</div>
           </div>
-
-          <div className="config-action-buttons">
-            <button
-              type="button"
-              className={`config-btn-cart ${addedSuccess ? "is-success" : ""}`}
-              disabled={pending || product.stock <= 0}
-              onClick={handleAddToCart}
-            >
-              {pending ? (
-                <span>Sepete Ekleniyor…</span>
-              ) : addedSuccess ? (
-                <span>✓ Sepete Eklendi</span>
-              ) : (
-                <span>+ Sepete Ekle</span>
-              )}
-            </button>
-
-            <Link href="/sepet" className="config-btn-checkout">
-              Sepete Git & Sipariş Ver →
-            </Link>
+          <div>
+            <div>🛡️</div>
+            <div>Kolay Montaj</div>
           </div>
-
-          {addedSuccess ? (
-            <div className="config-added-toast" role="alert">
-              <span>✓ Ürün ölçü ve renk tercihlerinizle sepete eklendi!</span>
-              <Link href="/sepet">Sepeti İncele →</Link>
-            </div>
-          ) : null}
+          <div>
+            <div>↩️</div>
+            <div>15 gün içerisinde<br/>iade hakkı</div>
+          </div>
         </div>
       </div>
     </div>

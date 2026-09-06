@@ -45,7 +45,7 @@ const aliases: Record<string, CargoCompany> = {
 };
 
 export function normalizeCargoCompany(value?: string | null): CargoCompany {
-  const key = String(value ?? "mng").trim().toLowerCase();
+  const key = String(value ?? "yurtici").trim().toLowerCase();
   return aliases[key] ?? "other";
 }
 

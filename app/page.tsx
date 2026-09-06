@@ -127,40 +127,71 @@ const catalogProducts: StoreProduct[] = [
 const categoryTiles = [
   {
     index: "01",
-    title: "Plise Perde Sistemleri",
-    href: "/urunler?kategori=Plise Perde",
+    title: "Sineklikler",
+    href: "/sineklikler",
     text: "Cam balkon ve pencerelere özel ince profilli kumaş serileri",
-    motif: "PLİSE",
+    motif: "SİNEKLİK",
+    image: "/images/products/venus/1.JPG",
   },
   {
     index: "02",
-    title: "Jaluzi Perde Modelleri",
-    href: "/urunler?kategori=Jaluzi Perde",
+    title: "Plise Perdeler",
+    href: "/plise-perdeler",
     text: "Hassas ışık ve gölge kontrolü sağlayan estetik lameller",
-    motif: "JALUZİ",
+    motif: "PLİSE",
+    image: "/images/products/bambu/bambu beyaz.png",
   },
   {
     index: "03",
-    title: "Zip Perde Çözümleri",
-    href: "/urunler?kategori=Zip Perde",
+    title: "Tutamaklar",
+    href: "/tutamaklar",
     text: "Teras ve dış cepheler için rüzgâr ve güneş koruması",
-    motif: "ZIP",
+    motif: "TUTAMAK",
+    image: "/images/products/touch/touch 1001.png",
   },
   {
     index: "04",
-    title: "Sineklik Sistemleri",
-    href: "/urunler?kategori=Sineklik",
+    title: "Profiller",
+    href: "/profiller",
     text: "Pencere ve kapılar için plise ve sürme sineklikler",
-    motif: "SİNEKLİK",
+    motif: "PROFİL",
+    image: "/images/products/silver/silver gri.png",
   },
   {
     index: "05",
-    title: "Sürgülü Kapı Sistemleri",
-    href: "/urunler?kategori=Sürgülü Kapılar",
+    title: "Aksesuarlar",
+    href: "/aksesuarlar",
     text: "Geniş mekân geçişleri için modern sürme çerçeveler",
-    motif: "SÜRGÜ",
+    motif: "AKSESUAR",
+    image: "/images/products/dia/_DSC9925.jpg",
   },
 ];
+
+function parseSwatches(colors?: string): string[] {
+  try {
+    const parsed = JSON.parse(colors ?? "[]") as Array<{ hex?: string }>;
+    return parsed.map((item) => item.hex).filter(Boolean) as string[];
+  } catch {
+    return neutral;
+  }
+}
+
+function toShelfProduct(product: Awaited<ReturnType<typeof stListProducts>>[number]): StoreProduct {
+  return {
+    id: product.id,
+    name: product.name,
+    code: product.sku,
+    category: `Marel / ${product.category}`,
+    image: product.image,
+    badge: product.salePrice ? "İndirimli" : "Yeni",
+    feature: "Ölçüye özel plise perde · Her görsel ayrı ürün",
+    colors: parseSwatches(product.colors),
+    priceKurus: product.salePrice ?? product.price,
+    currency: product.currency,
+    href: `/urunler/${product.slug}`,
+    imagePosition: "center",
+  };
+}
 
 export default async function Home() {
   const [liveProducts, reviews] = await Promise.all([
@@ -168,6 +199,7 @@ export default async function Home() {
     stListApprovedReviews(3).catch(() => [] as Awaited<ReturnType<typeof stListApprovedReviews>>),
   ]);
   const liveById = new Map(liveProducts.map((product) => [product.slug, product]));
+  const liveCatalogShelf = liveProducts.slice(0, 8).map(toShelfProduct);
   const liveShelf = (shelf: StoreProduct[]): StoreProduct[] =>
     shelf.map((item) => {
       const slug = item.href.split("/").filter(Boolean).at(-1) ?? "";
@@ -227,13 +259,13 @@ export default async function Home() {
               </div>
               <Link href="/urunler">Tümünü Gör →</Link>
             </div>
-            <ProductShelf products={liveShelf(bestSellers)} />
+            <ProductShelf products={liveCatalogShelf.length ? liveCatalogShelf.slice(0, 4) : liveShelf(bestSellers)} />
           </div>
         </section>
 
         {/* Promo Grid */}
         <Reveal id="indirimdekiler" className="shop-container promo-tile-grid" direction="up">
-          <Link className="promo-tile promo-tile-wide" href="/urunler?kategori=Plise Perde">
+          <Link className="promo-tile promo-tile-wide" href="/plise-perdeler">
             <Image
               unoptimized
               src="/images/hero/marel-honeycomb-hero-v3.png"
@@ -248,7 +280,7 @@ export default async function Home() {
               <b>Koleksiyonu Keşfet →</b>
             </div>
           </Link>
-          <Link className="promo-tile" href="/urunler?kategori=Plise Perde">
+          <Link className="promo-tile" href="/plise-perdeler">
             <Image
               unoptimized
               src="/images/real/diamond-gri.jpeg"
@@ -299,9 +331,9 @@ export default async function Home() {
                 <span>KATALOG KOLEKSİYONU</span>
                 <h2>Plise Perde Modelleri</h2>
               </div>
-              <Link href="/urunler?kategori=Plise Perde">Tüm plise perdeler →</Link>
+              <Link href="/plise-perdeler">Tüm plise perdeler →</Link>
             </div>
-            <ProductShelf products={liveShelf(catalogProducts)} />
+            <ProductShelf products={liveCatalogShelf.length ? liveCatalogShelf.slice(4, 8) : liveShelf(catalogProducts)} />
           </div>
         </section>
 
@@ -317,6 +349,7 @@ export default async function Home() {
             <Reveal className="shop-category-grid" direction="up">
               {categoryTiles.map((tile) => (
                 <Link href={tile.href} key={tile.title}>
+                  <Image unoptimized src={tile.image} alt={tile.title} fill sizes="(max-width: 700px) 100vw, 33vw" />
                   <span className="category-card-index">{tile.index}</span>
                   <span className="category-card-motif" aria-hidden="true">
                     {tile.motif}
