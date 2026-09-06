@@ -5,9 +5,56 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const slides = [
-  { eyebrow: "Honeycomb Series · 003 Gri", title: "Isıyı içeride, konforu evinde tut.", text: "%100 ışık filtrasyonu, hücresel ısı yalıtımı ve ölçüye özel üretim.", image: "/images/hero/marel-honeycomb-hero-v3.png", href: "/urunler/plise-perde/diamond-serisi#teklif", button: "Honeycomb teklifini hazırla", position: "center" },
-  { eyebrow: "Diamond Series", title: "Kumaşın gerçek dokusunu gör.", text: "%50 ışık filtrasyonu, UV dayanımı ve katalogdaki gerçek renk seçenekleri.", image: "/images/real/diamond-gri.jpeg", href: "/urunler/plise-perde/diamond-serisi", button: "Diamond renklerini incele", position: "center 43%" },
-  { eyebrow: "WhatsApp Destek", title: "Ölçünü gönder, doğru ürünü birlikte seçelim.", text: "Kumaş, kasa rengi, genişlik, yükseklik ve adet bilgilerini doğrudan danışmanımıza iletin.", image: "/images/catalog/diamond.webp", href: "https://wa.me/905467356602?text=Merhaba%2C%20%C3%B6l%C3%A7%C3%BCye%20%C3%B6zel%20perde%20teklifi%20almak%20istiyorum.", button: "WhatsApp'ta görüş", position: "center 22%" },
+  {
+    eyebrow: "ÖZEL ÖLÇÜ ÜRETİM",
+    useLogo: true,
+    title: "MAREL PLİSE PERDE SİSTEMLERİ",
+    text: "Mekânlarınıza Değer Katan Modern ve Estetik Çözümler",
+    image: "/images/hero/hero_plise_1_1788724387489.jpg",
+    href: "/plise-perdeler",
+    button: "Koleksiyonu İncele",
+    position: "center",
+  },
+  {
+    eyebrow: "YENİ NESİL TASARIM",
+    useLogo: false,
+    title: "HONEYCOMB ISI YALITIMLI SERİ",
+    text: "Hücresel yapısıyla %100 ışık filtrasyonu ve mükemmel ısı yalıtımı.",
+    image: "/images/hero/hero_plise_2_1788724444336.jpg",
+    href: "/plise-perdeler",
+    button: "Isı Yalıtımlı Perdeleri İncele",
+    position: "center",
+  },
+  {
+    eyebrow: "YUMUŞAK GÜN IŞIĞI",
+    useLogo: false,
+    title: "DIAMOND SERİSİ PLİSE PERDELER",
+    text: "Güneşin tadını çıkarırken mahremiyetinizi koruyan şık kumaş dokusu.",
+    image: "/images/hero/hero_plise_3_1788724456954.jpg",
+    href: "/plise-perdeler",
+    button: "Diamond Serisini Keşfet",
+    position: "center",
+  },
+  {
+    eyebrow: "LÜKS DOKUNUŞLAR",
+    useLogo: false,
+    title: "ZENGİN RENK VE DOKULAR",
+    text: "Evinizin atmosferini değiştirecek lüks renk seçenekleri.",
+    image: "/images/hero/hero_plise_4_1788724467997.jpg",
+    href: "/plise-perdeler",
+    button: "Tüm Renkleri İncele",
+    position: "center",
+  },
+  {
+    eyebrow: "TAM KARARTMA",
+    useLogo: false,
+    title: "BLACKOUT SERİSİ",
+    text: "Kaliteli uyku ve tam mahremiyet için %100 ışık geçirmeyen kumaşlar.",
+    image: "/images/hero/hero_plise_5_1788724477560.jpg",
+    href: "/plise-perdeler",
+    button: "Blackout Serisini İncele",
+    position: "center",
+  },
 ];
 
 export function StorefrontHero() {
@@ -19,13 +66,33 @@ export function StorefrontHero() {
   const slide = slides[active];
 
   return (
-    <section className="store-hero" aria-roledescription="carousel" aria-label="Kampanyalar">
-      <Image unoptimized key={slide.image} src={slide.image} alt="" fill priority sizes="100vw" style={{ objectPosition: slide.position }} />
+    <section className="store-hero kamatas-hero" aria-roledescription="carousel" aria-label="Kampanyalar">
+      <Image unoptimized key={slide.image} src={slide.image} alt={slide.title} fill priority sizes="100vw" style={{ objectPosition: slide.position, objectFit: "cover" }} />
       <div className="store-hero-shade" />
-      <div className="shop-container store-hero-content"><p>{slide.eyebrow}</p><h1>{slide.title}</h1><span>{slide.text}</span><Link href={slide.href}>{slide.button} →</Link></div>
+      <div className="shop-container store-hero-content">
+        <p>{slide.eyebrow}</p>
+        
+        {slide.useLogo ? (
+           <div style={{ marginBottom: "24px", maxWidth: "460px" }}>
+             <Image 
+                unoptimized 
+                src="/images/marel-logo.png" 
+                alt="Marel Logo" 
+                width={400} 
+                height={80} 
+                style={{ objectFit: "contain", width: "100%", height: "auto", filter: "brightness(0) invert(1)" }} 
+             />
+           </div>
+        ) : (
+           <h1>{slide.title}</h1>
+        )}
+        
+        <span style={{ fontSize: slide.useLogo ? "1.2rem" : undefined }}>{slide.text}</span>
+        <Link href={slide.href}>{slide.button} →</Link>
+      </div>
       <button className="hero-arrow hero-prev" type="button" onClick={() => setActive((active + slides.length - 1) % slides.length)} aria-label="Önceki kampanya">‹</button>
       <button className="hero-arrow hero-next" type="button" onClick={() => setActive((active + 1) % slides.length)} aria-label="Sonraki kampanya">›</button>
-      <div className="hero-dots">{slides.map((item, index) => <button type="button" key={item.title} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`${index + 1}. kampanyayı göster`} />)}</div>
+      <div className="hero-dots">{slides.map((item, index) => <button type="button" key={index} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`${index + 1}. kampanyayı göster`} />)}</div>
     </section>
   );
 }

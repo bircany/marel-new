@@ -5,169 +5,138 @@ import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { StorefrontHero } from "./components/storefront-hero";
 import { Reveal } from "./components/motion-media";
+import { KamatasCategoryCards } from "./components/kamatas-category-cards";
+import { KamatasReviews } from "./components/kamatas-reviews";
+import { KamatasFeatures, KamatasOrderTracking } from "./components/kamatas-features";
 import { stListProducts, stListApprovedReviews } from "@/app/lib/softtrade";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const metadata = {
-  title: "Marel | Online Perde ve Sineklik Mağazası",
+  title: "Kamataş Alüminyum | Sineklik, Perde ve Aksesuar",
   description:
-    "Plise perde, Honeycomb, jaluzi, zip perde ve sineklik sistemlerini gerçek seri ve renkleriyle inceleyin; ölçüye özel sipariş verin.",
+    "Kamataş Alüminyum - Sineklik, perde, otomatik panjur ve aksesuar ürünlerinde Türkiye'nin en çok satış yapan firması. 73.500+ mutlu müşteri.",
 };
-
-const neutral = ["#f4f2ec", "#d8d3c8", "#adb0b1", "#53575a", "#232527"];
 
 const bestSellers: StoreProduct[] = [
   {
-    id: "HC-003",
-    name: "Honeycomb 003 Gri Isı Yalıtımlı Plise Perde",
-    code: "HC-003",
-    category: "Marel / Honeycomb Series",
-    image: "/images/real/honeycomb-gri-detay.png",
-    badge: "Çok Satan",
-    feature: "%100 ışık filtrasyonu · Isı yalıtımlı hücresel yapı",
-    colors: neutral,
-    priceKurus: 116600,
+    id: "KS-001",
+    name: "Menteşeli Pencere Sineklik Beyaz",
+    code: "KS-001",
+    category: "Kamataş / Menteşeli Sineklik",
+    image: "/images/products/menteseli-beyaz.jpg",
+    badge: "EN ÇOK SATAN",
+    feature: "Menteşeli pencere sinekliği · Beyaz renk",
+    colors: ["#ffffff", "#d4d4d4", "#1a1a1a"],
+    priceKurus: 68900,
+    oldPriceKurus: 826800,
     currency: "TRY",
-    href: "/urunler/honeycomb-003-gri",
-    imagePosition: "center 38%",
+    href: "/urunler/menteseli-pencere-sineklik-beyaz",
   },
   {
-    id: "DIA-100",
-    name: "Diamond 100 Beyaz Plise Perde",
-    code: "DIA-100",
-    category: "Marel / Diamond Series",
-    image: "/images/real/diamond-beyaz.jpeg",
-    badge: "Gerçek Ürün",
-    feature: "%50 ışık filtrasyonu · UV dayanımlı kumaş",
-    colors: ["#f7f6f1", "#e6dfce", "#bec1c2", "#4d5052", "#1d1f21", "#7b6c58"],
-    priceKurus: 116600,
+    id: "KS-002",
+    name: "Menteşeli Pencere Sineklik Antrasit",
+    code: "KS-002",
+    category: "Kamataş / Menteşeli Sineklik",
+    image: "/images/products/menteseli-antrasit.jpg",
+    badge: "EN ÇOK SATAN",
+    feature: "Menteşeli pencere sinekliği · Antrasit renk",
+    colors: ["#2d2d2d", "#ffffff", "#8b7355"],
+    priceKurus: 68900,
+    oldPriceKurus: 826800,
     currency: "TRY",
-    href: "/urunler/diamond-100-beyaz",
-    imagePosition: "center 42%",
+    href: "/urunler/menteseli-pencere-sineklik-antrasit",
   },
   {
-    id: "DIA-102",
-    name: "Diamond 102 Gri Plise Perde",
-    code: "DIA-102",
-    category: "Marel / Diamond Series",
-    image: "/images/real/diamond-gri.jpeg",
-    badge: "Yeni",
-    feature: "110 gr/m² polyester · Kolay yıkanabilir yapı",
-    colors: ["#f7f6f1", "#ddd6c6", "#a4a7a8", "#55585b", "#252729", "#8a745a"],
-    priceKurus: 116600,
+    id: "KS-003",
+    name: "Menteşeli Pencere Sineklik Altınmeşe",
+    code: "KS-003",
+    category: "Kamataş / Menteşeli Sineklik",
+    image: "/images/products/menteseli-altinmese.jpg",
+    badge: "EN ÇOK SATAN",
+    feature: "Menteşeli pencere sinekliği · Altınmeşe renk",
+    colors: ["#8b7355", "#ffffff", "#2d2d2d"],
+    priceKurus: 90000,
+    oldPriceKurus: 120000,
     currency: "TRY",
-    href: "/urunler/diamond-102-gri",
-    imagePosition: "center 43%",
+    href: "/urunler/menteseli-pencere-sineklik-altinmese",
   },
   {
-    id: "BLK-05",
-    name: "Blackout 05 Siyah Tam Karartma",
-    code: "BLK-05",
-    category: "Marel / Blackout Series",
-    image: "/images/catalog/blackout.webp",
-    badge: "Tam Karartma",
-    feature: "%100 ışık kontrolü · 250 gr/m² kumaş",
-    colors: ["#eee8dc", "#9a9a98", "#2a2a2a", "#5d5148", "#484a4b"],
-    priceKurus: 149900,
+    id: "KS-004",
+    name: "Menteşeli Kapı Sineklik Beyaz",
+    code: "KS-004",
+    category: "Kamataş / Menteşeli Sineklik",
+    image: "/images/products/kapi-sineklik-beyaz.jpg",
+    badge: "EN ÇOK SATAN",
+    feature: "Menteşeli kapı sinekliği · Beyaz renk",
+    colors: ["#ffffff", "#2d2d2d", "#8b7355"],
+    priceKurus: 117000,
+    oldPriceKurus: 170000,
     currency: "TRY",
-    href: "/urunler/blackout-05-siyah",
+    href: "/urunler/menteseli-kapi-sineklik-beyaz",
   },
 ];
 
 const catalogProducts: StoreProduct[] = [
   {
-    id: "HC-001",
-    name: "Honeycomb 001 Beyaz Isı Yalıtımlı Perde",
-    code: "HC-001",
-    category: "Marel / Honeycomb Series",
-    image: "/images/real/diamond-beyaz-siyah-ip.jpeg",
-    badge: "Isı Yalıtımlı",
-    feature: "Hücresel doku · %100 polyester · 2 yıl garanti",
-    colors: neutral,
-    price: "1.166,00 ₺'den",
-    href: "/urunler/honeycomb-001-beyaz",
-    imagePosition: "center 43%",
+    id: "KS-005",
+    name: "Akordeon Pencere Sineklik Beyaz",
+    code: "KS-005",
+    category: "Kamataş / Akordeon Sineklik",
+    image: "/images/products/akordiyon-beyaz.jpg",
+    badge: "PEŞİN FİYATINA 3 TAKSİT",
+    feature: "Akordiyon pencere sinekliği · Beyaz renk",
+    colors: ["#ffffff", "#2d2d2d", "#8b7355"],
+    priceKurus: 150640,
+    oldPriceKurus: 215200,
+    currency: "TRY",
+    href: "/urunler/akordiyon-pencere-sineklik-beyaz",
   },
   {
-    id: "DIA-108",
-    name: "Diamond 108 Krem Plise Perde",
-    code: "DIA-108",
-    category: "Marel / Diamond Series",
-    image: "/images/real/diamond-krem.jpeg",
-    feature: "%50 ışık filtrasyonu · Yumuşak gün ışığı",
-    colors: ["#f7f6f1", "#e8dfca", "#d0c3aa", "#a8aaab", "#4d5052", "#222426"],
-    href: "/urunler/diamond-108-krem",
-    imagePosition: "center 40%",
+    id: "KS-006",
+    name: "Akordeon Pencere Sineklik Antrasit",
+    code: "KS-006",
+    category: "Kamataş / Akordeon Sineklik",
+    image: "/images/products/akordiyon-antrasit.jpg",
+    badge: "PEŞİN FİYATINA 3 TAKSİT",
+    feature: "Akordiyon pencere sinekliği · Antrasit renk",
+    colors: ["#2d2d2d", "#ffffff", "#8b7355"],
+    priceKurus: 150640,
+    oldPriceKurus: 215200,
+    currency: "TRY",
+    href: "/urunler/akordiyon-pencere-sineklik-antrasit",
   },
   {
-    id: "DIA-109",
-    name: "Diamond 109 Açık Gri Plise Perde",
-    code: "DIA-109",
-    category: "Marel / Diamond Series",
-    image: "/images/real/diamond-acik-gri.jpeg",
-    badge: "Gerçek Doku",
-    feature: "UV dayanımlı · Kolay temizlenebilir polyester",
-    colors: ["#f8f7f2", "#dfdcd3", "#b8bbbc", "#777a7b", "#47494a", "#202224"],
-    href: "/urunler/diamond-109-acik-gri",
-    imagePosition: "center 36%",
+    id: "KS-007",
+    name: "Akordeon Pencere Sineklik Altınmeşe",
+    code: "KS-007",
+    category: "Kamataş / Akordeon Sineklik",
+    image: "/images/products/akordiyon-altinmese.jpg",
+    badge: "PEŞİN FİYATINA 3 TAKSİT",
+    feature: "Akordiyon pencere sinekliği · Altınmeşe renk",
+    colors: ["#8b7355", "#ffffff", "#2d2d2d"],
+    priceKurus: 185863,
+    oldPriceKurus: 265500,
+    currency: "TRY",
+    href: "/urunler/akordiyon-pencere-sineklik-altinmese",
   },
   {
-    id: "SLV-7002",
-    name: "Silver 7002 Gri Plise Perde",
-    code: "SLV-7002",
-    category: "Marel / Silver Series",
-    image: "/images/catalog/silver.webp",
-    badge: "%70 Filtrasyon",
-    feature: "150 gr/m² kumaş · UV dayanımlı yapı",
-    colors: ["#f6f5f0", "#ddd6c8", "#aeb1b1", "#77797a", "#484a4b"],
-    href: "/urunler/silver-7002-gri",
-  },
-];
-
-const categoryTiles = [
-  {
-    index: "01",
-    title: "Sineklikler",
-    href: "/sineklikler",
-    text: "Cam balkon ve pencerelere özel ince profilli kumaş serileri",
-    motif: "SİNEKLİK",
-    image: "/images/products/venus/1.JPG",
-  },
-  {
-    index: "02",
-    title: "Plise Perdeler",
-    href: "/plise-perdeler",
-    text: "Hassas ışık ve gölge kontrolü sağlayan estetik lameller",
-    motif: "PLİSE",
-    image: "/images/products/bambu/bambu beyaz.png",
-  },
-  {
-    index: "03",
-    title: "Tutamaklar",
-    href: "/tutamaklar",
-    text: "Teras ve dış cepheler için rüzgâr ve güneş koruması",
-    motif: "TUTAMAK",
-    image: "/images/products/touch/touch 1001.png",
-  },
-  {
-    index: "04",
-    title: "Profiller",
-    href: "/profiller",
-    text: "Pencere ve kapılar için plise ve sürme sineklikler",
-    motif: "PROFİL",
-    image: "/images/products/silver/silver gri.png",
-  },
-  {
-    index: "05",
-    title: "Aksesuarlar",
-    href: "/aksesuarlar",
-    text: "Geniş mekân geçişleri için modern sürme çerçeveler",
-    motif: "AKSESUAR",
-    image: "/images/products/dia/_DSC9925.jpg",
+    id: "KS-008",
+    name: "Akordeon Kapı Sineklik Beyaz",
+    code: "KS-008",
+    category: "Kamataş / Akordeon Sineklik",
+    image: "/images/products/akordiyon-kapi-beyaz.jpg",
+    badge: "PEŞİN FİYATINA 3 TAKSİT",
+    feature: "Akordiyon kapı sinekliği · Beyaz renk",
+    colors: ["#ffffff", "#2d2d2d", "#8b7355"],
+    priceKurus: 250000,
+    oldPriceKurus: 367500,
+    currency: "TRY",
+    href: "/urunler/akordiyon-kapi-sineklik-beyaz",
   },
 ];
 
 function parseSwatches(colors?: string): string[] {
+  const neutral = ["#ffffff", "#d4d4d4", "#1a1a1a"];
   try {
     const parsed = JSON.parse(colors ?? "[]") as Array<{ hex?: string }>;
     return parsed.map((item) => item.hex).filter(Boolean) as string[];
@@ -181,21 +150,20 @@ function toShelfProduct(product: Awaited<ReturnType<typeof stListProducts>>[numb
     id: product.id,
     name: product.name,
     code: product.sku,
-    category: `Marel / ${product.category}`,
+    category: `Kamataş / ${product.category}`,
     image: product.image,
     badge: product.salePrice ? "İndirimli" : "Yeni",
-    feature: "Ölçüye özel plise perde · Her görsel ayrı ürün",
+    feature: "Ölçüye özel sineklik · Her görsel ayrı ürün",
     colors: parseSwatches(product.colors),
     priceKurus: product.salePrice ?? product.price,
     currency: product.currency,
     href: `/urunler/${product.slug}`,
-    imagePosition: "center",
   };
 }
 
 export default async function Home() {
   const [liveProducts, reviews] = await Promise.all([
-    stListProducts(false, "Marel").catch(() => [] as Awaited<ReturnType<typeof stListProducts>>),
+    stListProducts(false, "Kamataş").catch(() => [] as Awaited<ReturnType<typeof stListProducts>>),
     stListApprovedReviews(3).catch(() => [] as Awaited<ReturnType<typeof stListApprovedReviews>>),
   ]);
   const liveById = new Map(liveProducts.map((product) => [product.slug, product]));
@@ -219,24 +187,24 @@ export default async function Home() {
               {
                 "@type": "Organization",
                 "@id": `${absoluteUrl("/")}#organization`,
-                name: "Marel",
+                name: "Kamataş Alüminyum",
                 url: absoluteUrl("/"),
                 logo: absoluteUrl("/icon.svg"),
-                email: "info@marelpliseperde.com",
-                telephone: "+90 546 735 66 02",
-                sameAs: ["https://wa.me/905467356602"],
+                email: "info@kamatas.com",
+                telephone: "+905303842837",
+                sameAs: ["https://wa.me/905303842837"],
               },
               {
                 "@type": "WebSite",
                 "@id": `${absoluteUrl("/")}#website`,
-                name: "Marel",
+                name: "Kamataş Alüminyum",
                 url: absoluteUrl("/"),
                 inLanguage: "tr-TR",
                 publisher: { "@id": `${absoluteUrl("/")}#organization` },
               },
               {
                 "@type": "WebPage",
-                name: "Marel | Online Perde ve Sineklik Mağazası",
+                name: "Kamataş Alüminyum | Sineklik, Perde ve Aksesuar",
                 url: absoluteUrl("/"),
                 isPartOf: { "@id": `${absoluteUrl("/")}#website` },
                 about: { "@id": `${absoluteUrl("/")}#organization` },
@@ -249,13 +217,13 @@ export default async function Home() {
       <main>
         <StorefrontHero />
 
-        {/* Best Sellers */}
+        {/* En Çok Satanlar */}
         <section className="shop-section" id="cok-satanlar">
           <div className="shop-container">
             <div className="shop-section-title">
               <div>
-                <span>GERÇEK ÜRÜNLER · GERÇEK DOKULAR</span>
-                <h2>En Çok Satanlar</h2>
+                <span>KAMATAŞ ALÜMİNYUM</span>
+                <h2>En Çok Satan Ürünler</h2>
               </div>
               <Link href="/urunler">Tümünü Gör →</Link>
             </div>
@@ -263,189 +231,31 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* Promo Grid */}
-        <Reveal id="indirimdekiler" className="shop-container promo-tile-grid" direction="up">
-          <Link className="promo-tile promo-tile-wide" href="/plise-perdeler">
-            <Image
-              unoptimized
-              src="/images/hero/marel-honeycomb-hero-v3.png"
-              alt="Gri Honeycomb ısı yalıtımlı perde"
-              fill
-              sizes="66vw"
-            />
-            <div>
-              <span>ISI YALITIMLI KOLEKSİYON</span>
-              <h2>Honeycomb Series</h2>
-              <p>Hücresel dokusu, %100 ışık filtrasyonu ve beş doğal rengiyle.</p>
-              <b>Koleksiyonu Keşfet →</b>
-            </div>
-          </Link>
-          <Link className="promo-tile" href="/plise-perdeler">
-            <Image
-              unoptimized
-              src="/images/real/diamond-gri.jpeg"
-              alt="Diamond gri gerçek kumaş dokusu"
-              fill
-              sizes="34vw"
-            />
-            <div>
-              <span>YENİ KOLEKSİYON</span>
-              <h2>Diamond Serisi</h2>
-              <b>Renkleri incele →</b>
-            </div>
-          </Link>
-        </Reveal>
+        {/* Kategori Kartları - Üst Satır */}
+        <KamatasCategoryCards />
 
-        {/* Feature Row */}
-        <section className="shop-feature-row">
-          <Reveal className="shop-container" direction="up">
-            <article>
-              <b>01</b>
-              <div>
-                <strong>Milimetrik Ölçüye Özel İmalat</strong>
-                <p>Pencere ve cam balkonunuza sıfır hata ile üretilir.</p>
-              </div>
-            </article>
-            <article>
-              <b>02</b>
-              <div>
-                <strong>Canlı WhatsApp Danışmanı</strong>
-                <p>Mekân fotoğrafınızı gönderin, en uygun modeli birlikte seçelim.</p>
-              </div>
-            </article>
-            <article>
-              <b>03</b>
-              <div>
-                <strong>2 Yıl Kumaş & Mekanizma Garantisi</strong>
-                <p>Üst segment bileşenler ve kolay montaj aparatları.</p>
-              </div>
-            </article>
-          </Reveal>
-        </section>
-
-        {/* Catalog Collection Shelf */}
-        <section className="shop-section shop-section-soft">
+        {/* Akordeon Ürünleri */}
+        <section className="shop-section" id="akordiyon-urunleri">
           <div className="shop-container">
             <div className="shop-section-title">
               <div>
-                <span>KATALOG KOLEKSİYONU</span>
-                <h2>Plise Perde Modelleri</h2>
+                <span>AKORDİYON SİNEKLİKLER</span>
+                <h2>Akordeon Sineklik Modelleri</h2>
               </div>
-              <Link href="/plise-perdeler">Tüm plise perdeler →</Link>
+              <Link href="/sineklikler?alt=akordiyon">Tümünü Gör →</Link>
             </div>
             <ProductShelf products={liveCatalogShelf.length ? liveCatalogShelf.slice(4, 8) : liveShelf(catalogProducts)} />
           </div>
         </section>
 
-        {/* Categories Section - Clean Links */}
-        <section className="shop-section">
-          <div className="shop-container">
-            <div className="shop-section-title center-title">
-              <div>
-                <span>TÜM KATEGORİLER</span>
-                <h2>İhtiyacınıza Göre Seçin</h2>
-              </div>
-            </div>
-            <Reveal className="shop-category-grid" direction="up">
-              {categoryTiles.map((tile) => (
-                <Link href={tile.href} key={tile.title}>
-                  <Image unoptimized src={tile.image} alt={tile.title} fill sizes="(max-width: 700px) 100vw, 33vw" />
-                  <span className="category-card-index">{tile.index}</span>
-                  <span className="category-card-motif" aria-hidden="true">
-                    {tile.motif}
-                  </span>
-                  <div>
-                    <h3>{tile.title}</h3>
-                    <p>{tile.text}</p>
-                    <b>
-                      Ürünleri İncele <i aria-hidden="true">→</i>
-                    </b>
-                  </div>
-                </Link>
-              ))}
-            </Reveal>
-          </div>
-        </section>
+        {/* Müşteri Yorumları */}
+        <KamatasReviews />
 
-        {/* Store Reviews */}
-        <section className="store-reviews">
-          <div className="shop-container">
-            <div className="shop-section-title center-title">
-              <div>
-                <span>MÜŞTERİ DENEYİMİ</span>
-                <h2>Marel Kullananlar Anlatıyor</h2>
-              </div>
-            </div>
-            <Reveal className="review-grid" direction="up">
-              {reviews.length ? (
-                reviews.map((review) => (
-                  <article key={review.id}>
-                    <div>
-                      {"★".repeat(review.rating)}
-                      {"☆".repeat(5 - review.rating)}
-                    </div>
-                    <h3>{review.title}</h3>
-                    <p>{review.comment}</p>
-                    <strong>
-                      {review.user?.name}
-                      {review.product?.name ? ` · ${review.product.name}` : ""}
-                    </strong>
-                  </article>
-                ))
-              ) : (
-                <>
-                  <article>
-                    <div>★★★★★</div>
-                    <h3>Kusursuz ölçü ve kolay montaj</h3>
-                    <p>Cam balkon kanatlarına tam oturdu, yapıştırmalı montaj çok pratik oldu.</p>
-                    <strong>Marel Müşteri Deneyimi</strong>
-                  </article>
-                  <article>
-                    <div>★★★★★</div>
-                    <h3>Renk ve kumaş kalitesi harika</h3>
-                    <p>Antrasit rengi çok şık durdu, güneş ışığını tam istediğimiz gibi kırıyor.</p>
-                    <strong>Marel Danışman Desteği</strong>
-                  </article>
-                  <article>
-                    <div>★★★★★</div>
-                    <h3>Hızlı kargo ve güvenli paketleme</h3>
-                    <p>Ölçü teyidinden 3 gün sonra kargomuz sağlam şekilde teslim edildi.</p>
-                    <Link href="/urunler">Koleksiyonu İncele →</Link>
-                  </article>
-                </>
-              )}
-            </Reveal>
-          </div>
-        </section>
+        {/* Özellikler */}
+        <KamatasFeatures />
 
-        {/* Trust Badges */}
-        <section className="shop-trust-row">
-          <div className="shop-container">
-            <article>
-              <span>▣</span>
-              <h3>Katalogla Doğrulanmış Gerçek Kumaşlar</h3>
-            </article>
-            <article>
-              <span>◇</span>
-              <h3>Ölçüye Özel Milimetrik İmalat</h3>
-            </article>
-            <article>
-              <span>◉</span>
-              <h3>Doğrudan Canlı WhatsApp Desteği</h3>
-            </article>
-          </div>
-        </section>
-
-        {/* Order Tracking CTA */}
-        <section className="order-track" id="takip">
-          <div className="shop-container">
-            <h2>Sipariş & Kargo Takibi</h2>
-            <p>Sipariş numaranız ve e-postanız ile kargonuzun canlı durumunu anında sorgulayın.</p>
-            <Link className="button button-gold" href="/siparis-takip">
-              Siparişimi Takip Et →
-            </Link>
-          </div>
-        </section>
+        {/* Sipariş Takip */}
+        <KamatasOrderTracking />
       </main>
       <SiteFooter />
     </>

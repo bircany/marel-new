@@ -13,15 +13,19 @@ const menuGroups = [
     href: "/sineklikler",
     items: [
       ["Menteşeli Sineklikler", "/sineklikler?alt=menteseli"],
+      ["Menteşeli Pencere Sinekliği", "/sineklikler?alt=menteseli-pencere"],
+      ["Menteşeli Pencere Kedi Sinekliği", "/sineklikler?alt=menteseli-pencere-kedi"],
+      ["Menteşeli Kapı Kedi Sinekliği", "/sineklikler?alt=menteseli-kapi-kedi"],
       ["Sabit Sök-Tak Sineklikler", "/sineklikler?alt=sabit-sok-tak"],
       ["Akordiyon Sineklikler", "/sineklikler?alt=akordiyon"],
+      ["Cam Balkon Sineklikleri", "/sineklikler?alt=cam-balkon"],
       ["Kedi Sineklikleri", "/sineklikler?alt=kedi"],
       ["Sürme Sineklikler", "/sineklikler?alt=surme"],
       ["Sineklik Kasaları", "/sineklikler?alt=kasalar"],
     ],
   },
   {
-    label: "Separatör Kapı",
+    label: "Seperatör Kapı",
     href: "/separator-kapi",
     items: [
       ["Orjin Separatör Kapılar", "/separator-kapi?alt=orjin"],
@@ -47,6 +51,11 @@ const menuGroups = [
       ["Kumandalı Panjur", "/otomatik-panjurlar?alt=kumandali"],
       ["Yedek Parça", "/otomatik-panjurlar?alt=yedek-parca"],
     ],
+  },
+  {
+    label: "Tutamaklar",
+    href: "/tutamaklar",
+    items: [],
   },
   {
     label: "Aksesuarlar",
@@ -126,7 +135,6 @@ function SearchAutocomplete() {
     }
   };
 
-  // Click outside to close
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
@@ -177,7 +185,7 @@ function SearchAutocomplete() {
                 <div className="search-item-img">
                   <Image
                     unoptimized
-                    src={product.image || "/images/marel-logo.png"}
+                    src={product.image || "/images/kamatas-logo.png"}
                     alt={product.name}
                     width={44}
                     height={44}
@@ -262,49 +270,44 @@ export function SiteHeader() {
     <>
       <div className="benefit-bar" aria-label="Alışveriş avantajları">
         <span>HAVALEDE EK %10 İNDİRİM</span>
+        <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
         <span>PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
-        <span>YURTİÇİ KARGO İLE GÜVENLİ TESLİMAT</span>
       </div>
       <header className="shop-header">
         <div className="shop-header-main shop-container">
-          <Link className="shop-logo" href="/" aria-label="Marel ana sayfa">
-            <Image
-              unoptimized
-              src="/images/marel-logo.png"
-              alt="Marel Perde ve Sineklik Sistemleri"
-              width={220}
-              height={44}
-              priority
-              style={{ objectFit: "contain", width: "auto", height: "42px" }}
-            />
+          <Link className="shop-logo" href="/" aria-label="Kamataş ana sayfa">
+            <span className="kamatas-logo-text">Kamataş</span>
           </Link>
 
           <nav className="category-nav header-primary-nav" aria-label="Ürün kategorileri">
-            {menuGroups.map((group) => (
-              <details className="nav-dropdown" key={group.label}>
-                <summary>
-                  <Link href={group.href}>{group.label}</Link>
-                  <span aria-hidden="true">⌄</span>
-                </summary>
-                <div className="nav-dropdown-panel">
-                  {group.items.map(([label, href]) => (
-                    <Link href={href} key={href}>
-                      {label}
-                    </Link>
-                  ))}
-                </div>
-              </details>
-            ))}
-            <Link href="/tutamaklar">Tutamaklar</Link>
-            <Link href="/profiller">Profiller</Link>
-            <Link href="/kosebentler-1">Köşebentler</Link>
+            {menuGroups.map((group) =>
+              group.items.length > 0 ? (
+                <details className="nav-dropdown" key={group.label}>
+                  <summary>
+                    <Link href={group.href}>{group.label}</Link>
+                    <span aria-hidden="true">⌄</span>
+                  </summary>
+                  <div className="nav-dropdown-panel">
+                    {group.items.map(([label, href]) => (
+                      <Link href={href} key={href}>
+                        {label}
+                      </Link>
+                    ))}
+                  </div>
+                </details>
+              ) : (
+                <Link href={group.href} key={group.label}>
+                  {group.label}
+                </Link>
+              ),
+            )}
             <Link href="/siparis-takip">Sipariş Takip</Link>
           </nav>
 
           <div className="shop-actions">
             <SearchAutocomplete />
             <a
-              href="https://wa.me/905467356602"
+              href="https://wa.me/905303842837"
               target="_blank"
               rel="noreferrer"
               className="header-whatsapp-btn"
@@ -341,26 +344,23 @@ export function SiteHeader() {
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>
             <nav>
-              <Link href="/plise-perdeler">Plise Perde</Link>
               <Link href="/sineklikler">Sineklikler</Link>
+              <Link href="/separator-kapi">Seperatör Kapı</Link>
               <Link href="/perdeler">Perdeler</Link>
+              <Link href="/otomatik-panjurlar">Otomatik Panjurlar</Link>
               <Link href="/tutamaklar">Tutamaklar</Link>
-              <Link href="/profiller">Profiller</Link>
-              <Link href="/kosebentler-1">Köşebentler</Link>
               <Link href="/aksesuarlar">Aksesuarlar</Link>
-              <Link href="/urunler">Tüm Ürünler</Link>
               <Link href="/siparis-takip">Sipariş Takip</Link>
+              <Link href="/urunler">Tüm Ürünler</Link>
               <Link href="/iletisim">İletişim</Link>
             </nav>
           </details>
         </div>
-
       </header>
 
       <div className="red-ticker">
         <div>
-          HAVALEDE İNDİRİMLERE EK %10 İNDİRİM • PEŞİN FİYATINA 3 TAKSİT İMKANI • ÖLÇÜYE ÖZEL MİLLİMETRİK ÜRETİM • CANLI
-          WHATSAPP DANIŞMA
+          HAVALEDE İNDİRİMLERE EK %10 İNDİRİM • PEŞİN FİYATINA 3 TAKSİT İMKANI • 1000₺ ÜZERİ ÜCRETSİZ KARGO • CANLI WHATSAPP DANIŞMA
         </div>
       </div>
     </>
