@@ -26,12 +26,13 @@ export function AdminLogin({
     const form = new FormData(event.currentTarget);
     const email = String(form.get("email") ?? "").trim().toLowerCase();
     const password = String(form.get("password") ?? "");
+    const website = String(form.get("website") ?? "");
 
     try {
       const response = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, password, website }),
       });
 
       const data = (await response.json()) as {
@@ -87,6 +88,7 @@ export function AdminLogin({
         </header>
 
         <form onSubmit={submit} className="admin-login-form">
+          <input className="contact-honeypot" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: "none" }} />
           <div className="admin-input-group">
             <label htmlFor="admin-email">Yönetici E-Postası</label>
             <div className="input-with-icon">
@@ -139,6 +141,14 @@ export function AdminLogin({
                   </svg>
                 )}
               </button>
+            </div>
+            <div className="admin-forgot-password-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="14" height="14">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
+              <span>Şifrenizi unuttuysanız yetkiliyle iletişime geçin.</span>
             </div>
           </div>
 
