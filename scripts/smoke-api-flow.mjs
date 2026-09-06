@@ -58,7 +58,7 @@ async function main() {
   step("C. Misafir sepet → sipariş");
   const add = await req("POST", "/cart", {
     headers: { "X-Session-ID": SESSION },
-    body: { product_id: product.id, quantity: 1 },
+    body: { product_id: product.id, quantity: 1, width: 100, height: 150 },
   });
   assert(add.ok, `cart add ${add.status} ${JSON.stringify(add.json)}`);
   console.log("cart add OK");

@@ -145,6 +145,8 @@ async function initializeDatabase(): Promise<void> {
   ]);
   await seedCatalog(db);
   await seedAnnouncements(db);
+  await seedMockOrders(db);
+  await seedContactMessages(db);
   await db.prepare("PRAGMA optimize").run();
 }
 
@@ -180,6 +182,34 @@ async function seedAnnouncements(db: D1Database): Promise<void> {
     ["whatsapp-olcu-destegi", "Fotoğrafınızı gönderin, sistemi birlikte seçelim", "Perde, sineklik veya kapı sistemi seçiminde Marel danışmanından hızlı destek alın.", "Mekânın genel görünümünü ve yaklaşık ölçüleri paylaşmanız yeterli. Kullanım alanınıza göre uygun sistem, kumaş ve profil seçeneklerini birlikte belirleyelim.", "/images/catalog/diamond.webp", 0],
   ] as const;
   await db.batch(rows.map(([slug, title, summary, body, image, featured]) => db.prepare("INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)").bind(crypto.randomUUID(), slug, title, summary, body, image, featured, now, now, now)));
+}
+
+async function seedMockOrders(db: D1Database): Promise<void> {
+  const result = await db.prepare("SELECT COUNT(*) AS count FROM orders").first<{ count: number }>();
+  if ((result?.count ?? 0) > 0) return;
+  const now = new Date().toISOString();
+  const mockOrders = [
+    ["ord-001", "ORD-20260906-00001", "ahmet@example.com", "Ahmet Yılmaz", "05321112233", "pending", 116600, 116600, "Kadıköy / İstanbul", "Ölçüler 100x150cm"],
+    ["ord-002", "ORD-20260906-00002", "mehmet@example.com", "Mehmet Kaya", "05332223344", "measure_ok", 233200, 233200, "Çankaya / Ankara", "2 adet Diamond 100 Beyaz"],
+    ["ord-003", "ORD-20260906-00003", "ayse@example.com", "Ayşe Demir", "05354445566", "processing", 149900, 149900, "Karşıyaka / İzmir", "Blackout 05 Siyah karartma"],
+    ["ord-004", "ORD-20260906-00004", "can@example.com", "Can Öztürk", "05367778899", "shipped", 210900, 210900, "Nilüfer / Bursa", "Silver 7002 Gri Plise"],
+    ["ord-005", "ORD-20260905-00001", "zeynep@example.com", "Zeynep Şahin", "05378889900", "delivered", 150000, 150000, "Muratpaşa / Antalya", "Teslim edildi."],
+    ["ord-006", "ORD-20260905-00002", "mustafa@example.com", "Mustafa Yıldız", "05389990011", "delivered", 150000, 150000, "Odunpazarı / Eskişehir", "Teslim edildi."],
+  ] as const;
+  for (const [id, orderNumber, email, name, phone, status, subtotal, total, address, notes] of mockOrders) {
+    await db.prepare(
+      "INSERT INTO orders (id, order_number, email, customer_name, phone, status, subtotal, shipping, total, currency, shipping_address, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 0, ?, 'TRY', ?, ?, ?, ?)"
+    ).bind(id, orderNumber, email, name, phone, status, subtotal, total, address, notes, now, now).run();
+  }
+}
+
+async function seedContactMessages(db: D1Database): Promise<void> {
+  const result = await db.prepare("SELECT COUNT(*) AS count FROM contact_messages").first<{ count: number }>();
+  if ((result?.count ?? 0) > 0) return;
+  const now = new Date().toISOString();
+  await db.prepare(
+    "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'new', ?, ?)"
+  ).bind("cm-001", "Mehmet Demir", "mehmet@example.com", "05339998877", "Ölçü & Kumaş Desteği", "Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.", now, now).run();
 }
 
 export async function listProducts(includeInactive = false): Promise<CatalogProduct[]> {
