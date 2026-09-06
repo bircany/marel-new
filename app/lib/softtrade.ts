@@ -208,8 +208,12 @@ export async function stCreateProduct(form: FormData): Promise<{ id: number; slu
   payload.set("stock", String(stock));
   payload.set("status", "active");
   payload.set("is_featured", form.get("featured") ? "1" : "0");
-  const image = form.get("image");
-  if (image instanceof File && image.size > 0) payload.append("images[]", image);
+  const images = form.getAll("images");
+  const legacyImage = form.get("image");
+  for (const image of images) {
+    if (image instanceof File && image.size > 0) payload.append("images[]", image);
+  }
+  if (images.length === 0 && legacyImage instanceof File && legacyImage.size > 0) payload.append("images[]", legacyImage);
 
   const created = await request<SoftTradeProduct>("/admin/products", { method: "POST", admin: true, body: payload });
   return { id: created.id, slug: created.slug };
@@ -237,11 +241,15 @@ export async function stDeleteProduct(id: string): Promise<void> {
 }
 
 export async function stUploadImage(id: string, file: File): Promise<{ url: string }> {
+  const images = await stUploadImages(id, [file]);
+  return { url: images[0]?.url ?? "" };
+}
+
+export async function stUploadImages(id: string, files: File[]): Promise<Array<{ id: number; url: string }>> {
   const payload = new FormData();
-  payload.append("images[]", file);
+  for (const file of files) payload.append("images[]", file);
   payload.set("set_first_as_cover", "true");
-  const images = await request<Array<{ id: number; url: string }>>(`/admin/products/${id}/images`, { method: "POST", admin: true, body: payload });
-  return { url: images?.[0]?.url ?? "" };
+  return request<Array<{ id: number; url: string }>>(`/admin/products/`+id+`/images`, { method: "POST", admin: true, body: payload });
 }
 
 export async function stListOrders(): Promise<OrderRecord[]> {
@@ -253,6 +261,9 @@ export async function stListOrders(): Promise<OrderRecord[]> {
     shipping_cost: number;
     total: number;
     created_at: string;
+    cargo_company?: string | null;
+    tracking_number?: string | null;
+    tracking_url?: string | null;
     user?: { id: number; full_name: string; email: string; phone?: string | null } | null;
   }>>("/admin/orders?per_page=100", { admin: true });
   return orders.map((order) => ({
@@ -269,17 +280,30 @@ export async function stListOrders(): Promise<OrderRecord[]> {
     currency: "TRY",
     shippingAddress: "",
     notes: "",
+    cargoCompany: order.cargo_company ?? null,
+    trackingNumber: order.tracking_number ?? null,
+    trackingUrl: order.tracking_url ?? null,
     createdAt: order.created_at,
     updatedAt: order.created_at,
   }));
 }
 
-export async function stUpdateOrderStatus(id: string, status: string, note = ""): Promise<void> {
+export async function stUpdateOrderStatus(
+  id: string,
+  status: string,
+  note = "",
+  cargo?: { cargoCompany?: string; trackingNumber?: string },
+): Promise<void> {
   await request<unknown>(`/admin/orders/${id}/status`, {
     method: "PUT",
     admin: true,
     headers: { "content-type": "application/json" },
-    body: JSON.stringify({ status, admin_notes: note || undefined }),
+    body: JSON.stringify({
+      status,
+      admin_notes: note || undefined,
+      cargo_company: cargo?.cargoCompany || undefined,
+      tracking_number: cargo?.trackingNumber || undefined,
+    }),
   });
 }
 

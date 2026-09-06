@@ -35,6 +35,9 @@ export type OrderRecord = {
   currency: string;
   shippingAddress: string;
   notes: string;
+  cargoCompany: string | null;
+  trackingNumber: string | null;
+  trackingUrl: string | null;
   createdAt: string;
   updatedAt: string;
 };

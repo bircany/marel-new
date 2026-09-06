@@ -4,7 +4,7 @@ import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Sepetim" };
+export const metadata = { title: "Sepetim", robots: { index: false, follow: false } };
 
 export default async function CartPage() {
   const user = await getCurrentUser();

@@ -1,67 +1,63 @@
-import Image from "next/image";
 import Link from "next/link";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
-import { productGroups } from "../data";
-import { ProductShelf, type StoreProduct } from "../components/product-shelf";
+import { CatalogBrowser } from "../components/catalog-browser";
 import { stListProducts } from "@/app/lib/softtrade";
-import { ParallaxImage, Reveal } from "../components/motion-media";
+import { absoluteUrl } from "@/app/lib/site";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Ürünler",
-  description: "Marel plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri.",
+  title: "Marel Ürünleri | Plise Perde, Jaluzi, Zip Perde ve Sineklik Sistemleri",
+  description:
+    "Ölçüye özel plise perde, jaluzi, zip perde, sineklik ve sürme kapı sistemleri. Kumaş, renk ve ölçü filtreleriyle en uygun sistemi hemen bulun.",
+  alternates: { canonical: absoluteUrl("/urunler") },
 };
 
-export default async function ProductsPage() {
+export default async function ProductsPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ kategori?: string; q?: string }>;
+}) {
+  const params = await searchParams;
   const products = await stListProducts(false, "Marel");
-  const storeProducts: StoreProduct[] = products.map((product) => ({
-    id: product.id,
-    name: product.name,
-    code: product.sku,
-    category: `Marel / ${product.category}`,
-    image: product.image,
-    feature: product.description,
-    colors: [],
-    href: `/urunler/${product.slug}`,
-    priceKurus: product.stock > 0 ? product.salePrice ?? product.price : undefined,
-    currency: product.currency,
-    badge: product.featured ? "Öne Çıkan" : undefined,
-  }));
+
   return (
     <>
       <SiteHeader />
-      <main>
-        <section className="page-hero">
-          <div className="page-hero-bg"><Image unoptimized src="/images/catalog/pages/page-01.webp" alt="" fill priority sizes="100vw" /></div>
-          <div className="container page-hero-inner">
-            <div className="breadcrumbs"><Link href="/">Ana sayfa</Link><span>/</span><span>Ürünler</span></div>
-            <p className="eyebrow light">Marel ürün ailesi</p>
-            <h1>Bir ürün değil,<br />doğru sistemi seçin.</h1>
-            <p>İhtiyacınızı, kullanım alanınızı ve ölçünüzü birlikte değerlendirerek kumaştan kasaya kadar size özel bir çözüm hazırlıyoruz.</p>
+      <main className="catalog-page-main">
+        {/* Compact breadcrumb header */}
+        <div className="catalog-page-header shop-container">
+          <div className="breadcrumbs">
+            <Link href="/">Ana sayfa</Link>
+            <span>/</span>
+            {params?.kategori ? (
+              <>
+                <Link href="/urunler">Ürünler</Link>
+                <span>/</span>
+                <span>{params.kategori}</span>
+              </>
+            ) : params?.q ? (
+              <>
+                <Link href="/urunler">Ürünler</Link>
+                <span>/</span>
+                <span>Arama: &ldquo;{params.q}&rdquo;</span>
+              </>
+            ) : (
+              <span>Ürünler</span>
+            )}
           </div>
-        </section>
-        <section className="shop-section"><div className="shop-container"><div className="shop-section-title"><div><span>GÜNCEL FİYAT VE STOK</span><h2>Online Mağaza</h2></div></div><ProductShelf products={storeProducts} /></div></section>
-        <section aria-label="Ürün grupları">
-          {productGroups.map((group, index) => (
-            <article className="product-group" id={group.id} key={group.id}>
-              <Reveal className="product-group-media" direction={index % 2 === 0 ? "left" : "right"}><ParallaxImage src={group.image} alt={`${group.title} ürün görünümü`} sizes="(max-width: 760px) 100vw, 50vw" /></Reveal>
-              <Reveal className="product-group-copy" direction={index % 2 === 0 ? "right" : "left"}>
-                <span className="product-group-index">0{index + 1} / 05</span>
-                <h2>{group.title}</h2>
-                <p>{group.description}</p>
-                <ul className="tag-list">{group.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
-                <div><Link className="button button-gold" href={group.href}>{index === 0 ? "Serileri incele" : "Bilgi ve teklif al"}</Link></div>
-              </Reveal>
-            </article>
-          ))}
-        </section>
-        <section className="info-cta" id="teklif-bilgi">
-          <div className="container info-cta-inner">
-            <h2>Hangi sistem olduğundan emin değil misiniz?</h2>
-            <div><p>Mekânın fotoğrafını ve yaklaşık ölçüyü gönderin. Kullanım şeklinize uygun perde, sineklik veya kapı sistemini birlikte belirleyelim.</p><a className="button button-gold" href="https://wa.me/905467356602?text=Merhaba%2C%20mek%C3%A2n%C4%B1m%20i%C3%A7in%20uygun%20sistem%20hakk%C4%B1nda%20bilgi%20almak%20istiyorum." target="_blank" rel="noreferrer">WhatsApp&apos;tan danışın</a></div>
-          </div>
+          <h1 className="catalog-page-title">
+            {params?.kategori || (params?.q ? `"${params.q}" için sonuçlar` : "Tüm Ürünler")}
+          </h1>
+        </div>
+
+        <section className="catalog-browser-section shop-container">
+          <CatalogBrowser
+            products={products}
+            initialCategory={params?.kategori}
+            initialSearch={params?.q}
+          />
         </section>
       </main>
       <SiteFooter />

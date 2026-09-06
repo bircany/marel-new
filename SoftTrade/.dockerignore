@@ -1,0 +1,21 @@
+.git
+.gitignore
+.env
+.env.*
+!.env.example
+softtrade-client
+node_modules
+vendor
+# Windows/OneDrive broken junction — recreate inside container via storage:link
+public/storage
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+raporlar
+tests
+.phpunit.result.cache
+Dockerfile
+docker-compose.yml
+README.md

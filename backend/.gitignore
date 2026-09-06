@@ -1,0 +1,44 @@
+﻿# Genel
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+
+# Ortam
+.env
+.env.backup
+.env.production
+/auth.json
+
+# Test / cache
+/.phpunit.cache
+.phpunit.result.cache
+.phpactor.json
+
+# IDE
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Frontend (Next.js)
+/softtrade-client/node_modules
+/softtrade-client/.next
+/softtrade-client/out
+/softtrade-client/.turbo
+/softtrade-client/.env
+/softtrade-client/.env.local
+/softtrade-client/.env.production
+/softtrade-client/.env.development
+
+# Loglar
+npm-debug.log
+yarn-error.log
+pnpm-debug.log
+
+# Lokal test dosyalari
+/users.txt

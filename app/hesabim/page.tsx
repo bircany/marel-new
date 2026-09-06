@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { getCurrentUser, laravel } from "@/app/lib/laravel-auth";
 import { AuthPanel } from "@/app/components/auth-panel";
 import { SiteFooter } from "@/app/components/site-footer";
@@ -11,7 +12,7 @@ import type { OrderPayload } from "@/app/api/orders/route";
 import type { ReviewPayload } from "@/app/api/reviews/route";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Hesabım" };
+export const metadata = { title: "Hesabım | Marel", robots: { index: false, follow: false } };
 
 const statusNames: Record<string, string> = {
   pending: "Bekliyor",
@@ -33,26 +34,21 @@ const progressByStatus: Record<string, number> = {
 
 function GuestAccount() {
   return (
-    <main className="account-guest-page">
-      <section className="account-guest-shell shop-container">
-        <div className="account-guest-story">
-          <span className="account-eyebrow">MAREL HESABIM</span>
-          <h1>Eviniz için seçtikleriniz, her an elinizin altında.</h1>
-          <p>Siparişinizin ölçü teyidinden üretime, kargodan teslimata kadar tüm süreci tek ekrandan izleyin.</p>
-          <div className="account-benefit-list">
-            <article><b>01</b><div><strong>Anlık sipariş durumu</strong><small>Üretim ve kargo adımlarını kolayca takip edin.</small></div></article>
-            <article><b>02</b><div><strong>Güvenli hesap erişimi</strong><small>E-posta ve şifrenizle hesabınıza güvenle giriş yapın.</small></div></article>
-            <article><b>03</b><div><strong>Tüm Marel siparişleri</strong><small>Geçmiş ve devam eden siparişlerinizi bir arada görün.</small></div></article>
-          </div>
+    <main className="simple-account-page">
+      <div className="simple-account-container">
+        <div className="simple-account-brand">
+          <Image
+            unoptimized
+            src="/images/marel-logo.png"
+            alt="Marel"
+            width={160}
+            height={36}
+            style={{ objectFit: "contain" }}
+          />
+          <p>Hesabınıza giriş yaparak siparişlerinizi takip edin.</p>
         </div>
         <AuthPanel />
-      </section>
-
-      <section className="account-trust-row shop-container" aria-label="Marel hesap avantajları">
-        <span><b>Güvenli giriş</b><small>Korumalı hesap erişimi</small></span>
-        <span><b>Canlı durum</b><small>Sipariş adımları tek ekranda</small></span>
-        <span><b>Marel desteği</b><small>İhtiyaç duyduğunuzda yanınızda</small></span>
-      </section>
+      </div>
     </main>
   );
 }
@@ -72,7 +68,7 @@ function OrderCard({ order }: { order: OrderPayload }) {
         <span><small>Toplam</small><b>{formatMoney(Math.round((order.total + Number.EPSILON) * 100))}</b></span>
       </div>
       {order.status !== "cancelled" && <div className="account-order-progress" aria-label={`Sipariş ilerlemesi yüzde ${progress}`}><i style={{ width: `${progress}%` }} /></div>}
-      <div className="account-order-actions"><span>{order.status === "delivered" ? "Siparişiniz teslim edildi." : "Siparişiniz Marel ekibi tarafından takip ediliyor."}</span><Link href="/siparis-takip">Detayları gör →</Link></div>
+      <div className="account-order-actions"><span>{order.status === "delivered" ? "Siparişiniz teslim edildi." : "Siparişiniz takip ediliyor."}</span><Link href="/siparis-takip">Detayları gör →</Link></div>
     </article>
   );
 }
@@ -116,7 +112,7 @@ export default async function AccountPage() {
 
           <div className="account-section-title"><div><span>SON HAREKETLER</span><h2>Siparişlerim</h2></div><Link href="/urunler">Alışverişe devam et →</Link></div>
           <div className="account-order-list">
-            {orders.length ? orders.map((order) => <OrderCard key={order.id} order={order} />) : <div className="account-empty-orders"><div aria-hidden="true">M</div><h3>Henüz bir siparişiniz yok.</h3><p>Ölçünüze özel Marel ürünlerini keşfedin; ilk siparişiniz burada adım adım görünsün.</p><Link className="account-primary-action" href="/urunler"><span>Ürünleri keşfet</span><b aria-hidden="true">→</b></Link></div>}
+            {orders.length ? orders.map((order) => <OrderCard key={order.id} order={order} />) : <div className="account-empty-orders"><h3>Henüz bir siparişiniz yok.</h3><p>Ölçünüze özel Marel ürünlerini keşfedin.</p><Link className="account-primary-action" href="/urunler"><span>Ürünleri keşfet</span><b aria-hidden="true">→</b></Link></div>}
           </div>
           <CustomerReviews products={products.map(({ id, name }) => ({ id, name }))} reviews={reviews} />
         </section>

@@ -1,0 +1,341 @@
+[
+  {
+    "id": "TC-UI-001",
+    "title": "Ana sayfa yüklenir ve kritik bölümler görünür",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "http://localhost:3002/ adresine git" },
+      { "type": "assertion", "description": "HTTP 200 ve hero / çok satanlar / kategoriler görünür" },
+      { "type": "assertion", "description": "Header'da Ürünler, Sepet, Hesabım linkleri vardır" }
+    ]
+  },
+  {
+    "id": "TC-UI-002",
+    "title": "Ürün kataloğu ve ürün detay navigasyonu",
+    "category": "ui",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "/urunler sayfasına git" },
+      { "type": "assertion", "description": "Ürün listesi veya kategori vitrini görünür" },
+      { "type": "action", "description": "Bir ürün detayına (/urunler/[slug]) tıkla" },
+      { "type": "assertion", "description": "Ürün adı, fiyat veya ölçüye göre fiyat, sepete ekle / WhatsApp CTA görünür" }
+    ]
+  },
+  {
+    "id": "TC-UI-003",
+    "title": "Kategori landing sayfaları",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "/urunler/plise-perde, /urunler/jaluzi-perde, /urunler/zip-perde, /urunler/sineklik, /urunler/surgulu-kapilar sayfalarını sırayla aç" },
+      { "type": "assertion", "description": "Her sayfa 200 döner ve kategori başlığı görünür" }
+    ]
+  },
+  {
+    "id": "TC-UI-004",
+    "title": "Duyurular ve iletişim sayfaları",
+    "category": "ui",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "/duyurular ve /iletisim sayfalarını aç" },
+      { "type": "assertion", "description": "Duyuru listesi veya boş durum; iletişim formu alanları (ad, e-posta, mesaj) görünür" }
+    ]
+  },
+  {
+    "id": "TC-AUTH-001",
+    "title": "Admin geçerli kimlik bilgileriyle giriş",
+    "category": "functional",
+    "priority": "High",
+    "prerequisites": ["SoftTrade API http://localhost:8081/api/v1 ayakta", "admin@softtrade.com / admin123"],
+    "steps": [
+      { "type": "action", "description": "/admin adresine git" },
+      { "type": "action", "description": "E-posta: admin@softtrade.com, şifre: admin123 gir ve giriş yap" },
+      { "type": "assertion", "description": "Admin konsolu açılır; Ürünler/Siparişler/Yorumlar/Duyurular/Mesajlar sekmeleri görünür" }
+    ]
+  },
+  {
+    "id": "TC-AUTH-002",
+    "title": "Geçersiz kimlik bilgileriyle giriş başarısız",
+    "category": "error handling",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "/hesabim veya /admin giriş formunda yanlış şifre dene" },
+      { "type": "assertion", "description": "Hata mesajı gösterilir; admin konsolu açılmaz" }
+    ]
+  },
+  {
+    "id": "TC-AUTH-003",
+    "title": "Müşteri kayıt ve giriş",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "/hesabim'de Kayıt ol moduna geç" },
+      { "type": "action", "description": "Benzersiz e-posta, ad, soyad, min 8 karakter şifre ile kayıt ol" },
+      { "type": "assertion", "description": "Hesap paneli açılır (Merhaba, {ad})" },
+      { "type": "action", "description": "Çıkış yap, aynı bilgilerle tekrar giriş yap" },
+      { "type": "assertion", "description": "Oturum yeniden kurulur" }
+    ]
+  },
+  {
+    "id": "TC-AUTH-004",
+    "title": "Admin olmayan kullanıcı admin panele erişemez",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "role=customer kullanıcı ile giriş yap" },
+      { "type": "action", "description": "/admin adresine git" },
+      { "type": "assertion", "description": "Yönetici girişi formu görünür; AdminConsole render edilmez" }
+    ]
+  },
+  {
+    "id": "TC-CART-001",
+    "title": "Sepete ürün ekleme ve güncelleme",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Giriş yapmış müşteri ile ürünü sepete ekle" },
+      { "type": "action", "description": "/sepet sayfasını aç" },
+      { "type": "assertion", "description": "Ürün satırı görünür" },
+      { "type": "action", "description": "Miktarı güncelle / satırı sil" },
+      { "type": "assertion", "description": "Sepet API yanıtı başarılı ve UI güncellenir" }
+    ]
+  },
+  {
+    "id": "TC-ORDER-001",
+    "title": "Sipariş oluşturma ve takip",
+    "category": "functional",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Sepette siparişi tamamla (adres bilgileriyle)" },
+      { "type": "assertion", "description": "Sipariş numarası içeren başarı ekranı görünür" },
+      { "type": "action", "description": "/siparis-takip ve /hesabim'e git" },
+      { "type": "assertion", "description": "Yeni sipariş listede görünür ve durum etiketi vardır" }
+    ]
+  },
+  {
+    "id": "TC-CONTACT-001",
+    "title": "İletişim formu gönderimi",
+    "category": "functional",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "/iletisim formunu doldurup gönder" },
+      { "type": "assertion", "description": "Başarı mesajı veya 2xx API yanıtı" },
+      { "type": "assertion", "description": "Admin Mesajlar sekmesinde yeni kayıt (status=new) görünür" }
+    ]
+  },
+  {
+    "id": "TC-ADM-PROD-001",
+    "title": "Admin ürün oluşturma (Create)",
+    "category": "admin-crud",
+    "priority": "High",
+    "prerequisites": ["Admin oturumu açık"],
+    "steps": [
+      { "type": "action", "description": "/admin Ürünler sekmesinde yeni ürün formu doldur (ad, SKU, kategori, fiyat, stok)" },
+      { "type": "action", "description": "Ürünü kaydet" },
+      { "type": "assertion", "description": "Başarı mesajı; ürün listesinde yeni kayıt" },
+      { "type": "assertion", "description": "GET /api/admin/products içinde ürün mevcut" }
+    ]
+  },
+  {
+    "id": "TC-ADM-PROD-002",
+    "title": "Admin ürün fiyat/stok güncelleme (Update)",
+    "category": "admin-crud",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Mevcut ürünün fiyat, indirim, stok, availability alanlarını değiştirip Güncelle" },
+      { "type": "assertion", "description": "Kaydedildi mesajı; mağaza ürün detayında yeni fiyat yansır (sync)" }
+    ]
+  },
+  {
+    "id": "TC-ADM-PROD-003",
+    "title": "Admin ürün görsel yükleme",
+    "category": "admin-crud",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "Ürün satırında PNG/JPEG/WebP görsel seçip yükle" },
+      { "type": "assertion", "description": "Görsel admin listesinde ve ürün sayfasında görünür" }
+    ]
+  },
+  {
+    "id": "TC-ADM-ORD-001",
+    "title": "Admin sipariş durumu güncelleme",
+    "category": "admin-crud",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Siparişler sekmesinde bir siparişi processing → shipped → delivered yap" },
+      { "type": "assertion", "description": "Durum kaydedilir; müşteri /hesabim veya /siparis-takip'te yeni durum görünür" }
+    ]
+  },
+  {
+    "id": "TC-ADM-REV-001",
+    "title": "Admin yorum onay/red ve yanıt",
+    "category": "admin-crud",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Yorumlar sekmesinde pending yorumu approved yap ve adminReply yaz" },
+      { "type": "assertion", "description": "Yorum mağazada yayınlanır; yanıt görünür" },
+      { "type": "action", "description": "Başka bir yorumu rejected yap" },
+      { "type": "assertion", "description": "Reddedilen yorum public listede yok" }
+    ]
+  },
+  {
+    "id": "TC-ADM-ANN-001",
+    "title": "Admin duyuru Create / Update / Delete",
+    "category": "admin-crud",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Yeni duyuru oluştur (başlık, özet, body, published, featured)" },
+      { "type": "assertion", "description": "/duyurular ve ana sayfada görünür (published ise)" },
+      { "type": "action", "description": "Duyuruyu güncelle sonra sil" },
+      { "type": "assertion", "description": "Silinen duyuru public'te yok" }
+    ]
+  },
+  {
+    "id": "TC-ADM-CON-001",
+    "title": "Admin iletişim mesajı durumu",
+    "category": "admin-crud",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "Mesajlar sekmesinde new → read → resolved güncelle" },
+      { "type": "assertion", "description": "Durum kalıcı; yeni sayaç azalır" }
+    ]
+  },
+  {
+    "id": "TC-SEC-001",
+    "title": "Admin API yetkisiz erişim engeli",
+    "category": "security",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Cookie olmadan POST /api/admin/products çağır" },
+      { "type": "assertion", "description": "403 ve yönetici yetkisi hatası" },
+      { "type": "action", "description": "Customer token ile aynı çağrıyı dene" },
+      { "type": "assertion", "description": "403 döner" }
+    ]
+  },
+  {
+    "id": "TC-CORS-001",
+    "title": "CORS preflight ve cross-origin policy",
+    "category": "cors",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Origin: https://evil.example ile OPTIONS /api/auth/login gönder" },
+      { "type": "assertion", "description": "Beklenen Access-Control-Allow-Origin politikası (whitelist veya yok); credentials sızıntısı olmamalı" },
+      { "type": "action", "description": "SoftTrade API'ye cross-origin GET/POST dene" },
+      { "type": "assertion", "description": "SoftTrade CORS header'ları dokümantasyonla uyumlu" }
+    ]
+  },
+  {
+    "id": "TC-CORS-002",
+    "title": "Same-origin mağaza API çağrıları sorunsuz",
+    "category": "cors",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "Browser same-origin fetch ile /api/auth/me, /api/cart çağır" },
+      { "type": "assertion", "description": "CORS hatası yok; beklenen JSON yanıt" }
+    ]
+  },
+  {
+    "id": "TC-RL-001",
+    "title": "Auth endpoint rate limit",
+    "category": "rate-limit",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "/api/auth/login'e 60 sn içinde 50+ başarısız istek gönder" },
+      { "type": "assertion", "description": "429 Too Many Requests veya SoftTrade throttle yanıtı; brute-force sınırsız olmamalı" }
+    ]
+  },
+  {
+    "id": "TC-RL-002",
+    "title": "Contact ve public API rate limit",
+    "category": "rate-limit",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "/api/contact ve /api/products'a kısa sürede yüksek hacimli istek at" },
+      { "type": "assertion", "description": "Throttle veya kabul edilebilir hata; sunucu çökmez" }
+    ]
+  },
+  {
+    "id": "TC-RL-003",
+    "title": "Rate limit gap analizi (frontend middleware yok)",
+    "category": "rate-limit",
+    "priority": "Medium",
+    "steps": [
+      { "type": "assertion", "description": "Kod tabanında rate-limit middleware bulunmadığı doğrulanır (bilinen gap)" },
+      { "type": "assertion", "description": "Rapor: SoftTrade veya edge katmanında limit zorunlu önerisi" }
+    ]
+  },
+  {
+    "id": "TC-SYNC-001",
+    "title": "SoftTrade ürün değişikliği mağaza sync",
+    "category": "sync-regression",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Admin'de ürün fiyatını değiştir" },
+      { "type": "action", "description": "Mağaza ürün detayını hard refresh ile aç" },
+      { "type": "assertion", "description": "Yeni fiyat görünür (SoftTrade → storefront sync)" }
+    ]
+  },
+  {
+    "id": "TC-SYNC-002",
+    "title": "SoftTrade kapalıyken D1 fallback regresyon",
+    "category": "sync-regression",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "SoftTrade'i durdur; /urunler ve ana sayfayı aç" },
+      { "type": "assertion", "description": "Ürün listesi D1 fallback ile gelir veya kontrollü boş durum; 500 olmamalı" },
+      { "type": "action", "description": "Login /admin dene" },
+      { "type": "assertion", "description": "Auth başarısız ama UI çökmez" }
+    ]
+  },
+  {
+    "id": "TC-SYNC-003",
+    "title": "Sipariş durumu müşteri-admin sync",
+    "category": "sync-regression",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "Admin sipariş durumunu shipped yap" },
+      { "type": "assertion", "description": "Müşteri hesabında durum Kargoda / shipped olarak güncellenir" }
+    ]
+  },
+  {
+    "id": "TC-REG-001",
+    "title": "Kritik sayfa regresyon smoke",
+    "category": "regression",
+    "priority": "High",
+    "steps": [
+      { "type": "action", "description": "/, /urunler, /sepet, /hesabim, /siparis-takip, /admin, /iletisim, /duyurular, /gizlilik-ve-iade-kosullari aç" },
+      { "type": "assertion", "description": "Hepsi 200 (veya auth gate); uncaught exception yok" }
+    ]
+  },
+  {
+    "id": "TC-STRESS-001",
+    "title": "Eşzamanlı ürün listesi stresi",
+    "category": "stress",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "50 paralel GET /api/products (veya SoftTrade /products)" },
+      { "type": "assertion", "description": "Başarı oranı >= %95; p95 latency kabul edilebilir; 5xx < %5" }
+    ]
+  },
+  {
+    "id": "TC-STRESS-002",
+    "title": "Eşzamanlı login stresi",
+    "category": "stress",
+    "priority": "Medium",
+    "steps": [
+      { "type": "action", "description": "20 paralel /api/auth/login (geçerli + geçersiz karışık)" },
+      { "type": "assertion", "description": "Sunucu ayakta; rate-limit veya 200/401 dağılımı tutarlı" }
+    ]
+  },
+  {
+    "id": "TC-STRESS-003",
+    "title": "Admin CRUD concurrent stress",
+    "category": "stress",
+    "priority": "Low",
+    "steps": [
+      { "type": "action", "description": "Aynı ürüne 10 paralel PATCH fiyat güncellemesi gönder" },
+      { "type": "assertion", "description": "Son yazma kazanır veya tutarlı hata; veri bozulması yok" }
+    ]
+  }
+]

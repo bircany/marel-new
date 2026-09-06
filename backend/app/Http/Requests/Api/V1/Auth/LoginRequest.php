@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Http\Requests\Api\V1\Auth;
+
+use Illuminate\Foundation\Http\FormRequest;
+
+class LoginRequest extends FormRequest
+{
+    public function authorize(): bool
+    {
+        return true;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'email'    => ['required', 'email'],
+            'password' => ['required', 'string'],
+            'device_name' => ['nullable', 'string', 'max:100'], // Sanctum token adı
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'email.required'    => 'E-posta adresi zorunludur.',
+            'email.email'       => 'Geçerli bir e-posta adresi giriniz.',
+            'password.required' => 'Şifre zorunludur.',
+        ];
+    }
+}

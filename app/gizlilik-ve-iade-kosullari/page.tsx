@@ -1,14 +1,79 @@
 import Link from "next/link";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { absoluteUrl } from "@/app/lib/site";
 
-export const metadata = { title: "Gizlilik ve İade Koşulları", description: "Marel kişisel veri, çerez, cayma ve iade koşulları hakkında bilgilendirme." };
+export const metadata = {
+  title: "Yasal Bilgilendirme ve Koşullar | Marel",
+  description: "Marel gizlilik, iade, KVKK, çerez politikası ve mesafeli satış sözleşmesi bilgilendirme merkezi.",
+  alternates: { canonical: absoluteUrl("/gizlilik-ve-iade-kosullari") },
+};
 
-export default function PrivacyReturnsPage() { return <><SiteHeader /><main className="legal-page"><section className="legal-hero shop-container"><span>YASAL BİLGİLENDİRME</span><h1>Gizlilik ve<br />İade Koşulları</h1><p>Son güncelleme: 8 Ağustos 2026</p></section><div className="legal-layout shop-container"><aside><a href="#gizlilik">Gizlilik</a><a href="#veriler">İşlenen veriler</a><a href="#cerezler">Çerezler</a><a href="#iade">İade ve cayma</a><a href="#ozel-uretim">Özel üretim</a><a href="#basvuru">Başvuru</a></aside><article>
-  <section id="gizlilik"><span>01</span><h2>Gizlilik yaklaşımımız</h2><p>Marel; iletişim, hesap, sipariş, yorum ve destek süreçlerinde paylaştığınız bilgileri yalnız ilgili hizmeti sunmak, güvenliği sağlamak ve yasal yükümlülükleri yerine getirmek amacıyla işler. Veriler amaçla sınırlı ve ölçülü tutulur.</p></section>
-  <section id="veriler"><span>02</span><h2>Hangi veriler işlenir?</h2><p>Ad-soyad, e-posta, telefon, teslimat bilgisi, sipariş ve destek kayıtları; hesabınızla giriş yaptığınızda kullanıcı kimliği; tercih vermeniz halinde analitik ve reklam ölçüm verileri işlenebilir.</p><p>KVKK kapsamındaki aydınlatma; veri sorumlusunun kimliği, işleme amacı, aktarım, toplama yöntemi ve hukuki sebep ile ilgili kişi haklarını kapsar. Detaylı başvurularınızı <Link href="/iletisim">iletişim formundan</Link> iletebilirsiniz.</p></section>
-  <section id="cerezler"><span>03</span><h2>Çerezler ve ölçüm</h2><p>Sepet ve tercih bilgileri gibi zorunlu olmayan cihaz içi veriler deneyimi sürdürmek için kullanılabilir. Google ölçüm ve reklam etiketleri yalnız izin tercihiniz doğrultusunda çalışır; tercihinizi tarayıcı verilerini temizleyerek yeniden verebilirsiniz.</p></section>
-  <section id="iade"><span>04</span><h2>İade ve cayma koşulları</h2><p>Mesafeli satışlarda tüketici, mevzuattaki istisnalar saklı kalmak üzere malın tesliminden itibaren 14 gün içinde cayma hakkını kullanabilir. Cayma bildiriminin yazılı veya kalıcı veri saklayıcısı ile iletilmesi gerekir. Talebiniz için sipariş numaranızla <Link href="/iletisim">bize ulaşın</Link>.</p><p>Yanlış, eksik veya ayıplı ürün bildirimleri ayrıca değerlendirilir; tüketicinin ayıplı mala ilişkin kanuni seçimlik hakları saklıdır.</p></section>
-  <section id="ozel-uretim"><span>05</span><h2>Ölçüye özel ürünler</h2><p>Tüketicinin isteği veya kişisel ihtiyaçları doğrultusunda hazırlanan ürünler cayma hakkı istisnası kapsamında olabilir. Marel perde, sineklik ve kapı sistemleri onaylanan ölçü, kumaş ve profil tercihine göre üretildiğinde bu istisna uygulanabilir. Üretime başlamadan önce ölçü ve seçim teyidi alınır.</p></section>
-  <section id="basvuru"><span>06</span><h2>Talep ve başvurular</h2><p>Gizlilik, veri sahipliği, sipariş, cayma veya iade taleplerinizde sipariş numarası ve iletişim bilgilerinizi belirterek <Link href="/iletisim">iletişim sayfasını</Link> veya WhatsApp hattımızı kullanabilirsiniz.</p><div className="legal-sources"><b>Resmî kaynaklar</b><a href="https://www.kvkk.gov.tr/Icerik/2033/Aydinlatma-Yukumlulugu-" target="_blank" rel="noreferrer">KVKK — Aydınlatma Yükümlülüğü ↗</a><a href="https://tuketici.ticaret.gov.tr/yayinlar/tuketici-bilgi-rehberi/mesafeli-sozlesmeler-hakkinda-bilgilendirme" target="_blank" rel="noreferrer">Ticaret Bakanlığı — Mesafeli Sözleşmeler ↗</a></div></section>
-</article></div></main><SiteFooter /></>; }
+export default function LegalHubPage() {
+  return (
+    <>
+      <SiteHeader />
+      <main className="legal-page">
+        <section className="legal-hero shop-container">
+          <span>YASAL BİLGİLENDİRME MERKEZİ</span>
+          <h1>Kurumsal & Yasal Koşullar</h1>
+          <p>Müşteri hakları, veri güvenliği, iade ve mesafeli satış bilgilendirmeleri.</p>
+        </section>
+
+        <div className="legal-layout shop-container">
+          <aside className="legal-sidebar-nav">
+            <Link href="/gizlilik-politikasi">Gizlilik Politikası</Link>
+            <Link href="/iade-ve-iptal-kosullari">İade ve İptal Koşulları</Link>
+            <Link href="/kvkk-aydinlatma-metni">KVKK Aydınlatma Metni</Link>
+            <Link href="/cerez-politikasi">Çerez Politikası</Link>
+            <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
+            <Link href="/iletisim">İletişim & Danışma</Link>
+          </aside>
+
+          <article className="legal-content-body">
+            <section>
+              <h2>Tüm Yasal ve Tüketici Hakları Dokümanları</h2>
+              <p>
+                Marel olarak şeffaflık, müşteri hakları ve veri güvenliği ilkelerine tam bağlılıkla hizmet veriyoruz.
+                İhtiyaç duyduğunuz yasal bilgilendirme metnine aşağıdaki başlıklardan doğrudan ulaşabilirsiniz:
+              </p>
+
+              <div className="legal-cards-grid">
+                <Link href="/gizlilik-politikasi" className="legal-doc-card">
+                  <strong>🔒 Gizlilik Politikası</strong>
+                  <p>Kişisel verilerinizin hangi amaçlarla toplandığı ve nasıl korunduğu.</p>
+                  <span>Metni İncele →</span>
+                </Link>
+
+                <Link href="/iade-ve-iptal-kosullari" className="legal-doc-card">
+                  <strong>📦 İade ve İptal Koşulları</strong>
+                  <p>Özel üretim istisnaları, cayma hakkı ve hasarlı ürün değişim süreçleri.</p>
+                  <span>Metni İncele →</span>
+                </Link>
+
+                <Link href="/kvkk-aydinlatma-metni" className="legal-doc-card">
+                  <strong>⚖️ KVKK Aydınlatma Metni</strong>
+                  <p>6698 sayılı kanun kapsamındaki haklarınız ve veri sorumlusu bilgilendirmesi.</p>
+                  <span>Metni İncele →</span>
+                </Link>
+
+                <Link href="/cerez-politikasi" className="legal-doc-card">
+                  <strong>🍪 Çerez (Cookie) Politikası</strong>
+                  <p>Web sitemizde kullanılan zorunlu ve işlevsel çerezler hakkında detaylar.</p>
+                  <span>Metni İncele →</span>
+                </Link>
+
+                <Link href="/mesafeli-satis-sozlesmesi" className="legal-doc-card">
+                  <strong>📑 Mesafeli Satış Sözleşmesi</strong>
+                  <p>Alışveriş esnasında tarafların hak, yükümlülük ve teslimat şartları.</p>
+                  <span>Metni İncele →</span>
+                </Link>
+              </div>
+            </section>
+          </article>
+        </div>
+      </main>
+      <SiteFooter />
+    </>
+  );
+}
