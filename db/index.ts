@@ -147,6 +147,7 @@ async function initializeDatabase(): Promise<void> {
   await seedAnnouncements(db);
   await seedMockOrders(db);
   await seedContactMessages(db);
+  await seedMockReviews(db);
   await db.prepare("PRAGMA optimize").run();
 }
 
@@ -210,6 +211,23 @@ async function seedContactMessages(db: D1Database): Promise<void> {
   await db.prepare(
     "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'new', ?, ?)"
   ).bind("cm-001", "Mehmet Demir", "mehmet@example.com", "05339998877", "Ölçü & Kumaş Desteği", "Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.", now, now).run();
+}
+
+async function seedMockReviews(db: D1Database): Promise<void> {
+  const result = await db.prepare("SELECT COUNT(*) AS count FROM reviews").first<{ count: number }>();
+  if ((result?.count ?? 0) > 0) return;
+  const now = new Date().toISOString();
+  const mockReviews = [
+    ["rev-001", "usr-101", "DIA-100", 5, "Mükemmel Plise Perde", "Diamond 100 Beyaz modelini salonumuz için aldık. Ölçüleri birebir uydu, montajı son derece kolay ve malzeme kalitesi harika.", "approved", "Bizi tercih ettiğiniz için teşekkür ederiz!", now],
+    ["rev-002", "usr-102", "HC-003", 5, "Yalıtımı Gerçekten Hissediliyor", "Honeycomb gri plise perde çift cam balkonumuza tam oturdu. Güneş sıcaklığını belirgin şekilde kesti.", "pending", "", now],
+    ["rev-003", "usr-103", "BLK-05", 4, "Tam Karartma Başarılı", "Yatak odası için aldık, sıfır ışık sızması sağlıyor. Kumaşı kaliteli ve kargo hızlıydı.", "approved", "", now],
+  ] as const;
+
+  for (const [id, userId, productId, rating, title, body, status, adminReply, createdAt] of mockReviews) {
+    await db.prepare(
+      "INSERT INTO reviews (id, user_id, product_id, rating, title, body, status, admin_reply, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(id, userId, productId, rating, title, body, status, adminReply, createdAt, createdAt).run();
+  }
 }
 
 export async function listProducts(includeInactive = false): Promise<CatalogProduct[]> {

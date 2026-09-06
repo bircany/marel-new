@@ -475,7 +475,7 @@ export function AdminConsole({
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-              Duyurular & Blog
+              Duyurular
             </span>
             <span className="admin-nav-badge">{announcements.length}</span>
           </button>
@@ -1348,33 +1348,33 @@ export function AdminConsole({
           <>
             <header className="admin-page-header">
               <div className="admin-page-header-left">
-                <span>İÇERİK & BLOG YÖNETİMİ</span>
-                <h1>Duyurular ve Rehberler</h1>
+                <span>İÇERİK YÖNETİMİ</span>
+                <h1>Duyurular</h1>
                 <p>
-                  Rehberleri, kampanya duyurularını ve blog yazılarını oluşturun. Yayınlanan içerikler `/duyurular` sayfasında anında canlıya alınır.
+                  Kampanya duyurularını ve bilgilendirme içeriklerini oluşturun. Yayınlanan duyurular `/duyurular` sayfasında anında canlıya alınır.
                 </p>
               </div>
             </header>
 
             {/* Create Announcement Drawer */}
             <details className="admin-create-box">
-              <summary>+ Yeni Blog Yazısı / Duyuru Oluştur</summary>
+              <summary>+ Yeni Duyuru Oluştur</summary>
               <form onSubmit={createAnnouncement} className="admin-grid-form">
                 <label className="span-2">
                   Başlık *
-                  <input name="title" placeholder="Örn: Ölçüye Özel Plise Perde Seçim Rehberi" required />
+                  <input name="title" placeholder="Örn: Ölçüye Özel Plise Perde Kampanyası" required />
                 </label>
                 <label className="span-2">
                   URL Adı (Slug)
-                  <input name="slug" placeholder="olcu-rehberi (otomatik üretilir)" />
+                  <input name="slug" placeholder="duyuru-basligi (otomatik üretilir)" />
                 </label>
                 <label className="span-4">
                   Kısa Özet *
-                  <textarea name="summary" rows={2} placeholder="Ana sayfa ve kartlarda görünecek kısa özet..." required />
+                  <textarea name="summary" rows={2} placeholder="Kartlarda ve duyuru listesinde görünecek kısa özet..." required />
                 </label>
                 <label className="span-4">
-                  Blog / Duyuru Metni *
-                  <textarea name="body" rows={6} placeholder="Rehber içeriğinin tam metni..." required />
+                  Duyuru Metni *
+                  <textarea name="body" rows={6} placeholder="Duyurunun detaylı metni..." required />
                 </label>
                 <label className="span-4">
                   Görsel Yolu
@@ -1493,7 +1493,7 @@ export function AdminConsole({
               ) : (
                 <div className="admin-empty-state">
                   <h3>Duyuru bulunamadı.</h3>
-                  <p>Yukarıdaki formu kullanarak yeni blog yazısı veya duyuru ekleyebilirsiniz.</p>
+                  <p>Yukarıdaki formu kullanarak yeni duyuru ekleyebilirsiniz.</p>
                 </div>
               )}
             </div>

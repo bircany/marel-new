@@ -1,3 +1,4 @@
+import { getDb } from "@/db";
 import { requireAdminApi } from "@/app/lib/admin-auth";
 import { laravel } from "@/app/lib/laravel-auth";
 
@@ -13,6 +14,15 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     token: true,
     body: JSON.stringify({ status }),
   });
-  if (!result.ok) return Response.json({ error: result.message }, { status: result.status });
+  if (!result.ok) {
+    try {
+      const db = getDb();
+      const now = new Date().toISOString();
+      await db.prepare("UPDATE contact_messages SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
+      return Response.json({ ok: true });
+    } catch {
+      return Response.json({ error: result.message }, { status: result.status });
+    }
+  }
   return Response.json({ ok: true });
 }

@@ -392,7 +392,9 @@ export async function stListReviews(): Promise<ReviewRecord[]> {
   } catch {
     const db = getDb();
     const { results } = await db
-      .prepare("SELECT id, user_id AS userId, product_id AS productId, rating, title, body, status, admin_reply AS adminReply, created_at AS createdAt, updated_at AS updatedAt FROM reviews ORDER BY created_at DESC")
+      .prepare(
+        "SELECT r.id, r.user_id AS userId, r.product_id AS productId, COALESCE(p.name, 'Genel Marel Deneyimi') AS productName, COALESCE(u.full_name, 'Müşteri') AS authorName, r.rating, r.title, r.body, r.status, r.admin_reply AS adminReply, r.created_at AS createdAt, r.updated_at AS updatedAt FROM reviews r LEFT JOIN products p ON r.product_id = p.id LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC"
+      )
       .all<ReviewRecord>();
     return results;
   }
@@ -429,10 +431,43 @@ export async function stListApprovedReviews(limit = 6): Promise<SoftTradeReview[
   try {
     const response = await fetch(`${SOFTRADE_API_URL}/reviews/approved?limit=${limit}`, { cache: "no-store" });
     const json = (await response.json().catch(() => null)) as { success?: boolean; data?: SoftTradeReview[] } | null;
-    if (!response.ok || !json?.success) return [];
+    if (!response.ok || !json?.success) throw new Error("Backend review fetch failed");
     return json.data ?? [];
   } catch {
-    return [];
+    try {
+      const db = getDb();
+      const { results } = await db
+        .prepare(
+          "SELECT r.id, r.rating, r.title, r.body AS comment, r.status, 1 AS is_verified_purchase, r.created_at, p.id AS p_id, p.name AS p_name, p.slug AS p_slug FROM reviews r LEFT JOIN products p ON r.product_id = p.id WHERE r.status = 'approved' ORDER BY r.created_at DESC LIMIT ?"
+        )
+        .bind(limit)
+        .all<{
+          id: string;
+          rating: number;
+          title: string;
+          comment: string;
+          status: string;
+          is_verified_purchase: number;
+          created_at: string;
+          p_id?: string;
+          p_name?: string;
+          p_slug?: string;
+        }>();
+
+      return results.map((row) => ({
+        id: Number(row.id.replace(/\D/g, "")) || 1,
+        rating: row.rating,
+        title: row.title,
+        comment: row.comment,
+        status: row.status,
+        is_verified_purchase: true,
+        user: { name: "Müşteri", avatar: null },
+        product: row.p_id ? { id: Number(row.p_id.replace(/\D/g, "")) || 1, name: row.p_name || "", slug: row.p_slug || "" } : null,
+        created_at: row.created_at,
+      }));
+    } catch {
+      return [];
+    }
   }
 }
 

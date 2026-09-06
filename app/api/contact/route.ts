@@ -1,3 +1,4 @@
+import { getDb } from "@/db";
 import { laravel } from "@/app/lib/laravel-auth";
 
 export async function POST(request: Request) {
@@ -22,6 +23,21 @@ export async function POST(request: Request) {
     method: "POST",
     body: JSON.stringify({ name, email, phone: phone || null, subject, message }),
   });
-  if (!result.ok) return Response.json({ error: result.message }, { status: result.status });
+  if (!result.ok) {
+    try {
+      const db = getDb();
+      const now = new Date().toISOString();
+      const id = "cm-" + Date.now();
+      await db
+        .prepare(
+          "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'new', ?, ?)"
+        )
+        .bind(id, name, email, phone || "", subject, message, now, now)
+        .run();
+      return Response.json({ ok: true, message: "Mesajınız Marel ekibine ulaştı." }, { status: 201 });
+    } catch {
+      return Response.json({ error: result.message }, { status: result.status });
+    }
+  }
   return Response.json({ ok: true, message: "Mesajınız Marel ekibine ulaştı." }, { status: 201 });
 }
