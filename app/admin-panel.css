@@ -847,37 +847,50 @@
 .admin-filter-pill {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 6px;
-  background: #f8fafc;
-  border: 1px solid #e2e8f0;
-  color: #475569;
-  font-size: 0.72rem;
-  font-weight: 650;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 750;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: all 0.15s ease;
   font-family: inherit;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .admin-filter-pill:hover {
   background: #f1f5f9;
-  border-color: #cbd5e1;
-  color: #0f172a;
+  border-color: #0f172a;
+  color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.08);
 }
 
 .admin-filter-pill.active {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
-  font-weight: 800;
+  background: #f1f5f9;
+  border-color: #0f172a;
+  color: #0f172a;
+  font-weight: 850;
+  box-shadow: 0 2px 5px rgba(15, 23, 42, 0.1);
 }
 
 .admin-filter-pill span {
-  font-size: 0.6rem;
-  background: rgba(0, 0, 0, 0.05);
-  padding: 1px 5px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #0f172a;
+  padding: 2px 7px;
   border-radius: 10px;
+}
+
+.admin-filter-pill.active span {
+  background: #0f172a;
+  color: #ffffff;
+  border-color: #0f172a;
 }
 
 .admin-search-input {

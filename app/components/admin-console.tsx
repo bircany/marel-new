@@ -634,7 +634,7 @@ export function AdminConsole({
             {/* Quick Actions Shortcuts */}
             <div className="admin-toolbar" style={{ marginTop: 20 }}>
               <div className="admin-filter-group">
-                <strong style={{ fontSize: "0.82rem", color: "#fff" }}>Hızlı İşlemler:</strong>
+                <strong style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 800 }}>Hızlı İşlemler:</strong>
                 <button className="admin-filter-pill" onClick={() => setTab("cargo")} type="button">
                   📦 Kargo Takip Modülü
                 </button>
@@ -651,7 +651,7 @@ export function AdminConsole({
                   💬 Mesajları Yanıtla ({newContactsCount})
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("announcements")} type="button">
-                  📝 Yeni Duyuru / Blog Ekle
+                  📝 Yeni Duyuru Ekle
                 </button>
               </div>
             </div>
