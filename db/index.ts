@@ -133,7 +133,7 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id)"),
     db.prepare("CREATE TABLE IF NOT EXISTS order_events (id TEXT PRIMARY KEY NOT NULL, order_id TEXT NOT NULL REFERENCES orders(id) ON DELETE CASCADE, status TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', actor_user_id TEXT REFERENCES users(id) ON DELETE SET NULL, created_at TEXT NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_order_events_order_created ON order_events(order_id, created_at)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS reviews (id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, product_id TEXT REFERENCES products(id) ON DELETE SET NULL, rating INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', admin_reply TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS reviews (id TEXT PRIMARY KEY NOT NULL, user_id TEXT REFERENCES users(id) ON DELETE SET NULL, product_id TEXT REFERENCES products(id) ON DELETE SET NULL, rating INTEGER NOT NULL, title TEXT NOT NULL, body TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', admin_reply TEXT NOT NULL DEFAULT '', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_reviews_status_created ON reviews(status, created_at)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_reviews_user_created ON reviews(user_id, created_at)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_reviews_product_status ON reviews(product_id, status)"),
@@ -147,6 +147,7 @@ async function initializeDatabase(): Promise<void> {
   await seedAnnouncements(db);
   await seedMockOrders(db);
   await seedContactMessages(db);
+  await seedUsers(db);
   await seedMockReviews(db);
   await db.prepare("PRAGMA optimize").run();
 }
@@ -211,6 +212,25 @@ async function seedContactMessages(db: D1Database): Promise<void> {
   await db.prepare(
     "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'new', ?, ?)"
   ).bind("cm-001", "Mehmet Demir", "mehmet@example.com", "05339998877", "Ölçü & Kumaş Desteği", "Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.", now, now).run();
+}
+
+async function seedUsers(db: D1Database): Promise<void> {
+  const now = new Date().toISOString();
+  const seedUsersList = [
+    ["usr-101", "selin@example.com", "Selin Yılmaz", "customer"],
+    ["usr-102", "burak@example.com", "Burak Kaya", "customer"],
+    ["usr-103", "ayse@example.com", "Ayşe Tan", "customer"],
+    ["usr-guest", "guest@marel.com", "Müşteri (Misafir)", "customer"],
+  ] as const;
+
+  for (const [id, email, fullName, role] of seedUsersList) {
+    const existing = await db.prepare("SELECT 1 FROM users WHERE id = ?").bind(id).first();
+    if (!existing) {
+      await db.prepare(
+        "INSERT INTO users (id, email, full_name, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
+      ).bind(id, email, fullName, role, now, now).run();
+    }
+  }
 }
 
 async function seedMockReviews(db: D1Database): Promise<void> {
