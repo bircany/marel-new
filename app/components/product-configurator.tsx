@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { addToServerCart, formatMoney } from "@/app/lib/commerce";
 import { trackCommerceEvent } from "@/app/lib/google-ads";
 import type { CatalogProduct } from "@/db";
@@ -34,7 +34,17 @@ export const PROFILE_COLORS = [
 ];
 
 export function ProductConfigurator({ product }: { product: CatalogProduct }) {
-  const [selectedColor, setSelectedColor] = useState<ColorOption>(DEFAULT_FABRIC_COLORS[0]);
+  const productColors: ColorOption[] = useMemo(() => {
+    try {
+      if (product.colors) {
+        const parsed = JSON.parse(product.colors);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch {}
+    return DEFAULT_FABRIC_COLORS;
+  }, [product.colors]);
+
+  const [selectedColor, setSelectedColor] = useState<ColorOption>(productColors[0]);
   const [selectedProfile, setSelectedProfile] = useState(PROFILE_COLORS[0]);
   const [mountType, setMountType] = useState<"screw" | "adhesive">("screw");
   const [width, setWidth] = useState<number>(80);
@@ -99,7 +109,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
 
         {/* Thumbnail Color Switcher */}
         <div className="config-thumbs-strip">
-          {DEFAULT_FABRIC_COLORS.slice(0, 5).map((color) => (
+          {productColors.slice(0, 5).map((color) => (
             <button
               key={color.id}
               type="button"
@@ -187,7 +197,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
             <strong>{selectedColor.name}</strong>
           </div>
           <div className="config-color-swatches">
-            {DEFAULT_FABRIC_COLORS.map((color) => (
+            {productColors.map((color) => (
               <button
                 key={color.id}
                 type="button"

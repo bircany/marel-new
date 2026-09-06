@@ -16,6 +16,7 @@ export type CatalogProduct = {
   googleProductCategory: string;
   active: number;
   featured: number;
+  colors?: string;
   image: string;
   createdAt: string;
   updatedAt: string;
@@ -116,7 +117,7 @@ async function initializeDatabase(): Promise<void> {
   await db.batch([
     db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, full_name TEXT, role TEXT NOT NULL DEFAULT 'customer', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY NOT NULL, slug TEXT NOT NULL, sku TEXT NOT NULL, name TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', price INTEGER NOT NULL DEFAULT 0, sale_price INTEGER, currency TEXT NOT NULL DEFAULT 'TRY', stock INTEGER NOT NULL DEFAULT 0, availability TEXT NOT NULL DEFAULT 'in_stock', brand TEXT NOT NULL DEFAULT 'Marel', google_product_category TEXT NOT NULL DEFAULT 'Home & Garden > Decor > Window Treatments', active INTEGER NOT NULL DEFAULT 1, featured INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY NOT NULL, slug TEXT NOT NULL, sku TEXT NOT NULL, name TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', price INTEGER NOT NULL DEFAULT 0, sale_price INTEGER, currency TEXT NOT NULL DEFAULT 'TRY', stock INTEGER NOT NULL DEFAULT 0, availability TEXT NOT NULL DEFAULT 'in_stock', brand TEXT NOT NULL DEFAULT 'Marel', google_product_category TEXT NOT NULL DEFAULT 'Home & Garden > Decor > Window Treatments', active INTEGER NOT NULL DEFAULT 1, featured INTEGER NOT NULL DEFAULT 0, colors TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_products_slug ON products(slug)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_products_sku ON products(sku)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_products_active_category ON products(active, category)"),
@@ -143,6 +144,7 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE TABLE IF NOT EXISTS contact_messages (id TEXT PRIMARY KEY NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL, phone TEXT NOT NULL DEFAULT '', subject TEXT NOT NULL, message TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'new', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_contact_messages_status_created ON contact_messages(status, created_at)"),
   ]);
+  try { await db.prepare("ALTER TABLE products ADD COLUMN colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
   await seedCatalog(db);
   await seedAnnouncements(db);
   await seedMockOrders(db);
@@ -152,24 +154,27 @@ async function initializeDatabase(): Promise<void> {
   await db.prepare("PRAGMA optimize").run();
 }
 
+import { GENERATED_SEEDS } from "./generated-catalog";
+
 async function seedCatalog(db: D1Database): Promise<void> {
+  const result = await db.prepare("SELECT COUNT(*) AS count FROM products").first<{ count: number }>();
+  if ((result?.count ?? 0) > 20) return; // if already seeded, skip
+
   const now = new Date().toISOString();
-  const seeds = [
-    ["HC-003", "honeycomb-003-gri", "HC-003", "Honeycomb 003 Gri Isı Yalıtımlı Plise Perde", "Honeycomb", "Hücresel yapılı, ısı yalıtımlı ve ölçüye özel plise perde.", 116600, 12, "/images/real/honeycomb-gri-detay.png"],
-    ["DIA-100", "diamond-100-beyaz", "DIA-100", "Diamond 100 Beyaz Plise Perde", "Diamond", "%50 ışık filtrasyonlu, UV dayanımlı ölçüye özel plise perde.", 116600, 18, "/images/real/diamond-beyaz.jpeg"],
-    ["DIA-102", "diamond-102-gri", "DIA-102", "Diamond 102 Gri Plise Perde", "Diamond", "Kolay temizlenebilir gri polyester doku.", 116600, 14, "/images/real/diamond-gri.jpeg"],
-    ["BLK-05", "blackout-05-siyah", "BLK-05", "Blackout 05 Siyah Tam Karartma", "Blackout", "%100 ışık kontrolü sağlayan tam karartma kumaşı.", 149900, 8, "/images/catalog/blackout.webp"],
-    ["HC-001", "honeycomb-001-beyaz", "HC-001", "Honeycomb 001 Beyaz Isı Yalıtımlı Perde", "Honeycomb", "Hücresel dokulu, %100 polyester ve ısı yalıtımlı ölçüye özel plise perde.", 116600, 10, "/images/real/diamond-beyaz-siyah-ip.jpeg"],
-    ["DIA-108", "diamond-108-krem", "DIA-108", "Diamond 108 Krem Plise Perde", "Diamond", "%50 ışık filtrasyonlu, yumuşak gün ışığı sağlayan ölçüye özel plise perde.", 116600, 15, "/images/real/diamond-krem.jpeg"],
-    ["DIA-109", "diamond-109-acik-gri", "DIA-109", "Diamond 109 Açık Gri Plise Perde", "Diamond", "UV dayanımlı, kolay temizlenebilir açık gri polyester doku.", 116600, 13, "/images/real/diamond-acik-gri.jpeg"],
-    ["SLV-7002", "silver-7002-gri", "SLV-7002", "Silver 7002 Gri Plise Perde", "Silver", "%70 ışık filtrasyonlu, 150 gr/m² UV dayanımlı kumaş.", 116600, 16, "/images/catalog/silver.webp"],
-  ] as const;
   const statements: D1PreparedStatement[] = [];
-  for (const [id, slug, sku, name, category, description, price, stock, image] of seeds) {
-    const existing = await db.prepare("SELECT 1 FROM products WHERE slug = ?").bind(slug).first();
-    if (existing) continue;
-    statements.push(db.prepare("INSERT INTO products (id, slug, sku, name, category, description, price, currency, stock, availability, brand, google_product_category, active, featured, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'TRY', ?, 'in_stock', 'Marel', 'Home & Garden > Decor > Window Treatments', 1, 1, ?, ?)").bind(id, slug, sku, name, category, description, price, stock, now, now));
-    statements.push(db.prepare("INSERT INTO product_images (id, product_id, source_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, 0, ?)").bind(crypto.randomUUID(), id, image, name, now));
+  
+  // Wipe if few products
+  statements.push(db.prepare("DELETE FROM products"));
+  statements.push(db.prepare("DELETE FROM product_images"));
+
+  for (const product of GENERATED_SEEDS) {
+    const id = crypto.randomUUID();
+    statements.push(db.prepare("INSERT INTO products (id, slug, sku, name, category, description, price, currency, stock, availability, brand, google_product_category, active, featured, colors, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 'TRY', ?, 'in_stock', 'Marel', 'Home & Garden > Decor > Window Treatments', 1, 1, ?, ?, ?)").bind(id, product.slug, product.sku, product.name, product.category, product.description, product.price, product.stock, product.colors, now, now));
+    
+    let sortOrder = 0;
+    for (const image of product.images) {
+      statements.push(db.prepare("INSERT INTO product_images (id, product_id, source_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(crypto.randomUUID(), id, image, product.name, sortOrder++, now));
+    }
   }
   if (statements.length) await db.batch(statements);
 }
@@ -253,13 +258,13 @@ async function seedMockReviews(db: D1Database): Promise<void> {
 export async function listProducts(includeInactive = false): Promise<CatalogProduct[]> {
   await ensureDatabase();
   const where = includeInactive ? "" : "WHERE p.active = 1";
-  const { results } = await getDb().prepare(`SELECT p.id, p.slug, p.sku, p.name, p.category, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`).all<CatalogProduct>();
+  const { results } = await getDb().prepare(`SELECT p.id, p.slug, p.sku, p.name, p.category, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`).all<CatalogProduct>();
   return results;
 }
 
 export async function getProductBySlug(slug: string): Promise<CatalogProduct | null> {
   await ensureDatabase();
-  return getDb().prepare("SELECT p.id, p.slug, p.sku, p.name, p.category, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image FROM products p WHERE p.slug = ? AND p.active = 1").bind(slug).first<CatalogProduct>();
+  return getDb().prepare("SELECT p.id, p.slug, p.sku, p.name, p.category, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image FROM products p WHERE p.slug = ? AND p.active = 1").bind(slug).first<CatalogProduct>();
 }
 
 export async function listAnnouncements(publishedOnly = true): Promise<AnnouncementRecord[]> {

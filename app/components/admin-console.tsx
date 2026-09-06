@@ -559,7 +559,6 @@ export function AdminConsole({
               <div className="admin-stat-card">
                 <div className="admin-stat-card-top">
                   <small>Toplam Sipariş Ciro</small>
-                  <div className="admin-stat-icon green">₺</div>
                 </div>
                 <strong>{formatMoney(totalRevenue)}</strong>
                 <small style={{ color: "#22c55e" }}>{orders.length} toplam sipariş kaydı</small>
@@ -611,7 +610,6 @@ export function AdminConsole({
               <div className="admin-stat-card">
                 <div className="admin-stat-card-top">
                   <small>Onay Bekleyen Yorumlar</small>
-                  <div className="admin-stat-icon amber">★</div>
                 </div>
                 <strong>{pendingReviewsCount}</strong>
                 <small style={{ color: pendingReviewsCount > 0 ? "#f59e0b" : "#94a3b8" }}>
@@ -622,7 +620,6 @@ export function AdminConsole({
               <div className="admin-stat-card">
                 <div className="admin-stat-card-top">
                   <small>Yeni Müşteri Mesajları</small>
-                  <div className="admin-stat-icon blue">✉</div>
                 </div>
                 <strong>{newContactsCount}</strong>
                 <small style={{ color: newContactsCount > 0 ? "#38bdf8" : "#94a3b8" }}>
@@ -636,22 +633,22 @@ export function AdminConsole({
               <div className="admin-filter-group">
                 <strong style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 800 }}>Hızlı İşlemler:</strong>
                 <button className="admin-filter-pill" onClick={() => setTab("cargo")} type="button">
-                  📦 Kargo Takip Modülü
+                  Kargo Takip Modülü
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("orders")} type="button">
-                  📋 Siparişleri Yönet
+                  Siparişleri Yönet
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("products")} type="button">
-                  🏷️ Ürün & Stok Güncelle
+                  Ürün & Stok Güncelle
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("reviews")} type="button">
-                  ⭐ Yorumları Onayla ({pendingReviewsCount})
+                  Yorumları Onayla ({pendingReviewsCount})
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("contacts")} type="button">
-                  💬 Mesajları Yanıtla ({newContactsCount})
+                  Mesajları Yanıtla ({newContactsCount})
                 </button>
                 <button className="admin-filter-pill" onClick={() => setTab("announcements")} type="button">
-                  📝 Yeni Duyuru Ekle
+                  Yeni Duyuru Ekle
                 </button>
               </div>
             </div>
