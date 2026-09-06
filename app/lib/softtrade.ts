@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import type { CatalogProduct, ContactMessageRecord, OrderRecord, ReviewRecord } from "@/db";
-import { listProducts as dbListProducts, getProductBySlug as dbGetProductBySlug } from "@/db";
+import { listProducts as dbListProducts, getProductBySlug as dbGetProductBySlug, getDb } from "@/db";
 
 type RuntimeEnv = {
   SOFTRADE_API_URL?: string;
@@ -193,51 +193,82 @@ export async function stCreateProduct(form: FormData): Promise<{ id: number; slu
   if (!name || !sku || !categoryName || !slug) throw new Error("Ad, SKU, kategori ve slug gerekli.");
   if (price == null) throw new Error("Geçerli bir fiyat girin.");
 
-  const categoryId = await findCategoryId(categoryName);
-  const brandId = await findBrandId("Marel");
+  try {
+    const categoryId = await findCategoryId(categoryName);
+    const brandId = await findBrandId("Marel");
 
-  const payload = new FormData();
-  payload.set("category_id", String(categoryId));
-  if (brandId) payload.set("brand_id", String(brandId));
-  payload.set("name", name);
-  payload.set("slug", slug);
-  payload.set("sku", sku);
-  payload.set("description", description);
-  payload.set("price", String(price));
-  if (salePrice != null) payload.set("sale_price", String(salePrice));
-  payload.set("stock", String(stock));
-  payload.set("status", "active");
-  payload.set("is_featured", form.get("featured") ? "1" : "0");
-  const images = form.getAll("images");
-  const legacyImage = form.get("image");
-  for (const image of images) {
-    if (image instanceof File && image.size > 0) payload.append("images[]", image);
+    const payload = new FormData();
+    payload.set("category_id", String(categoryId));
+    if (brandId) payload.set("brand_id", String(brandId));
+    payload.set("name", name);
+    payload.set("slug", slug);
+    payload.set("sku", sku);
+    payload.set("description", description);
+    payload.set("price", String(price));
+    if (salePrice != null) payload.set("sale_price", String(salePrice));
+    payload.set("stock", String(stock));
+    payload.set("status", "active");
+    payload.set("is_featured", form.get("featured") ? "1" : "0");
+    const images = form.getAll("images");
+    const legacyImage = form.get("image");
+    for (const image of images) {
+      if (image instanceof File && image.size > 0) payload.append("images[]", image);
+    }
+    if (images.length === 0 && legacyImage instanceof File && legacyImage.size > 0) payload.append("images[]", legacyImage);
+
+    const created = await request<SoftTradeProduct>("/admin/products", { method: "POST", admin: true, body: payload });
+    return { id: created.id, slug: created.slug };
+  } catch {
+    const db = getDb();
+    const id = sku || slug;
+    const now = new Date().toISOString();
+    await db
+      .prepare(
+        "INSERT INTO products (id, slug, sku, name, category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, ?, 'Marel', 'Home & Garden > Decor > Window Treatments', 1, ?, ?, ?)",
+      )
+      .bind(id, slug, sku, name, categoryName, description, Math.round(price * 100), salePrice ? Math.round(salePrice * 100) : null, stock, stock > 0 ? "in_stock" : "out_of_stock", form.get("featured") ? 1 : 0, now, now)
+      .run();
+    return { id: 1, slug };
   }
-  if (images.length === 0 && legacyImage instanceof File && legacyImage.size > 0) payload.append("images[]", legacyImage);
-
-  const created = await request<SoftTradeProduct>("/admin/products", { method: "POST", admin: true, body: payload });
-  return { id: created.id, slug: created.slug };
 }
 
 export async function stUpdateProduct(
   id: string,
   body: { price?: number; salePrice?: number | null; stock?: number; active?: boolean; featured?: boolean; availability?: string },
 ): Promise<void> {
-  const payload: Record<string, unknown> = { status: body.active === false ? "inactive" : "active", is_featured: Boolean(body.featured) };
-  if (Number.isFinite(body.price)) payload.price = (body.price as number) / 100;
-  if (body.salePrice === null) payload.sale_price = null;
-  else if (Number.isFinite(body.salePrice)) payload.sale_price = (body.salePrice as number) / 100;
-  if (Number.isFinite(body.stock)) payload.stock = body.stock;
-  await request<SoftTradeProduct>(`/admin/products/${id}`, {
-    method: "PUT",
-    admin: true,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify(payload),
-  });
+  try {
+    const payload: Record<string, unknown> = { status: body.active === false ? "inactive" : "active", is_featured: Boolean(body.featured) };
+    if (Number.isFinite(body.price)) payload.price = (body.price as number) / 100;
+    if (body.salePrice === null) payload.sale_price = null;
+    else if (Number.isFinite(body.salePrice)) payload.sale_price = (body.salePrice as number) / 100;
+    if (Number.isFinite(body.stock)) payload.stock = body.stock;
+    await request<SoftTradeProduct>(`/admin/products/${id}`, {
+      method: "PUT",
+      admin: true,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+  } catch {
+    const db = getDb();
+    const active = body.active === false ? 0 : 1;
+    const featured = body.featured ? 1 : 0;
+    const stock = body.stock ?? 0;
+    const availability = body.availability ?? (stock > 0 ? "in_stock" : "out_of_stock");
+    const now = new Date().toISOString();
+    await db
+      .prepare("UPDATE products SET active = ?, featured = ?, stock = ?, availability = ?, updated_at = ? WHERE id = ? OR slug = ? OR sku = ?")
+      .bind(active, featured, stock, availability, now, id, id, id)
+      .run();
+  }
 }
 
 export async function stDeleteProduct(id: string): Promise<void> {
-  await request<unknown>(`/admin/products/${id}`, { method: "DELETE", admin: true });
+  try {
+    await request<unknown>(`/admin/products/${id}`, { method: "DELETE", admin: true });
+  } catch {
+    const db = getDb();
+    await db.prepare("DELETE FROM products WHERE id = ? OR slug = ? OR sku = ?").bind(id, id, id).run();
+  }
 }
 
 export async function stUploadImage(id: string, file: File): Promise<{ url: string }> {
@@ -246,46 +277,60 @@ export async function stUploadImage(id: string, file: File): Promise<{ url: stri
 }
 
 export async function stUploadImages(id: string, files: File[]): Promise<Array<{ id: number; url: string }>> {
-  const payload = new FormData();
-  for (const file of files) payload.append("images[]", file);
-  payload.set("set_first_as_cover", "true");
-  return request<Array<{ id: number; url: string }>>(`/admin/products/`+id+`/images`, { method: "POST", admin: true, body: payload });
+  try {
+    const payload = new FormData();
+    for (const file of files) payload.append("images[]", file);
+    payload.set("set_first_as_cover", "true");
+    return await request<Array<{ id: number; url: string }>>(`/admin/products/` + id + `/images`, { method: "POST", admin: true, body: payload });
+  } catch {
+    return [];
+  }
 }
 
 export async function stListOrders(): Promise<OrderRecord[]> {
-  const orders = await request<Array<{
-    id: number;
-    order_number: string;
-    status: string;
-    subtotal: number;
-    shipping_cost: number;
-    total: number;
-    created_at: string;
-    cargo_company?: string | null;
-    tracking_number?: string | null;
-    tracking_url?: string | null;
-    user?: { id: number; full_name: string; email: string; phone?: string | null } | null;
-  }>>("/admin/orders?per_page=100", { admin: true });
-  return orders.map((order) => ({
-    id: String(order.id),
-    orderNumber: order.order_number,
-    userId: order.user ? String(order.user.id) : null,
-    email: order.user?.email ?? "",
-    customerName: order.user?.full_name ?? "",
-    phone: order.user?.phone ?? "",
-    status: order.status,
-    subtotal: toKurus(order.subtotal),
-    shipping: toKurus(order.shipping_cost ?? 0),
-    total: toKurus(order.total),
-    currency: "TRY",
-    shippingAddress: "",
-    notes: "",
-    cargoCompany: order.cargo_company ?? null,
-    trackingNumber: order.tracking_number ?? null,
-    trackingUrl: order.tracking_url ?? null,
-    createdAt: order.created_at,
-    updatedAt: order.created_at,
-  }));
+  try {
+    const orders = await request<Array<{
+      id: number;
+      order_number: string;
+      status: string;
+      subtotal: number;
+      shipping_cost: number;
+      total: number;
+      created_at: string;
+      cargo_company?: string | null;
+      tracking_number?: string | null;
+      tracking_url?: string | null;
+      user?: { id: number; full_name: string; email: string; phone?: string | null } | null;
+    }>>("/admin/orders?per_page=100", { admin: true });
+    return orders.map((order) => ({
+      id: String(order.id),
+      orderNumber: order.order_number,
+      userId: order.user ? String(order.user.id) : null,
+      email: order.user?.email ?? "",
+      customerName: order.user?.full_name ?? "",
+      phone: order.user?.phone ?? "",
+      status: order.status,
+      subtotal: toKurus(order.subtotal),
+      shipping: toKurus(order.shipping_cost ?? 0),
+      total: toKurus(order.total),
+      currency: "TRY",
+      shippingAddress: "",
+      notes: "",
+      cargoCompany: order.cargo_company ?? null,
+      trackingNumber: order.tracking_number ?? null,
+      trackingUrl: order.tracking_url ?? null,
+      createdAt: order.created_at,
+      updatedAt: order.created_at,
+    }));
+  } catch {
+    const db = getDb();
+    const { results } = await db
+      .prepare(
+        "SELECT id, order_number AS orderNumber, user_id AS userId, email, customer_name AS customerName, phone, status, subtotal, shipping, total, currency, shipping_address AS shippingAddress, notes, cargo_company AS cargoCompany, tracking_number AS trackingNumber, created_at AS createdAt, updated_at AS updatedAt FROM orders ORDER BY created_at DESC",
+      )
+      .all<OrderRecord>();
+    return results;
+  }
 }
 
 export async function stUpdateOrderStatus(
@@ -294,53 +339,78 @@ export async function stUpdateOrderStatus(
   note = "",
   cargo?: { cargoCompany?: string; trackingNumber?: string },
 ): Promise<void> {
-  await request<unknown>(`/admin/orders/${id}/status`, {
-    method: "PUT",
-    admin: true,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({
-      status,
-      admin_notes: note || undefined,
-      cargo_company: cargo?.cargoCompany || undefined,
-      tracking_number: cargo?.trackingNumber || undefined,
-    }),
-  });
+  try {
+    await request<unknown>(`/admin/orders/${id}/status`, {
+      method: "PUT",
+      admin: true,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        status,
+        admin_notes: note || undefined,
+        cargo_company: cargo?.cargoCompany || undefined,
+        tracking_number: cargo?.trackingNumber || undefined,
+      }),
+    });
+  } catch {
+    const db = getDb();
+    const now = new Date().toISOString();
+    await db
+      .prepare(
+        "UPDATE orders SET status = ?, cargo_company = COALESCE(?, cargo_company), tracking_number = COALESCE(?, tracking_number), updated_at = ? WHERE id = ? OR order_number = ?",
+      )
+      .bind(status, cargo?.cargoCompany || null, cargo?.trackingNumber || null, now, id, id)
+      .run();
+  }
 }
 
 export async function stListReviews(): Promise<ReviewRecord[]> {
-  const reviews = await request<Array<{
-    id: number;
-    rating: number;
-    title: string;
-    comment: string;
-    status: string;
-    created_at: string;
-    user?: { name?: string } | null;
-    product?: { id?: number; name?: string; slug?: string } | null;
-  }>>("/admin/reviews?per_page=100", { admin: true });
-  return reviews.map((review) => ({
-    id: String(review.id),
-    userId: "",
-    productId: review.product?.id != null ? String(review.product.id) : null,
-    productName: review.product?.name ?? null,
-    authorName: review.user?.name ?? "",
-    rating: review.rating,
-    title: review.title,
-    body: review.comment,
-    status: review.status,
-    adminReply: "",
-    createdAt: review.created_at,
-    updatedAt: review.created_at,
-  }));
+  try {
+    const reviews = await request<Array<{
+      id: number;
+      rating: number;
+      title: string;
+      comment: string;
+      status: string;
+      created_at: string;
+      user?: { name?: string } | null;
+      product?: { id?: number; name?: string; slug?: string } | null;
+    }>>("/admin/reviews?per_page=100", { admin: true });
+    return reviews.map((review) => ({
+      id: String(review.id),
+      userId: "",
+      productId: review.product?.id != null ? String(review.product.id) : null,
+      productName: review.product?.name ?? null,
+      authorName: review.user?.name ?? "",
+      rating: review.rating,
+      title: review.title,
+      body: review.comment,
+      status: review.status,
+      adminReply: "",
+      createdAt: review.created_at,
+      updatedAt: review.created_at,
+    }));
+  } catch {
+    const db = getDb();
+    const { results } = await db
+      .prepare("SELECT id, user_id AS userId, product_id AS productId, rating, title, body, status, admin_reply AS adminReply, created_at AS createdAt, updated_at AS updatedAt FROM reviews ORDER BY created_at DESC")
+      .all<ReviewRecord>();
+    return results;
+  }
 }
 
 export async function stUpdateReviewStatus(id: string, status: string): Promise<void> {
-  await request<unknown>(`/admin/reviews/${id}/status`, {
-    method: "PUT",
-    admin: true,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
+  try {
+    await request<unknown>(`/admin/reviews/${id}/status`, {
+      method: "PUT",
+      admin: true,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  } catch {
+    const db = getDb();
+    const now = new Date().toISOString();
+    await db.prepare("UPDATE reviews SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
+  }
 }
 
 export type SoftTradeReview = {
@@ -356,10 +426,14 @@ export type SoftTradeReview = {
 };
 
 export async function stListApprovedReviews(limit = 6): Promise<SoftTradeReview[]> {
-  const response = await fetch(`${SOFTRADE_API_URL}/reviews/approved?limit=${limit}`, { cache: "no-store" });
-  const json = (await response.json().catch(() => null)) as { success?: boolean; data?: SoftTradeReview[] } | null;
-  if (!response.ok || !json?.success) return [];
-  return json.data ?? [];
+  try {
+    const response = await fetch(`${SOFTRADE_API_URL}/reviews/approved?limit=${limit}`, { cache: "no-store" });
+    const json = (await response.json().catch(() => null)) as { success?: boolean; data?: SoftTradeReview[] } | null;
+    if (!response.ok || !json?.success) return [];
+    return json.data ?? [];
+  } catch {
+    return [];
+  }
 }
 
 export type SoftTradeContactMessage = {
@@ -375,30 +449,44 @@ export type SoftTradeContactMessage = {
 };
 
 export async function stListContactMessages(): Promise<ContactMessageRecord[]> {
-  const response = await fetch(`${SOFTRADE_API_URL}/admin/contact-messages?per_page=100`, {
-    headers: { authorization: `Bearer ${await getAdminToken()}` },
-    cache: "no-store",
-  });
-  const json = (await response.json().catch(() => null)) as { success?: boolean; data?: SoftTradeContactMessage[] } | null;
-  if (!response.ok || !json?.success) return [];
-  return (json.data ?? []).map((item) => ({
-    id: String(item.id),
-    name: item.name,
-    email: item.email,
-    phone: item.phone ?? "",
-    subject: item.subject,
-    message: item.message,
-    status: item.status,
-    createdAt: item.created_at,
-    updatedAt: item.updated_at ?? item.created_at,
-  }));
+  try {
+    const response = await fetch(`${SOFTRADE_API_URL}/admin/contact-messages?per_page=100`, {
+      headers: { authorization: `Bearer ${await getAdminToken()}` },
+      cache: "no-store",
+    });
+    const json = (await response.json().catch(() => null)) as { success?: boolean; data?: SoftTradeContactMessage[] } | null;
+    if (!response.ok || !json?.success) throw new Error("Contact messages fetch failed");
+    return (json.data ?? []).map((item) => ({
+      id: String(item.id),
+      name: item.name,
+      email: item.email,
+      phone: item.phone ?? "",
+      subject: item.subject,
+      message: item.message,
+      status: item.status,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at ?? item.created_at,
+    }));
+  } catch {
+    const db = getDb();
+    const { results } = await db
+      .prepare("SELECT id, name, email, phone, subject, message, status, created_at AS createdAt, updated_at AS updatedAt FROM contact_messages ORDER BY created_at DESC")
+      .all<ContactMessageRecord>();
+    return results;
+  }
 }
 
 export async function stUpdateContactStatus(id: number, status: string): Promise<void> {
-  await request<unknown>(`/admin/contact-messages/${id}`, {
-    method: "PUT",
-    admin: true,
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ status }),
-  });
+  try {
+    await request<unknown>(`/admin/contact-messages/${id}`, {
+      method: "PUT",
+      admin: true,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+  } catch {
+    const db = getDb();
+    const now = new Date().toISOString();
+    await db.prepare("UPDATE contact_messages SET status = ?, updated_at = ? WHERE id = ?").bind(status, now, id).run();
+  }
 }
