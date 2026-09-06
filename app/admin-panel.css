@@ -455,12 +455,10 @@
   color: #94a3b8;
   padding: 6px 10px 4px;
   text-transform: uppercase;
-}
-
-.admin-nav-menu {
+}.admin-nav-menu {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 5px;
   margin-bottom: 14px;
 }
 
@@ -471,14 +469,14 @@
   align-items: center !important;
   justify-content: space-between !important;
   width: 100% !important;
-  min-height: 38px !important;
-  padding: 6px 10px !important;
-  background: transparent;
+  min-height: 40px !important;
+  padding: 8px 12px !important;
+  background: #ffffff;
   border: 1px solid transparent;
   border-radius: 8px;
-  color: #475569;
-  font-size: 0.78rem;
-  font-weight: 650;
+  color: #0f172a !important;
+  font-size: 0.82rem;
+  font-weight: 750;
   font-family: inherit;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -504,45 +502,49 @@
   flex-shrink: 0 !important;
   display: inline-block !important;
   vertical-align: middle !important;
-  color: #64748b;
+  color: #0f172a !important;
   transition: color 0.15s ease;
 }
 
 .admin-nav-btn:hover {
   background: #f1f5f9;
-  color: #0f172a;
+  border-color: #cbd5e1;
+  color: #000000 !important;
 }
 
 .admin-nav-btn:hover svg {
-  color: #d97706;
+  color: #000000 !important;
 }
 
 .admin-nav-btn.active {
-  background: #fef3c7;
-  border-color: #fde68a;
-  color: #92400e;
-  font-weight: 800;
+  background: #f1f5f9 !important;
+  border-color: #0f172a !important;
+  color: #0f172a !important;
+  font-weight: 850 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
 }
 
 .admin-nav-btn.active svg {
-  color: #d97706;
+  color: #0f172a !important;
 }
 
 .admin-nav-badge {
   display: inline-grid;
   place-items: center;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  background: #e2e8f0;
-  font-size: 0.62rem;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  font-size: 0.65rem;
   font-weight: 800;
-  color: #475569;
+  color: #0f172a;
 }
 
 .admin-nav-badge.alert {
   background: #ef4444;
+  border: 1px solid #dc2626;
   color: #ffffff;
 }
 
@@ -564,23 +566,23 @@
 .admin-sidebar-user {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: 10px;
+  padding: 8px 10px;
   border-radius: 8px;
   background: #f8fafc;
+  border: 1px solid #e2e8f0;
 }
 
 .admin-sidebar-user-avatar {
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
-  background: #fef3c7;
-  border: 1px solid #fde68a;
-  color: #b45309;
+  background: #0f172a;
+  color: #ffffff;
   display: grid;
   place-items: center;
-  font-size: 0.7rem;
-  font-weight: 800;
+  font-size: 0.75rem;
+  font-weight: 850;
 }
 
 .admin-sidebar-user-info {
@@ -590,34 +592,42 @@
 }
 
 .admin-sidebar-user-info strong {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: #0f172a;
+  font-weight: 800;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .admin-sidebar-user-info small {
-  font-size: 0.58rem;
-  color: #64748b;
+  font-size: 0.6rem;
+  color: #475569;
 }
 
 .admin-sidebar-ext-link {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 7px 10px;
-  border-radius: 6px;
-  font-size: 0.7rem;
-  color: #475569;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 750;
+  color: #0f172a;
   text-decoration: none;
   transition: all 0.15s;
   background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-ext-link svg {
+  color: #0f172a;
 }
 
 .admin-sidebar-ext-link:hover {
   background: #f1f5f9;
-  color: #d97706;
+  border-color: #cbd5e1;
+  color: #000000;
 }
 
 /* ========================================================
