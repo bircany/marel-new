@@ -28,16 +28,19 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const body = (await request.json().catch(() => ({}))) as { productId?: string | number; quantity?: number };
-  const productId = Number(body.productId);
+  const body = (await request.json().catch(() => ({}))) as { productId?: string | number; product_id?: string | number; quantity?: number };
+  const rawId = body.productId ?? body.product_id;
+  const productId = String(rawId ?? "").trim();
   const quantity = Math.max(1, Math.min(100, Math.floor(Number(body.quantity) || 1)));
-  if (!Number.isFinite(productId) || productId <= 0) {
+  if (!productId) {
     return Response.json({ error: "Ürün seçimi gerekli." }, { status: 400 });
   }
+  const numericId = Number(productId);
+  const payloadId = Number.isFinite(numericId) && numericId > 0 ? numericId : productId;
   const result = await laravel<CartPayload>("/cart", {
     method: "POST",
     session: true,
-    body: JSON.stringify({ product_id: productId, quantity }),
+    body: JSON.stringify({ product_id: payloadId, quantity }),
   });
   if (!result.ok) return Response.json({ error: result.message }, { status: result.status });
   return Response.json(result.data, { status: 201 });
