@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E5C378" />
+      <stop offset="50%" stop-color="#C5A059" />
+      <stop offset="100%" stop-color="#9E782F" />
+    </linearGradient>
+  </defs>
+  <!-- Geometric Pleated Blind M Icon -->
+  <path d="M10 52 L10 12 L22 34 L22 52 Z" fill="url(#goldGrad)" opacity="0.9" />
+  <path d="M22 52 L22 34 L32 46 L32 52 Z" fill="url(#goldGrad)" opacity="1" />
+  <path d="M32 52 L32 46 L42 34 L42 52 Z" fill="url(#goldGrad)" opacity="0.9" />
+  <path d="M42 52 L42 34 L54 12 L54 52 Z" fill="url(#goldGrad)" opacity="1" />
+  <path d="M22 34 L32 18 L42 34 Z" fill="url(#goldGrad)" opacity="0.85" />
+</svg>
