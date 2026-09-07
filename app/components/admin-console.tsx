@@ -2,12 +2,22 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { formatMoney } from "@/app/lib/commerce";
 import { CARGO_PROVIDERS, cargoLabel, cargoTrackingUrl, type CargoCompany } from "@/app/lib/cargo";
-import type { AnnouncementRecord, CatalogProduct, ContactMessageRecord, OrderRecord, ReviewRecord } from "@/db";
+import type {
+  AnnouncementRecord,
+  CatalogProduct,
+  ContactMessageRecord,
+  CouponRecord,
+  CustomerRecord,
+  OrderRecord,
+  ReviewRecord,
+  SiteSettingsRecord,
+} from "@/db";
 import type { LaravelUser } from "@/app/lib/laravel-auth";
+import { AdminProductEditorModal } from "@/app/components/admin-product-editor-modal";
 
 const orderStatuses = [
   "pending",
@@ -31,7 +41,24 @@ const orderStatusNames: Record<string, string> = {
   refunded: "İade Edildi",
 };
 
-type Tab = "dashboard" | "products" | "orders" | "cargo" | "reviews" | "announcements" | "contacts";
+const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+function createCouponCode() {
+  const bytes = new Uint8Array(5);
+  crypto.getRandomValues(bytes);
+  return `MRL-${Array.from(bytes, (byte) => alphabet[byte % alphabet.length]).join("")}`;
+}
+
+type Tab =
+  | "dashboard"
+  | "products"
+  | "orders"
+  | "cargo"
+  | "coupons"
+  | "customers"
+  | "settings"
+  | "reviews"
+  | "announcements"
+  | "contacts";
 
 export function AdminConsole({
   products,
@@ -39,6 +66,9 @@ export function AdminConsole({
   reviews,
   announcements,
   contacts,
+  initialCoupons,
+  initialSettings,
+  initialCustomers,
   adminUser,
 }: {
   products: CatalogProduct[];
@@ -46,16 +76,35 @@ export function AdminConsole({
   reviews: ReviewRecord[];
   announcements: AnnouncementRecord[];
   contacts: ContactMessageRecord[];
+  initialCoupons?: CouponRecord[];
+  initialSettings?: SiteSettingsRecord;
+  initialCustomers?: CustomerRecord[];
   adminUser?: LaravelUser | null;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("dashboard");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as Tab | null;
+  const [tab, setTab] = useState<Tab>(tabParam && ["dashboard", "products", "orders", "cargo", "coupons", "customers", "settings", "reviews", "announcements", "contacts"].includes(tabParam) ? tabParam : "dashboard");
+
+  useEffect(() => {
+    if (tabParam && ["dashboard", "products", "orders", "cargo", "coupons", "customers", "settings", "reviews", "announcements", "contacts"].includes(tabParam)) {
+      setTab(tabParam);
+    }
+  }, [tabParam]);
+
   const [message, setMessage] = useState("");
 
-  // Filters & Search states
+  // Product modal & bulk states
+  const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
+  const [isProductModalOpen, setIsProductModalOpen] = useState(false);
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+
+  // Product Filters
   const [productSearch, setProductSearch] = useState("");
+  const [productRootCategoryFilter, setProductRootCategoryFilter] = useState("all");
   const [productCategoryFilter, setProductCategoryFilter] = useState("all");
-  const [productStockFilter, setProductStockFilter] = useState("all");
+  const [productBrandFilter, setProductBrandFilter] = useState("all");
+  const [productStatusFilter, setProductStatusFilter] = useState("all");
 
   const [orderSearch, setOrderSearch] = useState("");
   const [orderStatusFilter, setOrderStatusFilter] = useState("all");
@@ -67,6 +116,21 @@ export function AdminConsole({
   const [reviewStatusFilter, setReviewStatusFilter] = useState("pending");
   const [announcementFilter, setAnnouncementFilter] = useState("all");
   const [contactStatusFilter, setContactStatusFilter] = useState("all");
+
+  const [coupons, setCoupons] = useState<CouponRecord[]>(initialCoupons || []);
+  const [settings, setSettings] = useState<SiteSettingsRecord>(initialSettings || {});
+  const [customers, setCustomers] = useState<CustomerRecord[]>(initialCustomers || []);
+  const [selectedOrder, setSelectedOrder] = useState<OrderRecord | null>(null);
+
+  const [couponCode, setCouponCode] = useState(createCouponCode);
+  const [couponCopied, setCouponCopied] = useState(false);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponError, setCouponError] = useState("");
+
+  const [settingsLoading, setSettingsLoading] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
+  const [customerSearch, setCustomerSearch] = useState("");
 
   // Helper for requests
   const request = async (url: string, init: RequestInit) => {
@@ -91,43 +155,111 @@ export function AdminConsole({
     }
   };
 
-  // Product Actions
-  const createProduct = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    return run(() => request("/api/admin/products", { method: "POST", body: new FormData(form) }), "Ürün kaydedilemedi.");
+  // Product Actions & Handlers
+  const openCreateProductModal = () => {
+    setEditingProduct(null);
+    setIsProductModalOpen(true);
   };
 
-  const updateProduct = (event: React.FormEvent<HTMLFormElement>, id: string) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
+  const openEditProductModal = (product: CatalogProduct) => {
+    setEditingProduct(product);
+    setIsProductModalOpen(true);
+  };
+
+  const closeProductModal = () => {
+    setEditingProduct(null);
+    setIsProductModalOpen(false);
+  };
+
+  const handleSaveProduct = async (productData: any) => {
+    if (editingProduct) {
+      await request(`/api/admin/products/${editingProduct.id}`, {
+        method: "PATCH",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+    } else {
+      await request("/api/admin/products", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(productData),
+      });
+    }
+  };
+
+  const handleDuplicateProduct = (id: string) => {
     return run(
       () =>
-        request(`/api/admin/products/${id}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            price: Math.round(Number(form.get("price")) * 100),
-            salePrice: form.get("salePrice") ? Math.round(Number(form.get("salePrice")) * 100) : null,
-            stock: Number(form.get("stock")),
-            availability: form.get("availability"),
-            active: form.get("active") === "on",
-            featured: form.get("featured") === "on",
-          }),
+        request(`/api/admin/products/${id}/duplicate`, {
+          method: "POST",
         }),
-      "Ürün güncellenemedi.",
+      "Ürün çoğaltılamadı."
     );
   };
 
-  const uploadImages = (event: React.FormEvent<HTMLFormElement>, id: string) => {
-    event.preventDefault();
-    const form = event.currentTarget;
-    return run(() => request(`/api/admin/products/${id}/images`, { method: "POST", body: new FormData(form) }), "Görseller yüklenemedi.");
+  const handleQuickToggleActive = (product: CatalogProduct) => {
+    const newActive = product.active === 0;
+    return run(
+      () =>
+        request(`/api/admin/products/${product.id}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ active: newActive }),
+        }),
+      "Ürün durumu güncellenemedi."
+    );
   };
 
-  const deleteProduct = (id: string) => {
-    if (!window.confirm("Bu ürünü silmek istediğinize emin misiniz?")) return;
+  const handleQuickToggleFeatured = (product: CatalogProduct) => {
+    const newFeatured = !product.featured;
+    return run(
+      () =>
+        request(`/api/admin/products/${product.id}`, {
+          method: "PATCH",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ featured: newFeatured }),
+        }),
+      "Öne çıkan durumu güncellenemedi."
+    );
+  };
+
+  const handleDeleteProduct = (id: string, name: string) => {
+    if (!window.confirm(`"${name}" ürününü kalıcı olarak silmek istediğinize emin misiniz?`)) return;
     return run(() => request(`/api/admin/products/${id}`, { method: "DELETE" }), "Ürün silinemedi.");
+  };
+
+  const handleBulkAction = (action: "activate" | "deactivate" | "feature" | "unfeature" | "delete") => {
+    if (selectedProductIds.length === 0) return;
+    if (action === "delete") {
+      if (!window.confirm(`Seçilen ${selectedProductIds.length} ürünü silmek istediğinize emin misiniz?`)) return;
+    }
+    return run(
+      async () => {
+        await request("/api/admin/products/bulk", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ action, ids: selectedProductIds }),
+        });
+        setSelectedProductIds([]);
+      },
+      "Toplu işlem gerçekleştirilemedi."
+    );
+  };
+
+  const toggleSelectProduct = (id: string) => {
+    if (selectedProductIds.includes(id)) {
+      setSelectedProductIds(selectedProductIds.filter((item) => item !== id));
+    } else {
+      setSelectedProductIds([...selectedProductIds, id]);
+    }
+  };
+
+  const toggleSelectAllProducts = (filteredIds: string[]) => {
+    if (selectedProductIds.length === filteredIds.length) {
+      setSelectedProductIds([]);
+    } else {
+      setSelectedProductIds([...filteredIds]);
+    }
   };
 
   // Order & Cargo Actions
@@ -274,6 +406,122 @@ export function AdminConsole({
     window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`, "_blank");
   };
 
+  const sendWhatsAppOfficeNotice = (order: OrderRecord) => {
+    const siteWa = (settings.site_whatsapp || "+90 546 735 66 02").replace(/[^0-9]/g, "");
+    const officePhone = siteWa.startsWith("0") ? `9${siteWa}` : siteWa.startsWith("90") ? siteWa : `90${siteWa}`;
+    
+    const itemsLines = (order.items || []).map((it, idx) => {
+      let cfgText = "";
+      try {
+        const cfg = typeof it.configuration === "string" ? JSON.parse(it.configuration) : it.configuration || {};
+        const w = cfg.width || cfg.en;
+        const h = cfg.height || cfg.boy;
+        const fabric = cfg.fabric || cfg.kumas || "Standart";
+        const profile = cfg.profileColor || cfg.profil || "Standart";
+        if (w && h) cfgText = ` [${w}x${h} cm | Kumaş: ${fabric} | Profil: ${profile}]`;
+      } catch {}
+      return `${idx + 1}. ${it.name}${cfgText} x ${it.quantity} Adet`;
+    }).join("\n");
+
+    const text = `*YENİ MAREL SİPARİŞİ*\n` +
+      `Sipariş No: ${order.orderNumber}\n` +
+      `Müşteri: ${order.customerName}\n` +
+      `Telefon: ${order.phone}\n` +
+      `E-posta: ${order.email}\n` +
+      `Adres: ${order.shippingAddress} ${order.district ? `(${order.district} / ${order.city})` : ""}\n` +
+      `Tutar: ${formatMoney(order.total, order.currency)}\n` +
+      `Ödeme: ${order.paymentMethod || "Havale/EFT"}\n` +
+      `Not: ${order.notes || "Yok"}\n` +
+      `--------------------------\n` +
+      `Ürünler & Ölçüler:\n${itemsLines || "Standart Kalemler"}`;
+
+    window.open(`https://wa.me/${officePhone}?text=${encodeURIComponent(text)}`, "_blank");
+  };
+
+  const copyCouponCode = async () => {
+    await navigator.clipboard.writeText(couponCode);
+    setCouponCopied(true);
+    window.setTimeout(() => setCouponCopied(false), 1600);
+  };
+
+  const handleCreateCoupon = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCouponLoading(true);
+    setCouponError("");
+    const form = new FormData(event.currentTarget);
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: couponCode,
+          type: form.get("type"),
+          value: form.get("value"),
+          minimumSubtotal: form.get("minimumSubtotal"),
+          usageLimit: form.get("usageLimit"),
+          isActive: form.get("isActive") === "on",
+        }),
+      });
+      const data = (await res.json()) as { error?: string; id?: string };
+      if (!res.ok) throw new Error(data.error || "Kupon oluşturulamadı.");
+      setCoupons((prev) => [data as unknown as CouponRecord, ...prev]);
+      setCouponCode(createCouponCode());
+      (event.target as HTMLFormElement).reset();
+      setMessage("Kupon başarıyla oluşturuldu.");
+      window.setTimeout(() => setMessage(""), 3500);
+    } catch (err) {
+      setCouponError(err instanceof Error ? err.message : "Kupon oluşturulamadı.");
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  const handleDeleteCoupon = async (id: string) => {
+    if (!window.confirm("Bu kuponu silmek istediğinize emin misiniz?")) return;
+    try {
+      const res = await fetch(`/api/admin/coupons?id=${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Kupon silinemedi.");
+      setCoupons((prev) => prev.filter((c) => c.id !== id));
+      setMessage("Kupon silindi.");
+      window.setTimeout(() => setMessage(""), 3000);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Hata oluştu.");
+    }
+  };
+
+  const handleSaveSettings = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setSettingsLoading(true);
+    setSettingsSaved(false);
+    const form = new FormData(event.currentTarget);
+    const newSettings: Record<string, string> = {};
+    form.forEach((value, key) => {
+      newSettings[key] = String(value);
+    });
+    newSettings["maintenance_mode"] = form.get("maintenance_mode") === "on" ? "true" : "false";
+
+    try {
+      const res = await fetch("/api/admin/settings", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ settings: newSettings }),
+      });
+      const data = (await res.json()) as { error?: string; settings?: SiteSettingsRecord };
+      if (!res.ok) throw new Error(data.error || "Ayarlar kaydedilemedi.");
+      setSettings(data.settings || newSettings);
+      setSettingsSaved(true);
+      setMessage("Ayarlar başarıyla güncellendi.");
+      window.setTimeout(() => {
+        setMessage("");
+        setSettingsSaved(false);
+      }, 3500);
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Ayarlar kaydedilemedi.");
+    } finally {
+      setSettingsLoading(false);
+    }
+  };
+
   // Computed Metrics
   const pendingReviewsCount = reviews.filter((r) => r.status === "pending").length;
   const newContactsCount = contacts.filter((c) => c.status === "new").length;
@@ -282,24 +530,42 @@ export function AdminConsole({
   const totalRevenue = orders.reduce((acc, order) => acc + (order.status !== "cancelled" ? order.total : 0), 0);
 
   // Filtered Products
+  const rootCategories = useMemo(
+    () => Array.from(new Set(products.map((p) => p.rootCategory || "Perdeler").filter(Boolean))),
+    [products]
+  );
   const categories = useMemo(() => Array.from(new Set(products.map((p) => p.category).filter(Boolean))), [products]);
+  const brands = useMemo(() => Array.from(new Set(products.map((p) => p.brand || "Marel").filter(Boolean))), [products]);
+
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      const q = productSearch.toLowerCase().trim();
       const matchesSearch =
-        !productSearch ||
-        product.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-        product.sku.toLowerCase().includes(productSearch.toLowerCase()) ||
-        product.category.toLowerCase().includes(productSearch.toLowerCase());
+        !q ||
+        product.name.toLowerCase().includes(q) ||
+        product.sku.toLowerCase().includes(q) ||
+        product.category.toLowerCase().includes(q) ||
+        (product.brand && product.brand.toLowerCase().includes(q));
+
+      const matchesRoot =
+        productRootCategoryFilter === "all" ||
+        (product.rootCategory && product.rootCategory === productRootCategoryFilter) ||
+        (!product.rootCategory && productRootCategoryFilter === "Perdeler");
+
       const matchesCategory = productCategoryFilter === "all" || product.category === productCategoryFilter;
-      const matchesStock =
-        productStockFilter === "all" ||
-        (productStockFilter === "in_stock" && product.stock > 0) ||
-        (productStockFilter === "out_of_stock" && product.stock <= 0) ||
-        (productStockFilter === "featured" && Boolean(product.featured)) ||
-        (productStockFilter === "inactive" && !product.active);
-      return matchesSearch && matchesCategory && matchesStock;
+      const matchesBrand = productBrandFilter === "all" || (product.brand || "Marel") === productBrandFilter;
+
+      let matchesStatus = true;
+      if (productStatusFilter === "active") matchesStatus = product.active !== 0;
+      else if (productStatusFilter === "inactive") matchesStatus = product.active === 0;
+      else if (productStatusFilter === "featured") matchesStatus = Boolean(product.featured);
+      else if (productStatusFilter === "in_stock") matchesStatus = product.stock > 0;
+      else if (productStatusFilter === "out_of_stock") matchesStatus = product.stock <= 0;
+      else if (productStatusFilter === "discounted") matchesStatus = Boolean(product.salePrice && product.salePrice < product.price);
+
+      return matchesSearch && matchesRoot && matchesCategory && matchesBrand && matchesStatus;
     });
-  }, [products, productSearch, productCategoryFilter, productStockFilter]);
+  }, [products, productSearch, productRootCategoryFilter, productCategoryFilter, productBrandFilter, productStatusFilter]);
 
   // Filtered Orders
   const filteredOrders = useMemo(() => {
@@ -359,6 +625,18 @@ export function AdminConsole({
       return contact.status === contactStatusFilter;
     });
   }, [contacts, contactStatusFilter]);
+
+  // Filtered Customers
+  const filteredCustomers = useMemo(() => {
+    const q = customerSearch.toLowerCase().trim();
+    if (!q) return customers;
+    return customers.filter(
+      (c) =>
+        c.fullName.toLowerCase().includes(q) ||
+        c.email.toLowerCase().includes(q) ||
+        c.phone.includes(q),
+    );
+  }, [customers, customerSearch]);
 
   return (
     <div className="admin-shell">
@@ -496,6 +774,52 @@ export function AdminConsole({
             ) : (
               <span className="admin-nav-badge">{contacts.length}</span>
             )}
+          </button>
+
+          <button
+            className={`admin-nav-btn ${tab === "coupons" ? "active" : ""}`}
+            onClick={() => setTab("coupons")}
+            type="button"
+          >
+            <span className="admin-nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              Kupon Yönetimi
+            </span>
+            <span className="admin-nav-badge">{coupons.length}</span>
+          </button>
+
+          <button
+            className={`admin-nav-btn ${tab === "customers" ? "active" : ""}`}
+            onClick={() => setTab("customers")}
+            type="button"
+          >
+            <span className="admin-nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+              Müşteriler
+            </span>
+            <span className="admin-nav-badge">{customers.length}</span>
+          </button>
+
+          <button
+            className={`admin-nav-btn ${tab === "settings" ? "active" : ""}`}
+            onClick={() => setTab("settings")}
+            type="button"
+          >
+            <span className="admin-nav-btn-left">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+              Site Ayarları
+            </span>
           </button>
         </nav>
 
@@ -660,205 +984,470 @@ export function AdminConsole({
           <>
             <header className="admin-page-header">
               <div className="admin-page-header-left">
-                <span>KATALOG & STOK YÖNETİMİ</span>
+                <span>KATALOG, STOK & VİTRİN YÖNETİMİ</span>
                 <h1>Ürün Yönetim Paneli</h1>
-                <p>Ürün fiyatları, indirim oranları, stok adetleri, aktiflik durumu ve görsellerini yönetin.</p>
+                <p>
+                  Tüm ürünlerin renk, ölçü, satış fiyatı, indirim oranı, taksit kampanyası, stok durumu, aktif satış kapatma/açma ve çoklu fotoğraflarını yönetin.
+                </p>
+              </div>
+              <div className="admin-header-actions">
+                <button className="admin-btn-gold" onClick={openCreateProductModal} type="button" style={{ display: "inline-flex", alignItems: "center", gap: 6, fontWeight: 800 }}>
+                  <span style={{ fontSize: "1.1rem", lineHeight: 1 }}>+</span> Yeni Ürün Ekle
+                </button>
               </div>
             </header>
 
-            {/* Create Product Drawer */}
-            <details className="admin-create-box">
-              <summary>+ Yeni Ürün Ekle (Katalog Oluştur)</summary>
-              <form onSubmit={createProduct} className="admin-grid-form">
-                <label>
-                  Ürün Adı *
-                  <input name="name" placeholder="Örn: Diamond 110 Antrasit Plise Perde" required />
-                </label>
-                <label>
-                  SKU (Stok Kodu) *
-                  <input name="sku" placeholder="Örn: DIA-110" required />
-                </label>
-                <label>
-                  Kategori *
-                  <input name="category" placeholder="Örn: Diamond, Honeycomb, Blackout" required />
-                </label>
-                <label>
-                  URL Adı (Slug)
-                  <input name="slug" placeholder="diamond-110-antrasit (otomatik üretilir)" />
-                </label>
-                <label>
-                  Fiyat (₺) *
-                  <input name="price" type="number" min="0" step="0.01" placeholder="1166.00" required />
-                </label>
-                <label>
-                  İndirimli Fiyat (₺)
-                  <input name="salePrice" type="number" min="0" step="0.01" placeholder="990.00" />
-                </label>
-                <label>
-                  Stok Adedi *
-                  <input name="stock" type="number" min="0" defaultValue="15" required />
-                </label>
-                <label>
-                  Google Ürün Kategorisi
-                  <input name="googleProductCategory" defaultValue="Home & Garden > Decor > Window Treatments" />
-                </label>
-                <label className="span-2">
-                  Ürün Açıklaması
-                  <textarea name="description" rows={3} placeholder="Ürünün kumaş özellikleri, kullanım alanı ve detayları…" />
-                </label>
-                <label className="span-2">
-                  Ürün Görselleri
-                  <input name="images" type="file" accept="image/png,image/jpeg,image/webp" multiple />
-                </label>
-                <label style={{ flexDirection: "row", alignItems: "center", gap: 8, gridColumn: "span 2", cursor: "pointer" }}>
-                  <input name="featured" type="checkbox" style={{ width: 18, height: 18 }} />
-                  Öne Çıkan Ürün Olarak İşaretle
-                </label>
-                <button className="span-4" type="submit">
-                  Ürünü Kataloğa Kaydet
-                </button>
-              </form>
-            </details>
-
-            {/* Toolbar */}
-            <div className="admin-toolbar">
-              <div className="admin-search-input">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="11" cy="11" r="8" />
-                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  placeholder="Ürün adı, SKU veya kategori ara…"
-                />
+            {/* Product Quick Overview Stats Ribbon */}
+            <div className="admin-stats-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", marginBottom: 20 }}>
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>Toplam Ürün</small>
+                <strong style={{ fontSize: "1.3rem" }}>{products.length}</strong>
+                <small style={{ color: "#0ea5e9" }}>Katalogdaki tüm kayıtlar</small>
               </div>
-
-              <div className="admin-filter-group">
-                <button
-                  className={`admin-filter-pill ${productCategoryFilter === "all" ? "active" : ""}`}
-                  onClick={() => setProductCategoryFilter("all")}
-                  type="button"
-                >
-                  Tüm Kategoriler <span>{products.length}</span>
-                </button>
-                {categories.map((cat) => (
-                  <button
-                    key={cat}
-                    className={`admin-filter-pill ${productCategoryFilter === cat ? "active" : ""}`}
-                    onClick={() => setProductCategoryFilter(cat)}
-                    type="button"
-                  >
-                    {cat} <span>{products.filter((p) => p.category === cat).length}</span>
-                  </button>
-                ))}
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>Satışta Olan (Aktif)</small>
+                <strong style={{ fontSize: "1.3rem", color: "#16a34a" }}>{products.filter((p) => p.active !== 0).length}</strong>
+                <small style={{ color: "#16a34a" }}>Canlı mağazada açık</small>
               </div>
-
-              <div className="admin-filter-group">
-                <button
-                  className={`admin-filter-pill ${productStockFilter === "all" ? "active" : ""}`}
-                  onClick={() => setProductStockFilter("all")}
-                  type="button"
-                >
-                  Tümü
-                </button>
-                <button
-                  className={`admin-filter-pill ${productStockFilter === "in_stock" ? "active" : ""}`}
-                  onClick={() => setProductStockFilter("in_stock")}
-                  type="button"
-                >
-                  Stokta Olanlar
-                </button>
-                <button
-                  className={`admin-filter-pill ${productStockFilter === "out_of_stock" ? "active" : ""}`}
-                  onClick={() => setProductStockFilter("out_of_stock")}
-                  type="button"
-                >
-                  Tükenenler
-                </button>
-                <button
-                  className={`admin-filter-pill ${productStockFilter === "featured" ? "active" : ""}`}
-                  onClick={() => setProductStockFilter("featured")}
-                  type="button"
-                >
-                  Öne Çıkanlar
-                </button>
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>Satışa Kapatılan (Pasif)</small>
+                <strong style={{ fontSize: "1.3rem", color: "#dc2626" }}>{products.filter((p) => p.active === 0).length}</strong>
+                <small style={{ color: "#dc2626" }}>Canlıda gizli / kapalı</small>
+              </div>
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>Tükendi / Sıfır Stok</small>
+                <strong style={{ fontSize: "1.3rem", color: "#f59e0b" }}>{products.filter((p) => p.stock <= 0).length}</strong>
+                <small style={{ color: "#f59e0b" }}>Stok girişi bekleyen</small>
+              </div>
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>Öne Çıkan Ürünler</small>
+                <strong style={{ fontSize: "1.3rem", color: "#854d0e" }}>{products.filter((p) => Boolean(p.featured)).length}</strong>
+                <small style={{ color: "#854d0e" }}>Vitrinde vurgulanan</small>
+              </div>
+              <div className="admin-stat-card" style={{ padding: "12px 16px" }}>
+                <small style={{ color: "#64748b" }}>İndirimli Ürünler</small>
+                <strong style={{ fontSize: "1.3rem", color: "#9333ea" }}>
+                  {products.filter((p) => p.salePrice && p.salePrice < p.price).length}
+                </strong>
+                <small style={{ color: "#9333ea" }}>Kampanyalı ürünler</small>
               </div>
             </div>
 
-            {/* Product List */}
+            {/* Bulk Action Bar (Visible when items selected) */}
+            {selectedProductIds.length > 0 && (
+              <div className="admin-bulk-bar">
+                <div className="admin-bulk-left">
+                  <span>✓ {selectedProductIds.length} ürün seçildi</span>
+                </div>
+                <div className="admin-bulk-actions">
+                  <button type="button" className="admin-bulk-btn" onClick={() => handleBulkAction("activate")}>
+                    Toplu Satışa Aç
+                  </button>
+                  <button type="button" className="admin-bulk-btn" onClick={() => handleBulkAction("deactivate")}>
+                    Toplu Satışa Kapat
+                  </button>
+                  <button type="button" className="admin-bulk-btn" onClick={() => handleBulkAction("feature")}>
+                    Toplu Öne Çıkar
+                  </button>
+                  <button type="button" className="admin-bulk-btn" onClick={() => handleBulkAction("unfeature")}>
+                    Öne Çıkarmayı Kaldır
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-bulk-btn"
+                    style={{ background: "#dc2626", borderColor: "#ef4444" }}
+                    onClick={() => handleBulkAction("delete")}
+                  >
+                    Toplu Sil
+                  </button>
+                  <button
+                    type="button"
+                    className="admin-bulk-btn"
+                    style={{ background: "transparent", textDecoration: "underline" }}
+                    onClick={() => setSelectedProductIds([])}
+                  >
+                    Seçimi Temizle
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Toolbar Filters */}
+            <div className="admin-toolbar" style={{ flexDirection: "column", alignItems: "stretch", gap: 12 }}>
+              {/* Row 1: Search & Root Categories */}
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
+                <div className="admin-search-input" style={{ flex: "1 1 280px" }}>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    placeholder="Ürün adı, SKU, kategori veya marka ara…"
+                    style={{ width: "100%" }}
+                  />
+                  {productSearch && (
+                    <button
+                      type="button"
+                      onClick={() => setProductSearch("")}
+                      style={{ background: "none", border: "none", color: "#94a3b8", cursor: "pointer", padding: "0 4px" }}
+                    >
+                      &times;
+                    </button>
+                  )}
+                </div>
+
+                {/* Root Category Pills */}
+                <div className="admin-filter-group" style={{ flex: "2 1 auto" }}>
+                  <button
+                    className={`admin-filter-pill ${productRootCategoryFilter === "all" ? "active" : ""}`}
+                    onClick={() => setProductRootCategoryFilter("all")}
+                    type="button"
+                  >
+                    Tüm Kategoriler <span>{products.length}</span>
+                  </button>
+                  {["Perdeler", "Sineklikler", "Seperatör Kapı", "Otomatik Panjurlar", "Tutamaklar", "Aksesuarlar"].map((rc) => {
+                    const count = products.filter((p) => (p.rootCategory || "Perdeler") === rc).length;
+                    return (
+                      <button
+                        key={rc}
+                        className={`admin-filter-pill ${productRootCategoryFilter === rc ? "active" : ""}`}
+                        onClick={() => setProductRootCategoryFilter(rc)}
+                        type="button"
+                      >
+                        {rc} <span>{count}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Row 2: Secondary Dropdowns & Status Pills */}
+              <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #e2e8f0", paddingTop: 10 }}>
+                <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+                  {/* Brand Filter */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <small style={{ fontWeight: 700, color: "#475569" }}>Marka:</small>
+                    <select
+                      value={productBrandFilter}
+                      onChange={(e) => setProductBrandFilter(e.target.value)}
+                      style={{ padding: "6px 10px", borderRadius: 5, border: "1px solid #cbd5e1", fontSize: "0.8rem" }}
+                    >
+                      <option value="all">Tüm Markalar ({brands.length})</option>
+                      {brands.map((b) => (
+                        <option key={b} value={b}>
+                          {b} ({products.filter((p) => (p.brand || "Marel") === b).length})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Subcategory Filter */}
+                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                    <small style={{ fontWeight: 700, color: "#475569" }}>Alt Kategori:</small>
+                    <select
+                      value={productCategoryFilter}
+                      onChange={(e) => setProductCategoryFilter(e.target.value)}
+                      style={{ padding: "6px 10px", borderRadius: 5, border: "1px solid #cbd5e1", fontSize: "0.8rem" }}
+                    >
+                      <option value="all">Tüm Alt Kategoriler ({categories.length})</option>
+                      {categories.map((cat) => (
+                        <option key={cat} value={cat}>
+                          {cat} ({products.filter((p) => p.category === cat).length})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Status Filter Pills */}
+                <div className="admin-filter-group">
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "all" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("all")}
+                    type="button"
+                  >
+                    Tümü
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "active" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("active")}
+                    type="button"
+                  >
+                    Satışta (Aktif)
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "inactive" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("inactive")}
+                    type="button"
+                  >
+                    Satışa Kapalı (Pasif)
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "featured" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("featured")}
+                    type="button"
+                  >
+                    Öne Çıkanlar
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "discounted" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("discounted")}
+                    type="button"
+                  >
+                    İndirimliler
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "in_stock" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("in_stock")}
+                    type="button"
+                  >
+                    Stokta
+                  </button>
+                  <button
+                    className={`admin-filter-pill ${productStatusFilter === "out_of_stock" ? "active" : ""}`}
+                    onClick={() => setProductStatusFilter("out_of_stock")}
+                    type="button"
+                  >
+                    Tükenen
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* List Header & Select All */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 4px", marginBottom: 8, fontSize: "0.8rem", color: "#64748b" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontWeight: 700 }}>
+                <input
+                  type="checkbox"
+                  checked={filteredProducts.length > 0 && selectedProductIds.length === filteredProducts.length}
+                  onChange={() => toggleSelectAllProducts(filteredProducts.map((p) => p.id))}
+                  style={{ width: 17, height: 17 }}
+                />
+                <span>Tümünü Seç ({filteredProducts.length} ürün listeleniyor)</span>
+              </label>
+
+              <span>
+                Toplam: <strong>{products.length}</strong> ürün | Gösterilen: <strong>{filteredProducts.length}</strong>
+              </span>
+            </div>
+
+            {/* Products List */}
             <div className="admin-card-list">
               {filteredProducts.length ? (
-                filteredProducts.map((product) => (
-                  <article key={product.id} className="admin-data-card admin-product-row-card">
-                    <div className="admin-product-thumb">
-                      <Image unoptimized src={product.image} alt={product.name} fill sizes="100px" />
-                    </div>
+                filteredProducts.map((product) => {
+                  const isSelected = selectedProductIds.includes(product.id);
+                  const isInactive = product.active === 0;
+                  const hasDiscount = product.salePrice && product.salePrice < product.price;
+                  const discountPct = hasDiscount ? Math.round(((product.price - product.salePrice!) / product.price) * 100) : 0;
+                  const imageList = product.images && product.images.length > 0 ? product.images : [product.image];
 
-                    <div className="admin-product-meta">
-                      <small>
-                        {product.sku} · {product.category}
-                      </small>
-                      <h3>{product.name}</h3>
-                      <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 6 }}>
-                        <span className={`admin-status-badge ${product.stock > 0 ? "status-badge-delivered" : "status-badge-cancelled"}`}>
-                          {product.stock > 0 ? `Stok: ${product.stock} Adet` : "Tükendi"}
-                        </span>
-                        {product.featured ? <span className="admin-status-badge status-badge-new">Öne Çıkan</span> : null}
-                        <Link
-                          href={`/urunler/${product.slug}`}
-                          target="_blank"
-                          style={{ color: "#38bdf8", fontSize: "0.72rem", textDecoration: "none" }}
-                        >
-                          Mağazada Gör ↗
-                        </Link>
-                      </div>
-                    </div>
+                  // Parse color preview dots
+                  let colorItems: Array<{ name: string; code: string }> = [];
+                  if (product.colors) {
+                    try {
+                      const parsed = JSON.parse(product.colors);
+                      if (Array.isArray(parsed)) {
+                        colorItems = parsed.slice(0, 6).map((c) => {
+                          if (typeof c === "string") return { name: c, code: "#cbd5e1" };
+                          return { name: c.name || "Renk", code: c.code || "#cbd5e1" };
+                        });
+                      }
+                    } catch {}
+                  }
 
-                    <form onSubmit={(event) => updateProduct(event, product.id)} className="admin-product-quick-edit-form">
-                      <label>
-                        Fiyat (₺)
-                        <input name="price" type="number" step="0.01" defaultValue={(product.price / 100).toFixed(2)} required />
-                      </label>
-                      <label>
-                        İndirimli Fiyat
+                  return (
+                    <article
+                      key={product.id}
+                      className={`admin-data-card admin-product-row-card ${isInactive ? "is-inactive" : ""}`}
+                      style={{ borderColor: isSelected ? "#0f172a" : undefined }}
+                    >
+                      {/* 1. Selection Checkbox */}
+                      <div className="admin-checkbox-col">
                         <input
-                          name="salePrice"
-                          type="number"
-                          step="0.01"
-                          defaultValue={product.salePrice ? (product.salePrice / 100).toFixed(2) : ""}
-                          placeholder="Yok"
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => toggleSelectProduct(product.id)}
+                          aria-label={`${product.name} seç`}
                         />
-                      </label>
-                      <label>
-                        Stok
-                        <input name="stock" type="number" defaultValue={product.stock} required />
-                      </label>
-                      <label>
-                        Durum
-                        <select name="availability" defaultValue={product.availability}>
-                          <option value="in_stock">Stokta</option>
-                          <option value="out_of_stock">Tükendi</option>
-                          <option value="preorder">Ön Sipariş</option>
-                          <option value="backorder">Tedarik</option>
-                        </select>
-                      </label>
-                      <label className="admin-checkbox-label">
-                        <input name="active" type="checkbox" defaultChecked={Boolean(product.active)} />
-                        Yayında
-                      </label>
-                      <label className="admin-checkbox-label">
-                        <input name="featured" type="checkbox" defaultChecked={Boolean(product.featured)} />
-                        Öne Çıkar
-                      </label>
-                      <button type="submit">Değişiklikleri Güncelle</button>
-                    </form>
-                  </article>
-                ))
+                      </div>
+
+                      {/* 2. Thumbnail with count badge */}
+                      <div className="admin-product-thumb">
+                        <Image unoptimized src={product.image || "/images/catalog/diamond.webp"} alt={product.name} fill sizes="80px" />
+                        {imageList.length > 1 && (
+                          <span className="admin-product-image-count" title={`${imageList.length} görsel mevcut`}>
+                            📷 {imageList.length}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* 3. Product Meta & Details */}
+                      <div className="admin-product-meta" style={{ minWidth: 0 }}>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 2 }}>
+                          <span className="admin-badge admin-badge-gray">{product.sku}</span>
+                          <span className="admin-badge admin-badge-info">{product.brand || "Marel"}</span>
+                          <span className="admin-badge admin-badge-gray">{product.rootCategory || "Perdeler"}</span>
+                          <span style={{ fontSize: "0.72rem", color: "#64748b" }}>› {product.category}</span>
+                        </div>
+
+                        <h3 style={{ margin: "2px 0 6px 0", fontSize: "0.95rem" }}>{product.name}</h3>
+
+                        {/* Badges & Tags */}
+                        <div className="admin-product-badges">
+                          {isInactive ? (
+                            <span className="admin-badge admin-badge-danger">● SATIŞA KAPATILDI (GİZLİ)</span>
+                          ) : (
+                            <span className="admin-badge admin-badge-success">● Satışta</span>
+                          )}
+
+                          {product.stock > 0 ? (
+                            <span className="admin-badge admin-badge-success">Stok: {product.stock} Adet</span>
+                          ) : (
+                            <span className="admin-badge admin-badge-danger">Stok Tükendi</span>
+                          )}
+
+                          {product.featured ? <span className="admin-badge admin-badge-gold">★ Öne Çıkan</span> : null}
+
+                          {hasDiscount ? <span className="admin-discount-tag">%{discountPct} İNDİRİM</span> : null}
+
+                          {product.installmentText && (
+                            <span className="admin-badge admin-badge-info" style={{ fontSize: "0.68rem" }}>
+                              💳 {product.installmentText}
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Dimensions & Color preview */}
+                        <div style={{ display: "flex", gap: 14, alignItems: "center", marginTop: 6, flexWrap: "wrap" }}>
+                          {product.dimensions && (
+                            <small style={{ color: "#64748b", fontSize: "0.72rem" }}>
+                              📏 {product.dimensions}
+                            </small>
+                          )}
+
+                          {colorItems.length > 0 && (
+                            <div className="admin-color-dots" title={colorItems.map((c) => c.name).join(", ")}>
+                              <small style={{ fontSize: "0.7rem", color: "#64748b", marginRight: 2 }}>Renkler:</small>
+                              {colorItems.map((col, idx) => (
+                                <span
+                                  key={idx}
+                                  className="admin-color-dot"
+                                  style={{ background: col.code }}
+                                  title={col.name}
+                                />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* 4. Pricing, Quick Toggles & Action Buttons */}
+                      <div className="admin-product-quick-bar">
+                        {/* Price Display */}
+                        <div className="admin-price-box">
+                          {hasDiscount ? (
+                            <>
+                              <span className="admin-old-price">{formatMoney(product.price)}</span>
+                              <span className="admin-current-price" style={{ color: "#dc2626" }}>
+                                {formatMoney(product.salePrice!)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="admin-current-price">{formatMoney(product.price)}</span>
+                          )}
+                          <span className="admin-installment_note" style={{ fontSize: "0.68rem", color: "#059669", fontWeight: 700 }}>
+                            {product.installments ? `${product.installments} Taksit İmkanı` : "Peşin Fiyatına 3 Taksit"}
+                          </span>
+                        </div>
+
+                        {/* Quick Active/Inactive Toggle */}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                          <span
+                            className={`admin-switch ${!isInactive ? "active" : ""}`}
+                            onClick={() => handleQuickToggleActive(product)}
+                            title={!isInactive ? "Satışı Kapatmak İçin Tıkla" : "Satışı Açmak İçin Tıkla"}
+                            role="button"
+                            tabIndex={0}
+                          />
+                          <small style={{ fontSize: "0.65rem", fontWeight: 700, color: !isInactive ? "#16a34a" : "#dc2626" }}>
+                            {!isInactive ? "Satışta" : "Kapalı"}
+                          </small>
+                        </div>
+
+                        {/* Quick Featured Toggle */}
+                        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                          <span
+                            className={`admin-switch ${product.featured ? "active" : ""}`}
+                            onClick={() => handleQuickToggleFeatured(product)}
+                            title={product.featured ? "Öne Çıkarmayı Kaldır" : "Vitrinde Öne Çıkar"}
+                            role="button"
+                            tabIndex={0}
+                          />
+                          <small style={{ fontSize: "0.65rem", fontWeight: 700, color: product.featured ? "#854d0e" : "#64748b" }}>
+                            Vitrinde
+                          </small>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="admin-row-actions">
+                          <button
+                            type="button"
+                            className="admin-btn-action edit-btn"
+                            onClick={() => openEditProductModal(product)}
+                            title="Ürünün renk, ölçü, fiyat, taksit ve fotoğraflarını detaylı düzenle"
+                          >
+                            Düzenle
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn-action"
+                            onClick={() => handleDuplicateProduct(product.id)}
+                            title="Bu ürünü kopyalayarak yeni bir ürün oluştur"
+                          >
+                            Kopyala
+                          </button>
+                          <button
+                            type="button"
+                            className="admin-btn-action danger-btn"
+                            onClick={() => handleDeleteProduct(product.id, product.name)}
+                            title="Ürünü kalıcı olarak sil"
+                          >
+                            Sil
+                          </button>
+                          <Link
+                            href={`/urunler/${product.slug}`}
+                            target="_blank"
+                            className="admin-btn-action"
+                            style={{ textDecoration: "none", color: "#0284c7" }}
+                            title="Mağazada Görüntüle"
+                          >
+                            ↗
+                          </Link>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })
               ) : (
                 <div className="admin-empty-state">
                   <h3>Aramanıza uygun ürün bulunamadı.</h3>
                   <p>Arama terimini veya filtreleri değiştirerek tekrar deneyebilirsiniz.</p>
+                  <button
+                    type="button"
+                    className="admin-btn-action edit-btn"
+                    style={{ marginTop: 12 }}
+                    onClick={() => {
+                      setProductSearch("");
+                      setProductRootCategoryFilter("all");
+                      setProductCategoryFilter("all");
+                      setProductBrandFilter("all");
+                      setProductStatusFilter("all");
+                    }}
+                  >
+                    Filtreleri Sıfırla
+                  </button>
                 </div>
               )}
             </div>
@@ -873,6 +1462,15 @@ export function AdminConsole({
                 <span>SİPARİŞ OPERASYONU</span>
                 <h1>Sipariş Takip & Yönetim Modülü</h1>
                 <p>Onay, ölçü teyidi, atölye üretimi, kargo ve teslimat aşamalarını tek ekrandan yönetin.</p>
+              </div>
+              <div className="admin-header-actions">
+                <Link
+                  href="/admin/siparisler"
+                  className="admin-btn-gold"
+                  style={{ textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6 }}
+                >
+                  📋 Gelişmiş Sipariş Tablosu →
+                </Link>
               </div>
             </header>
 
@@ -952,17 +1550,54 @@ export function AdminConsole({
                         )}
                       </div>
 
-                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
                         <strong className="admin-order-total">{formatMoney(order.total, order.currency)}</strong>
-                        {order.phone ? (
+                        <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+                          <Link
+                            href={`/admin/siparisler/${order.id}`}
+                            style={{
+                              height: 36,
+                              padding: "0 14px",
+                              fontWeight: 700,
+                              textDecoration: "none",
+                              display: "inline-flex",
+                              alignItems: "center",
+                              backgroundColor: "#0f172a",
+                              color: "#fff",
+                              borderRadius: 6,
+                              fontSize: "0.82rem",
+                            }}
+                          >
+                            Tam Sayfada Yönet ↗
+                          </Link>
+                          <button
+                            type="button"
+                            className="admin-btn-action edit-btn"
+                            onClick={() => setSelectedOrder(order)}
+                            style={{ height: 36, padding: "0 14px", fontWeight: 700 }}
+                          >
+                            🔍 Hızlı Önizleme ({order.items?.length || 0} Ürün)
+                          </button>
+                          {order.phone ? (
+                            <button
+                              type="button"
+                              className="admin-cargo-wa-btn"
+                              onClick={() => sendWhatsAppCargoNotice(order)}
+                              title="Müşteriye kargo takip WhatsApp mesajı aç"
+                            >
+                              💬 Müşteri WhatsApp
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             className="admin-cargo-wa-btn"
-                            onClick={() => sendWhatsAppCargoNotice(order)}
+                            style={{ background: "#065f46", color: "#ecfdf5" }}
+                            onClick={() => sendWhatsAppOfficeNotice(order)}
+                            title="Atölye ve ofise tam sipariş ölçü mesajı aç"
                           >
-                            💬 Müşteriye WhatsApp Aç
+                            🏢 Atölye / Ofis WhatsApp
                           </button>
-                        ) : null}
+                        </div>
                       </div>
                     </div>
 
@@ -1618,6 +2253,623 @@ export function AdminConsole({
             </div>
           </>
         )}
+
+        {/* 7. COUPONS MANAGEMENT TAB */}
+        {tab === "coupons" && (
+          <>
+            <header className="admin-page-header">
+              <div className="admin-page-header-left">
+                <span>PAZARLAMA & KAMPANYALAR</span>
+                <h1>Kupon & İndirim Yönetimi</h1>
+                <p>Müşterilerin sepette kullanabileceği yüzde veya sabit TL indirim kuponlarını yönetin.</p>
+              </div>
+            </header>
+
+            {/* Create Coupon Card */}
+            <div className="admin-data-card" style={{ marginBottom: 24 }}>
+              <div className="admin-order-top-bar" style={{ marginBottom: 16 }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800 }}>Yeni Kupon Tanımla</h3>
+                  <small style={{ color: "var(--admin-text-dim)" }}>
+                    Otomatik kod üretilebilir veya özel bir kampanya kodu yazabilirsiniz.
+                  </small>
+                </div>
+              </div>
+
+              <form onSubmit={handleCreateCoupon} className="admin-form-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
+                <label>
+                  Kupon Kodu
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <input
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="MRL-XXXXX"
+                      style={{ textTransform: "uppercase", fontWeight: 700 }}
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setCouponCode(createCouponCode())}
+                      className="admin-btn-secondary"
+                      style={{ height: 38, padding: "0 10px" }}
+                      title="Yeni kod üret"
+                    >
+                      🔄
+                    </button>
+                    <button
+                      type="button"
+                      onClick={copyCouponCode}
+                      className="admin-btn-secondary"
+                      style={{ height: 38, padding: "0 10px" }}
+                      title="Kodu kopyala"
+                    >
+                      {couponCopied ? "✓" : "📋"}
+                    </button>
+                  </div>
+                </label>
+
+                <label>
+                  İndirim Tipi
+                  <select name="type" defaultValue="PERCENT">
+                    <option value="PERCENT">Yüzde İndirim (%)</option>
+                    <option value="FIXED">Sabit Tutar (TL)</option>
+                  </select>
+                </label>
+
+                <label>
+                  İndirim Tutarı / Oranı
+                  <input
+                    name="value"
+                    type="number"
+                    min="1"
+                    step="1"
+                    placeholder="Örn: 10 (%10 için) veya 150 (150 TL için)"
+                    required
+                  />
+                </label>
+
+                <label>
+                  Minimum Sepet Tutarı (TL)
+                  <input
+                    name="minimumSubtotal"
+                    type="number"
+                    min="0"
+                    placeholder="Örn: 500 (Boşsa sınırsız)"
+                  />
+                </label>
+
+                <label>
+                  Kullanım Limiti
+                  <input
+                    name="usageLimit"
+                    type="number"
+                    min="1"
+                    placeholder="Örn: 100 (Boşsa sınırsız)"
+                  />
+                </label>
+
+                <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 22 }}>
+                  <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer" }}>
+                    <input name="isActive" type="checkbox" defaultChecked style={{ width: 18, height: 18 }} />
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600 }}>Kupon Canlıda Aktif</span>
+                  </label>
+                </div>
+
+                <div style={{ gridColumn: "1 / -1", display: "flex", gap: 12, alignItems: "center", marginTop: 8 }}>
+                  <button
+                    type="submit"
+                    disabled={couponLoading}
+                    className="admin-btn-gold"
+                    style={{ height: 42, padding: "0 24px" }}
+                  >
+                    {couponLoading ? "Oluşturuluyor…" : "Kuponu Kaydet & Yayınla"}
+                  </button>
+                  {couponError ? <span style={{ color: "#ef4444", fontSize: "0.82rem" }}>{couponError}</span> : null}
+                </div>
+              </form>
+            </div>
+
+            {/* Coupons List Table */}
+            <div className="admin-card-list">
+              {coupons.length ? (
+                <div style={{ overflowX: "auto", background: "var(--admin-card-bg)", borderRadius: 12, border: "1px solid var(--admin-card-border)", padding: 16 }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--admin-card-border)", color: "var(--admin-text-dim)" }}>
+                        <th style={{ padding: "12px 10px" }}>KOD</th>
+                        <th style={{ padding: "12px 10px" }}>İNDİRİM TÜRÜ</th>
+                        <th style={{ padding: "12px 10px" }}>DEĞER</th>
+                        <th style={{ padding: "12px 10px" }}>MİN. SEPET</th>
+                        <th style={{ padding: "12px 10px" }}>KULLANIM</th>
+                        <th style={{ padding: "12px 10px" }}>DURUM</th>
+                        <th style={{ padding: "12px 10px", textAlign: "right" }}>İŞLEM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {coupons.map((c) => (
+                        <tr key={c.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                          <td style={{ padding: "14px 10px", fontWeight: 800, color: "var(--admin-gold)" }}>{c.code}</td>
+                          <td style={{ padding: "14px 10px" }}>{c.discountType === "PERCENT" ? "Yüzde (%)" : "Sabit TL"}</td>
+                          <td style={{ padding: "14px 10px", fontWeight: 700 }}>
+                            {c.discountType === "PERCENT" ? `%${c.discountValue}` : `${(c.discountValue / 100).toFixed(0)} ₺`}
+                          </td>
+                          <td style={{ padding: "14px 10px" }}>
+                            {c.minimumSubtotal ? `${(c.minimumSubtotal / 100).toFixed(0)} ₺` : "Yok"}
+                          </td>
+                          <td style={{ padding: "14px 10px" }}>
+                            {c.usageCount} {c.usageLimit ? `/ ${c.usageLimit}` : "kullanım"}
+                          </td>
+                          <td style={{ padding: "14px 10px" }}>
+                            <span className={`admin-status-badge ${c.active ? "status-badge-delivered" : "status-badge-cancelled"}`}>
+                              {c.active ? "Aktif" : "Pasif"}
+                            </span>
+                          </td>
+                          <td style={{ padding: "14px 10px", textAlign: "right" }}>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteCoupon(c.id)}
+                              className="admin-btn-action danger-btn"
+                              style={{ padding: "4px 12px" }}
+                            >
+                              Sil
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="admin-empty-state">
+                  <h3>Henüz tanımlı kupon yok.</h3>
+                  <p>Yukarıdaki formdan ilk indirim kuponunuzu oluşturabilirsiniz.</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* 8. CUSTOMERS DIRECTORY TAB */}
+        {tab === "customers" && (
+          <>
+            <header className="admin-page-header">
+              <div className="admin-page-header-left">
+                <span>MÜŞTERİ VERİTABANI</span>
+                <h1>Müşteri Rehberi & Analizi</h1>
+                <p>Mağazadan sipariş vermiş veya hesap oluşturmuş tüm müşterilerin iletişim ve sipariş geçmişi.</p>
+              </div>
+            </header>
+
+            <div className="admin-toolbar">
+              <div className="admin-search-input" style={{ maxWidth: 450 }}>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8" />
+                  <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+                <input
+                  value={customerSearch}
+                  onChange={(e) => setCustomerSearch(e.target.value)}
+                  placeholder="Müşteri adı, e-posta veya telefon ara..."
+                />
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--admin-text-dim)", fontSize: "0.85rem" }}>
+                <span>Toplam {customers.length} kayıtlı müşteri</span>
+              </div>
+            </div>
+
+            <div className="admin-card-list">
+              {filteredCustomers.length ? (
+                <div style={{ overflowX: "auto", background: "var(--admin-card-bg)", borderRadius: 12, border: "1px solid var(--admin-card-border)", padding: 16 }}>
+                  <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem", textAlign: "left" }}>
+                    <thead>
+                      <tr style={{ borderBottom: "1px solid var(--admin-card-border)", color: "var(--admin-text-dim)" }}>
+                        <th style={{ padding: "12px 10px" }}>MÜŞTERİ</th>
+                        <th style={{ padding: "12px 10px" }}>E-POSTA</th>
+                        <th style={{ padding: "12px 10px" }}>TELEFON</th>
+                        <th style={{ padding: "12px 10px" }}>SİPARİŞ SAYISI</th>
+                        <th style={{ padding: "12px 10px" }}>TOPLAM HARCAMA</th>
+                        <th style={{ padding: "12px 10px" }}>SON SİPARİŞ</th>
+                        <th style={{ padding: "12px 10px", textAlign: "right" }}>İLETİŞİM</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredCustomers.map((cust) => {
+                        const cleanPhone = cust.phone.replace(/[^0-9]/g, "");
+                        const waPhone = cleanPhone.startsWith("0") ? `9${cleanPhone}` : cleanPhone.startsWith("90") ? cleanPhone : `90${cleanPhone}`;
+                        return (
+                          <tr key={cust.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                            <td style={{ padding: "14px 10px", fontWeight: 700, color: "#fff" }}>{cust.fullName}</td>
+                            <td style={{ padding: "14px 10px", color: "var(--admin-text-dim)" }}>{cust.email}</td>
+                            <td style={{ padding: "14px 10px" }}>{cust.phone || "—"}</td>
+                            <td style={{ padding: "14px 10px", fontWeight: 700 }}>
+                              <span className="admin-status-badge status-badge-processing">{cust.orderCount} Sipariş</span>
+                            </td>
+                            <td style={{ padding: "14px 10px", fontWeight: 800, color: "var(--admin-gold)" }}>
+                              {formatMoney(cust.totalSpent)}
+                            </td>
+                            <td style={{ padding: "14px 10px", color: "var(--admin-text-dim)", fontSize: "0.78rem" }}>
+                              {cust.lastOrderDate ? new Date(cust.lastOrderDate).toLocaleDateString("tr-TR") : "—"}
+                            </td>
+                            <td style={{ padding: "14px 10px", textAlign: "right" }}>
+                              {cust.phone ? (
+                                <a
+                                  href={`https://wa.me/${waPhone}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="admin-btn-action"
+                                  style={{ textDecoration: "none", color: "#22c55e", borderColor: "rgba(34,197,94,0.3)" }}
+                                  title="WhatsApp ile mesaj aç"
+                                >
+                                  💬 WhatsApp
+                                </a>
+                              ) : null}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="admin-empty-state">
+                  <h3>Müşteri kaydı bulunamadı.</h3>
+                  <p>Arama filtrenizi değiştirerek tekrar deneyebilirsiniz.</p>
+                </div>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* 9. SITE & OPERATIONAL SETTINGS TAB */}
+        {tab === "settings" && (
+          <>
+            <header className="admin-page-header">
+              <div className="admin-page-header-left">
+                <span>YÖNETİM & YAPILANDIRMA</span>
+                <h1>Site & Operasyonel Ayarlar</h1>
+                <p>İletişim numaraları, kargo eşikleri, banka IBAN bilgileri ve bakım modunu buradan yönetin.</p>
+              </div>
+            </header>
+
+            <form onSubmit={handleSaveSettings} style={{ display: "grid", gap: 24, maxWidth: 900 }}>
+              {/* Card 1: İletişim & WhatsApp */}
+              <div className="admin-data-card">
+                <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 800 }}>İletişim & Danışma Hatları</h3>
+                <div className="admin-form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  <label>
+                    WhatsApp Sipariş Hattı
+                    <input name="site_whatsapp" defaultValue={settings.site_whatsapp || "+90 546 735 66 02"} required />
+                    <small style={{ color: "var(--admin-text-dim)", fontSize: "0.72rem" }}>Müşteri WhatsApp sipariş butonlarında kullanılan telefon.</small>
+                  </label>
+                  <label>
+                    Ofis / Müşteri Hizmetleri Telefonu
+                    <input name="site_phone" defaultValue={settings.site_phone || "+90 546 735 66 02"} required />
+                  </label>
+                  <label>
+                    Resmi E-Posta Adresi
+                    <input name="site_email" defaultValue={settings.site_email || "destek@marel.com.tr"} required />
+                  </label>
+                  <label>
+                    Firma / Showroom Adresi
+                    <input name="site_address" defaultValue={settings.site_address || "Elbistan / Kahramanmaraş"} />
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 2: Kargo & Teslimat Eşikleri */}
+              <div className="admin-data-card">
+                <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 800 }}>Kargo & Gönderi Ayarları</h3>
+                <div className="admin-form-grid" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+                  <label>
+                    Sabit Kargo Ücreti (TL)
+                    <input name="shipping_fee" type="number" defaultValue={settings.shipping_fee || "150"} required />
+                  </label>
+                  <label>
+                    Ücretsiz Kargo Limiti (TL)
+                    <input name="free_shipping_threshold" type="number" defaultValue={settings.free_shipping_threshold || "2000"} required />
+                    <small style={{ color: "var(--admin-text-dim)", fontSize: "0.72rem" }}>Bu tutar ve üzeri sepetlerde kargo bedava olur.</small>
+                  </label>
+                  <label>
+                    Varsayılan Kargo Firması
+                    <select name="default_cargo_company" defaultValue={settings.default_cargo_company || "yurtici"}>
+                      {CARGO_PROVIDERS.map((p) => (
+                        <option key={p.id} value={p.id}>{p.label}</option>
+                      ))}
+                    </select>
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 3: Banka Havale / EFT Bilgileri */}
+              <div className="admin-data-card">
+                <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 800 }}>Banka Havale / EFT Bilgileri</h3>
+                <div className="admin-form-grid" style={{ gridTemplateColumns: "1fr 1fr" }}>
+                  <label>
+                    Banka Adı
+                    <input name="bank_name" defaultValue={settings.bank_name || "Ziraat Bankası"} required />
+                  </label>
+                  <label>
+                    Hesap Sahibi / Alıcı Ünvanı
+                    <input name="bank_holder" defaultValue={settings.bank_holder || "Marel Perde Sistemleri San. Tic."} required />
+                  </label>
+                  <label className="span-2">
+                    IBAN Numarası
+                    <input name="bank_iban" defaultValue={settings.bank_iban || "TR33 0001 0001 2345 6789 0050 01"} required />
+                    <small style={{ color: "var(--admin-text-dim)", fontSize: "0.72rem" }}>Sipariş tamamlama ekranında müşteriye gösterilen resmi IBAN.</small>
+                  </label>
+                </div>
+              </div>
+
+              {/* Card 4: Bakım Modu */}
+              <div className="admin-data-card">
+                <h3 style={{ margin: "0 0 14px", fontSize: "1.05rem", fontWeight: 800 }}>Bakım Modu</h3>
+                <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", marginBottom: 14 }}>
+                  <input name="maintenance_mode" type="checkbox" defaultChecked={settings.maintenance_mode === "true"} style={{ width: 18, height: 18 }} />
+                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: settings.maintenance_mode === "true" ? "#ef4444" : "#fff" }}>
+                    Bakım Modunu Aktif Et (Site ziyaretçilere geçici bakım uyarısı gösterir)
+                  </span>
+                </label>
+                <label>
+                  Bakım Duyuru Mesajı
+                  <textarea
+                    name="maintenance_message"
+                    rows={2}
+                    defaultValue={settings.maintenance_message || "Sistemlerimizde planlı bakım çalışması yapılmaktadır. En kısa sürede hizmetinizdeyiz."}
+                  />
+                </label>
+              </div>
+
+              <div style={{ display: "flex", gap: 16, alignItems: "center" }}>
+                <button type="submit" disabled={settingsLoading} className="admin-btn-gold" style={{ height: 44, padding: "0 28px" }}>
+                  {settingsLoading ? "Kaydediliyor…" : "Ayarları Kaydet"}
+                </button>
+                {settingsSaved ? <span style={{ color: "#22c55e", fontWeight: 700 }}>✓ Ayarlar başarıyla güncellendi.</span> : null}
+              </div>
+            </form>
+          </>
+        )}
+
+        {/* MODAL: Sipariş Detayı & İmalat Kalemleri */}
+        {selectedOrder && (
+          <div
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: "rgba(0,0,0,0.8)",
+              backdropFilter: "blur(6px)",
+              zIndex: 9999,
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 20,
+            }}
+            onClick={(e) => {
+              if (e.target === e.currentTarget) setSelectedOrder(null);
+            }}
+          >
+            <div
+              style={{
+                background: "var(--admin-card-bg)",
+                border: "1px solid var(--admin-gold)",
+                borderRadius: 16,
+                maxWidth: 860,
+                width: "100%",
+                maxHeight: "92vh",
+                overflowY: "auto",
+                boxShadow: "0 25px 60px rgba(0,0,0,0.8)",
+                padding: 28,
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20, borderBottom: "1px solid var(--admin-card-border)", paddingBottom: 16 }}>
+                <div>
+                  <span style={{ color: "var(--admin-gold)", fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.1em" }}>SİPARİŞ DETAYI</span>
+                  <h2 style={{ margin: "4px 0", fontSize: "1.6rem", fontWeight: 900 }}>{selectedOrder.orderNumber}</h2>
+                  <small style={{ color: "var(--admin-text-dim)" }}>
+                    Oluşturulma: {new Date(selectedOrder.createdAt).toLocaleString("tr-TR")}
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedOrder(null)}
+                  style={{
+                    background: "rgba(255,255,255,0.08)",
+                    border: 0,
+                    color: "#fff",
+                    fontSize: "1.2rem",
+                    borderRadius: "50%",
+                    width: 36,
+                    height: 36,
+                    cursor: "pointer",
+                    display: "grid",
+                    placeItems: "center",
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Two Column Summary */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16, marginBottom: 24 }}>
+                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h4 style={{ margin: "0 0 10px", fontSize: "0.85rem", color: "var(--admin-gold)" }}>MÜŞTERİ BİLGİLERİ</h4>
+                  <p style={{ margin: "4px 0", fontSize: "0.9rem" }}><strong>Ad Soyad:</strong> {selectedOrder.customerName}</p>
+                  <p style={{ margin: "4px 0", fontSize: "0.85rem" }}><strong>Telefon:</strong> {selectedOrder.phone || "—"}</p>
+                  <p style={{ margin: "4px 0", fontSize: "0.85rem" }}><strong>E-posta:</strong> {selectedOrder.email}</p>
+                  <p style={{ margin: "8px 0 0", fontSize: "0.82rem", color: "var(--admin-text-dim)", lineHeight: 1.5 }}>
+                    <strong>Teslimat Adresi:</strong><br />
+                    {selectedOrder.shippingAddress} {selectedOrder.district ? `(${selectedOrder.district} / ${selectedOrder.city})` : ""}
+                  </p>
+                </div>
+
+                <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.06)" }}>
+                  <h4 style={{ margin: "0 0 10px", fontSize: "0.85rem", color: "var(--admin-gold)" }}>ÖDEME & DURUM</h4>
+                  <p style={{ margin: "4px 0", fontSize: "0.85rem" }}>
+                    <strong>Ödeme Şekli:</strong> {selectedOrder.paymentMethod === "cash_on_delivery" ? "Kapıda Ödeme" : "Banka Havale / EFT"}
+                  </p>
+                  <p style={{ margin: "4px 0", fontSize: "0.85rem" }}>
+                    <strong>Sipariş Durumu:</strong>{" "}
+                    <span className={`admin-status-badge status-badge-${selectedOrder.status}`}>
+                      {orderStatusNames[selectedOrder.status] ?? selectedOrder.status}
+                    </span>
+                  </p>
+                  <p style={{ margin: "4px 0", fontSize: "0.85rem" }}>
+                    <strong>Toplam Tutar:</strong>{" "}
+                    <span style={{ fontSize: "1.2rem", fontWeight: 900, color: "var(--admin-gold)" }}>
+                      {formatMoney(selectedOrder.total, selectedOrder.currency)}
+                    </span>
+                  </p>
+                  {selectedOrder.notes ? (
+                    <p style={{ margin: "8px 0 0", fontSize: "0.82rem", color: "#38bdf8", background: "rgba(56,189,248,0.1)", padding: 6, borderRadius: 6 }}>
+                      <strong>Müşteri Notu:</strong> {selectedOrder.notes}
+                    </p>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Items / Imalat List */}
+              <div style={{ marginBottom: 24 }}>
+                <h4 style={{ margin: "0 0 12px", fontSize: "0.95rem", fontWeight: 800 }}>
+                  Sipariş Kalemleri & İmalat Ölçüleri ({selectedOrder.items?.length || 0} Adet Ürün)
+                </h4>
+                {selectedOrder.items && selectedOrder.items.length > 0 ? (
+                  <div style={{ display: "grid", gap: 10 }}>
+                    {selectedOrder.items.map((it, idx) => {
+                      let cfg: Record<string, any> = {};
+                      try {
+                        cfg = typeof it.configuration === "string" ? JSON.parse(it.configuration) : it.configuration || {};
+                      } catch {}
+
+                      return (
+                        <div
+                          key={it.id || idx}
+                          style={{
+                            background: "rgba(255,255,255,0.04)",
+                            border: "1px solid rgba(255,255,255,0.08)",
+                            borderRadius: 10,
+                            padding: 14,
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: 12,
+                          }}
+                        >
+                          <div>
+                            <strong style={{ fontSize: "0.95rem", color: "#fff" }}>{it.name}</strong>
+                            <div style={{ fontSize: "0.78rem", color: "var(--admin-text-dim)", marginTop: 4 }}>
+                              SKU: {it.sku || "MRL"} · Adet: <strong style={{ color: "#fff" }}>{it.quantity}</strong> · Birim: {formatMoney(it.unitPrice)}
+                            </div>
+                            {cfg.width || cfg.height || cfg.fabric || cfg.profileColor ? (
+                              <div
+                                style={{
+                                  display: "flex",
+                                  gap: 8,
+                                  flexWrap: "wrap",
+                                  marginTop: 8,
+                                }}
+                              >
+                                {cfg.width && cfg.height ? (
+                                  <span style={{ background: "rgba(217,183,95,0.15)", color: "var(--admin-gold)", padding: "3px 8px", borderRadius: 6, fontSize: "0.75rem", fontWeight: 700 }}>
+                                    📐 Ölçü: {cfg.width} x {cfg.height} cm
+                                  </span>
+                                ) : null}
+                                {cfg.fabric ? (
+                                  <span style={{ background: "rgba(255,255,255,0.08)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: "0.75rem" }}>
+                                    Kumaş: {cfg.fabric}
+                                  </span>
+                                ) : null}
+                                {cfg.profileColor ? (
+                                  <span style={{ background: "rgba(255,255,255,0.08)", color: "#fff", padding: "3px 8px", borderRadius: 6, fontSize: "0.75rem" }}>
+                                    Profil: {cfg.profileColor}
+                                  </span>
+                                ) : null}
+                              </div>
+                            ) : null}
+                          </div>
+                          <strong style={{ fontSize: "1.05rem", color: "var(--admin-gold)" }}>
+                            {formatMoney(it.unitPrice * it.quantity)}
+                          </strong>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p style={{ color: "var(--admin-text-dim)", fontSize: "0.85rem" }}>Kalem detayları bulunamadı.</p>
+                )}
+              </div>
+
+              {/* Instant WhatsApp Triggers */}
+              <div style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 24, borderTop: "1px solid var(--admin-card-border)", paddingTop: 18 }}>
+                <button
+                  type="button"
+                  onClick={() => sendWhatsAppOfficeNotice(selectedOrder)}
+                  className="admin-btn-secondary"
+                  style={{ flex: 1, minHeight: 42, background: "rgba(6,95,70,0.4)", borderColor: "#059669", color: "#a7f3d0" }}
+                >
+                  🏢 Atölyeye WhatsApp ile İmalat Bilgisi Gönder
+                </button>
+                {selectedOrder.phone ? (
+                  <button
+                    type="button"
+                    onClick={() => sendWhatsAppCargoNotice(selectedOrder)}
+                    className="admin-btn-secondary"
+                    style={{ flex: 1, minHeight: 42, background: "rgba(37,99,235,0.2)", borderColor: "#2563eb", color: "#93c5fd" }}
+                  >
+                    💬 Müşteriye Kargo / Takip Bildirimi Aç
+                  </button>
+                ) : null}
+              </div>
+
+              {/* Order Update Form Inside Modal */}
+              <form
+                onSubmit={async (e) => {
+                  await updateOrder(e, selectedOrder.id);
+                  setSelectedOrder(null);
+                }}
+                className="admin-cargo-form"
+                style={{ background: "rgba(0,0,0,0.3)", padding: 18, borderRadius: 10 }}
+              >
+                <strong style={{ color: "#fff", fontSize: "0.85rem" }}>Sipariş & Kargo Bilgilerini Güncelle</strong>
+                <div className="admin-cargo-form-row">
+                  <select name="status" defaultValue={selectedOrder.status}>
+                    {orderStatuses.map((st) => (
+                      <option key={st} value={st}>{orderStatusNames[st] ?? st}</option>
+                    ))}
+                  </select>
+                  <select name="cargoCompany" defaultValue={selectedOrder.cargoCompany ?? "yurtici"}>
+                    {CARGO_PROVIDERS.map((p) => (
+                      <option key={p.id} value={p.id}>{p.label}</option>
+                    ))}
+                  </select>
+                </div>
+                <input name="trackingNumber" defaultValue={selectedOrder.trackingNumber ?? ""} placeholder="Kargo Takip Barkod No" />
+                <input name="note" defaultValue={selectedOrder.notes ?? ""} placeholder="Sipariş / atölye notu" />
+                <div style={{ display: "flex", gap: 10, marginTop: 6 }}>
+                  <button type="submit" className="admin-btn-gold" style={{ height: 40, flex: 1 }}>
+                    Değişiklikleri Kaydet
+                  </button>
+                  <button type="button" onClick={() => setSelectedOrder(null)} className="admin-btn-secondary" style={{ height: 40 }}>
+                    Kapat
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+        {/* Full-Featured Product Editor / Creator Modal */}
+        <AdminProductEditorModal
+          isOpen={isProductModalOpen}
+          product={editingProduct}
+          onClose={closeProductModal}
+          onSave={handleSaveProduct}
+          existingCategories={categories}
+          existingBrands={brands}
+          existingRootCategories={rootCategories}
+        />
       </main>
     </div>
   );

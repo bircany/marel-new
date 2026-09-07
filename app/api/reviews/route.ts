@@ -19,17 +19,21 @@ export async function POST(request: Request) {
     rating?: number;
     title?: string;
     body?: string;
+    comment?: string;
+    authorName?: string;
+    name?: string;
   };
   const rating = Math.round(Number(body.rating));
   const title = String(body.title ?? "").trim().slice(0, 150);
-  const comment = String(body.body ?? "").trim().slice(0, 1000);
+  const comment = String(body.body ?? body.comment ?? "").trim().slice(0, 1000);
+  const authorName = String(body.authorName ?? body.name ?? "").trim().slice(0, 80) || "Müşteri";
   const productIdRaw = String(body.productId ?? "").trim();
   const productId = productIdRaw ? Number(productIdRaw) : null;
   if (rating < 1 || rating > 5) {
     return Response.json({ error: "Geçerli bir puan (1-5) gereklidir." }, { status: 400 });
   }
   if (!title && !comment) return Response.json({ error: "Başlık veya yorum içeriği gereklidir." }, { status: 400 });
-  const payload: Record<string, unknown> = { rating, title: title || null, comment: comment || null };
+  const payload: Record<string, unknown> = { rating, title: title || null, comment: comment || null, author_name: authorName };
   if (productId) payload.product_id = productId;
 
   const result = await laravel<ReviewPayload>("/reviews", { method: "POST", token: true, body: JSON.stringify(payload) });
@@ -38,26 +42,39 @@ export async function POST(request: Request) {
       const db = getDb();
       const now = new Date().toISOString();
       const newId = "rev-" + Date.now();
+      let userId = "usr-guest";
+      if (authorName && authorName !== "Müşteri") {
+        userId = `usr-${crypto.randomUUID().slice(0, 8)}`;
+        try {
+          await db
+            .prepare("INSERT OR IGNORE INTO users (id, email, full_name, role, created_at, updated_at) VALUES (?, ?, ?, 'customer', ?, ?)")
+            .bind(userId, `${userId}@marel-guest.com`, authorName, now, now)
+            .run();
+        } catch {}
+      }
+
       await db
         .prepare(
-          "INSERT INTO reviews (id, user_id, product_id, rating, title, body, status, admin_reply, created_at, updated_at) VALUES (?, 'usr-guest', ?, ?, ?, ?, 'pending', '', ?, ?)"
+          "INSERT INTO reviews (id, user_id, product_id, rating, title, body, status, admin_reply, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'approved', '', ?, ?)"
         )
-        .bind(newId, productIdRaw || null, rating, title || "Müşteri Yorumu", comment || "", now, now)
+        .bind(newId, userId, productIdRaw || null, rating, title || "Müşteri Değerlendirmesi", comment || "", now, now)
         .run();
 
       return Response.json(
         {
           id: Date.now(),
           rating,
-          title: title || "Müşteri Yorumu",
+          title: title || "Müşteri Değerlendirmesi",
           comment: comment || "",
-          status: "pending",
+          status: "approved",
           is_verified_purchase: true,
+          user: { name: authorName, avatar: null },
           created_at: now,
         },
         { status: 201 }
       );
     } catch {
+
       return Response.json({ error: result.message }, { status: result.status });
     }
   }

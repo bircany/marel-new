@@ -71,18 +71,34 @@ export default function ContactPage() {
               {/* Direct Support Channels */}
               <div className="contact-channels-grid">
                 <article className="channel-box">
-                  <span className="channel-icon">📐</span>
+                  <span className="channel-icon">📍</span>
                   <div>
-                    <strong>Ölçü & Kumaş Desteği</strong>
-                    <small>Pencerenize uygun sistem ve kumaş kartelası seçimi</small>
+                    <strong>İmalat & Atölye Adresi</strong>
+                    <small>Sanayi Sitesi, Marel İmalat Atölyesi, Elbistan / Kahramanmaraş</small>
                   </div>
                 </article>
 
                 <article className="channel-box">
-                  <span className="channel-icon">📦</span>
+                  <span className="channel-icon">📞</span>
                   <div>
-                    <strong>Sipariş & Kargo Takibi</strong>
-                    <small>Atölye üretim durumu ve anlaşmalı kargo sevkiyatı</small>
+                    <strong>Müşteri Hizmetleri & WhatsApp</strong>
+                    <small>+90 546 735 66 02 · info@marelpliseperde.com</small>
+                  </div>
+                </article>
+
+                <article className="channel-box">
+                  <span className="channel-icon">📐</span>
+                  <div>
+                    <strong>Ölçü & Kumaş Desteği</strong>
+                    <small>Pencerenize özel milimetrik ölçü ve renk kartelası danışmanlığı</small>
+                  </div>
+                </article>
+
+                <article className="channel-box">
+                  <span className="channel-icon">🚚</span>
+                  <div>
+                    <strong>Yurtiçi Kargo Takibi</strong>
+                    <small>Türkiye geneli sigortalı ve korunaklı kargo teslimatı</small>
                   </div>
                 </article>
 
@@ -98,7 +114,7 @@ export default function ContactPage() {
                   <span className="channel-icon">🛡️</span>
                   <div>
                     <strong>Garanti & Teknik Destek</strong>
-                    <small>2 yıl parça ve mekanizma garantisi</small>
+                    <small>2 yıl parça, ip ve mekanizma garantisi</small>
                   </div>
                 </article>
               </div>

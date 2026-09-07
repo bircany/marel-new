@@ -13,12 +13,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/urunler",
     "/siparis-takip",
     "/iletisim",
+    "/duyurular",
     "/gizlilik-politikasi",
     "/iade-ve-iptal-kosullari",
     "/kvkk-aydinlatma-metni",
     "/cerez-politikasi",
     "/mesafeli-satis-sozlesmesi",
-    "/gizlilik-ve-iade-kosullari",
+    "/sss",
   ];
 
   const categoryEntries = Object.values(categoryPages).map((category) => ({

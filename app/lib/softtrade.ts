@@ -1,4 +1,3 @@
-import { env } from "cloudflare:workers";
 import type { CatalogProduct, ContactMessageRecord, OrderRecord, ReviewRecord } from "@/db";
 import { listProducts as dbListProducts, getProductBySlug as dbGetProductBySlug, getDb } from "@/db";
 
@@ -8,7 +7,7 @@ type RuntimeEnv = {
   SOFTRADE_ADMIN_PASSWORD?: string;
 };
 
-const runtime = env as unknown as RuntimeEnv;
+const runtime = (typeof process !== "undefined" ? (process.env as unknown as RuntimeEnv) : {}) as RuntimeEnv;
 
 function fromProcess(name: string): string | undefined {
   if (typeof process === "undefined") return undefined;
@@ -468,6 +467,22 @@ export async function stListApprovedReviews(limit = 6): Promise<SoftTradeReview[
     } catch {
       return [];
     }
+  }
+}
+
+export async function stGetProductReviews(productId: string): Promise<ReviewRecord[]> {
+  try {
+    const db = getDb();
+    const { results } = await db
+      .prepare(
+        "SELECT r.id, r.user_id AS userId, r.product_id AS productId, COALESCE(p.name, 'Ürün') AS productName, COALESCE(u.full_name, 'Müşteri') AS authorName, r.rating, r.title, r.body, r.status, r.admin_reply AS adminReply, r.created_at AS createdAt, r.updated_at AS updatedAt FROM reviews r LEFT JOIN products p ON r.product_id = p.id LEFT JOIN users u ON r.user_id = u.id WHERE (r.product_id = ? OR r.product_id IS NULL) AND r.status = 'approved' ORDER BY r.created_at DESC"
+      )
+      .bind(productId)
+      .all<ReviewRecord>();
+    return results;
+  } catch (err) {
+    console.error("Failed to get product reviews:", err);
+    return [];
   }
 }
 

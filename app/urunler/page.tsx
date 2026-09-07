@@ -2,7 +2,7 @@ import Link from "next/link";
 import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { CatalogBrowser } from "../components/catalog-browser";
-import { stListProducts } from "@/app/lib/softtrade";
+import { listProducts, type CatalogProduct } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +20,8 @@ export default async function ProductsPage({
   searchParams?: Promise<{ kategori?: string; q?: string }>;
 }) {
   const params = await searchParams;
-  const products = await stListProducts(false, "Marel");
+  const products = await listProducts(false);
+
 
   return (
     <>

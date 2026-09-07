@@ -61,12 +61,19 @@ export const orders = sqliteTable("orders", {
   customerName: text("customer_name").notNull(),
   phone: text("phone").notNull(),
   status: text("status").notNull().default("pending"),
+  paymentMethod: text("payment_method").notNull().default("bank_transfer"),
+  paymentStatus: text("payment_status").notNull().default("pending"),
   subtotal: integer("subtotal").notNull(),
   shipping: integer("shipping").notNull().default(0),
   total: integer("total").notNull(),
   currency: text("currency").notNull().default("TRY"),
+  city: text("city"),
+  district: text("district"),
   shippingAddress: text("shipping_address").notNull(),
   notes: text("notes").notNull().default(""),
+  cargoCompany: text("cargo_company"),
+  trackingNumber: text("tracking_number"),
+  trackingUrl: text("tracking_url"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [
@@ -141,3 +148,23 @@ export const contactMessages = sqliteTable("contact_messages", {
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [index("idx_contact_messages_status_created").on(table.status, table.createdAt)]);
+
+export const coupons = sqliteTable("coupons", {
+  id: text("id").primaryKey(),
+  code: text("code").notNull(),
+  discountType: text("discount_type").notNull().default("PERCENT"),
+  discountValue: integer("discount_value").notNull(),
+  minimumSubtotal: integer("minimum_subtotal").notNull().default(0),
+  usageLimit: integer("usage_limit"),
+  usageCount: integer("usage_count").notNull().default(0),
+  active: integer("active", { mode: "boolean" }).notNull().default(true),
+  expiresAt: text("expires_at"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+}, (table) => [uniqueIndex("idx_coupons_code").on(table.code)]);
+
+export const settings = sqliteTable("settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull().default(""),
+  updatedAt: text("updated_at").notNull(),
+});

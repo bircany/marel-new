@@ -104,7 +104,7 @@ export function OrderTracker({ user }: { user: LaravelUser }) {
     };
   }, []);
 
-  const open = async (id: number) => {
+  const open = async (id: number | string) => {
     setMessage("");
     setCargo(null);
     const response = await fetch(`/api/orders/${id}`, { cache: "no-store" });

@@ -55,14 +55,23 @@ export async function GET(request: Request) {
       }
     }
 
+    // Find matching categories
+    const matchingCategories = Array.from(
+      new Set(
+        allProducts
+          .map((p) => p.category)
+          .filter((c) => c && c.toLowerCase().includes(q))
+      )
+    ).slice(0, 5);
+
     // Sort by score descending, then by name
     scored.sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name, "tr"));
 
-    const limit = Number(searchParams.get("limit")) || 8;
+    const limit = Number(searchParams.get("limit")) || 12;
     const results = scored.slice(0, limit).map((s) => s.product);
 
-    return Response.json({ results });
+    return Response.json({ results, categories: matchingCategories });
   } catch {
-    return Response.json({ results: [] }, { status: 500 });
+    return Response.json({ results: [], categories: [] }, { status: 500 });
   }
 }

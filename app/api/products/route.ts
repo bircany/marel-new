@@ -1,5 +1,5 @@
-import { stListProducts } from "@/app/lib/softtrade";
+import { listProducts } from "@/db";
 
 export async function GET() {
-  return Response.json({ products: await stListProducts(false, "Marel") });
+  return Response.json({ products: await listProducts(false) });
 }

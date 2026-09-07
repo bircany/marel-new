@@ -14,7 +14,7 @@ export type FilterState = {
   minPrice: string;
   maxPrice: string;
   inStockOnly: boolean;
-  sortBy: "recommended" | "price_asc" | "price_desc" | "newest";
+  sortBy: "recommended" | "price_asc" | "price_desc" | "discount_asc" | "discount_desc" | "oldest" | "newest";
 };
 
 const COLOR_FILTERS = [
@@ -46,6 +46,7 @@ export function CatalogBrowser({
     sortBy: "recommended",
   });
 
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [addingId, setAddingId] = useState<string | null>(null);
   const [addedToast, setAddedToast] = useState<string | null>(null);
@@ -104,10 +105,18 @@ export function CatalogBrowser({
       .sort((a, b) => {
         const priceA = (a.salePrice ?? a.price) / 100;
         const priceB = (b.salePrice ?? b.price) / 100;
+        const discountA = a.price && a.salePrice ? ((a.price - a.salePrice) / a.price) * 100 : 0;
+        const discountB = b.price && b.salePrice ? ((b.price - b.salePrice) / b.price) * 100 : 0;
+
         if (filters.sortBy === "price_asc") return priceA - priceB;
         if (filters.sortBy === "price_desc") return priceB - priceA;
+        if (filters.sortBy === "discount_asc") return discountA - discountB;
+        if (filters.sortBy === "discount_desc") return discountB - discountA;
         if (filters.sortBy === "newest") {
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+        }
+        if (filters.sortBy === "oldest") {
+          return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
         }
         // Recommended (Featured first)
         return (b.featured ?? 0) - (a.featured ?? 0);
@@ -164,7 +173,7 @@ export function CatalogBrowser({
     Boolean(filters.search);
 
   return (
-    <div className="catalog-browser-layout">
+    <div className="kamatas-catalog-layout">
       {/* Mobile Filter Toggle */}
       <div className="catalog-mobile-bar">
         <button
@@ -196,259 +205,121 @@ export function CatalogBrowser({
       </div>
 
       {/* Left Sidebar Filter Panel */}
-      <aside className={`catalog-filters-sidebar ${mobileFilterOpen ? "mobile-open" : ""}`}>
-        <div className="filter-sidebar-header">
+      <aside className={`kamatas-catalog-sidebar ${mobileFilterOpen ? "mobile-open" : ""}`}>
+        <div className="filter-sidebar-header mobile-only">
           <h3>Filtreler</h3>
-          {hasActiveFilters ? (
-            <button type="button" className="filter-reset-btn" onClick={resetFilters}>
-              Temizle
-            </button>
-          ) : null}
-          {mobileFilterOpen ? (
-            <button
-              type="button"
-              className="filter-close-btn"
-              onClick={() => setMobileFilterOpen(false)}
-            >
-              ✕
-            </button>
-          ) : null}
+          <button type="button" onClick={() => setMobileFilterOpen(false)}>✕</button>
         </div>
 
-        {/* Search within catalog */}
-        <div className="filter-group">
-          <div className="filter-search-input">
-            <input
-              type="text"
-              placeholder="Ürün ara…"
-              value={filters.search}
-              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-            />
-            {filters.search ? (
-              <button type="button" onClick={() => setFilters({ ...filters, search: "" })}>✕</button>
-            ) : null}
-          </div>
+        <div className="kamatas-sidebar-widget kamatas-search-widget">
+          <input
+            type="text"
+            placeholder="Ne aramıştınız?"
+            value={filters.search}
+            onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+            className="kamatas-sidebar-search-input"
+          />
         </div>
 
-        {/* 1. Kategori Filtresi */}
-        <div className="filter-group">
-          <h4>Kategoriler</h4>
-          <ul className="filter-list">
+        <div className="kamatas-sidebar-widget">
+          <h4 className="widget-title">Alt Kategoriler</h4>
+          <ul className="widget-list">
             <li>
-              <label className="filter-checkbox-label">
+              <label>
                 <input
                   type="radio"
-                  name="filter-cat"
+                  name="subcat"
                   checked={filters.category === "all"}
                   onChange={() => setFilters({ ...filters, category: "all" })}
                 />
-                <span>Tüm Kategoriler</span>
-                <em>({products.length})</em>
+                <span>Tümü</span> <em>({products.length})</em>
               </label>
             </li>
             {categoriesList.map((cat) => (
               <li key={cat}>
-                <label className="filter-checkbox-label">
+                <label>
                   <input
                     type="radio"
-                    name="filter-cat"
-                    checked={filters.category.toLowerCase() === cat.toLowerCase()}
+                    name="subcat"
+                    checked={filters.category === cat}
                     onChange={() => setFilters({ ...filters, category: cat })}
                   />
-                  <span>{cat}</span>
-                  <em>({categoryCounts[cat]})</em>
+                  <span>{cat}</span> <em>({categoryCounts[cat]})</em>
                 </label>
               </li>
             ))}
           </ul>
         </div>
-
-        {/* 2. Renk Filtresi */}
-        <div className="filter-group">
-          <h4>Renk</h4>
-          <ul className="filter-list">
-            {COLOR_FILTERS.map((c) => (
-              <li key={c.id}>
-                <label className="filter-checkbox-label">
-                  <input
-                    type="radio"
-                    name="filter-color"
-                    checked={filters.color === c.id}
-                    onChange={() => setFilters({ ...filters, color: c.id })}
-                  />
-                  <span>{c.name}</span>
-                </label>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        {/* 3. Fiyat Aralığı */}
-        <div className="filter-group">
-          <h4>Fiyat (₺)</h4>
-          <div className="filter-price-inputs">
-            <input
-              type="number"
-              placeholder="Min"
-              value={filters.minPrice}
-              onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
-            />
-            <span>-</span>
-            <input
-              type="number"
-              placeholder="Max"
-              value={filters.maxPrice}
-              onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
-            />
-          </div>
-        </div>
-
-        {/* 4. Stok Durumu */}
-        <div className="filter-group">
-          <label className="filter-checkbox-label">
-            <input
-              type="checkbox"
-              checked={filters.inStockOnly}
-              onChange={(e) => setFilters({ ...filters, inStockOnly: e.target.checked })}
-            />
-            <span>Sadece Stokta Olanlar</span>
-          </label>
-        </div>
-
-        {mobileFilterOpen ? (
-          <button
-            type="button"
-            className="filter-apply-mobile-btn"
-            onClick={() => setMobileFilterOpen(false)}
-          >
-            Filtreleri Uygula ({filteredProducts.length} Ürün)
-          </button>
-        ) : null}
       </aside>
 
       {/* Right Main Catalog Content */}
-      <div className="catalog-main-content">
-        {/* Top Control Bar */}
-        <div className="catalog-top-bar">
-          <span className="catalog-product-count">
-            <strong>{filteredProducts.length}</strong> ürün listeleniyor
-          </span>
+      <div className="kamatas-catalog-main">
+        {/* Kamatas Top Sorting Tabs */}
+        <div className="kamatas-sorting-tabs">
+          <button className={filters.sortBy === 'recommended' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'recommended' })}>Öne Çıkanlar</button>
+          <button className={filters.sortBy === 'price_asc' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'price_asc' })}>Artan Fiyat</button>
+          <button className={filters.sortBy === 'price_desc' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'price_desc' })}>Azalan Fiyat</button>
+          <button className={filters.sortBy === 'discount_asc' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'discount_asc' })}>Artan İndirim</button>
+          <button className={filters.sortBy === 'discount_desc' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'discount_desc' })}>Azalan İndirim</button>
+          <button className={filters.sortBy === 'oldest' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'oldest' })}>İlk Eklenen</button>
+          <button className={filters.sortBy === 'newest' ? 'active' : ''} onClick={() => setFilters({ ...filters, sortBy: 'newest' })}>Son Eklenen</button>
 
-          <div className="catalog-sort-wrapper">
-            <label>Sırala:</label>
-            <select
-              value={filters.sortBy}
-              onChange={(e) => setFilters({ ...filters, sortBy: e.target.value as FilterState["sortBy"] })}
-              className="catalog-sort-select desktop"
-            >
-              <option value="recommended">Önerilen Sıralama</option>
-              <option value="price_asc">Fiyat: Düşükten Yükseğe</option>
-              <option value="price_desc">Fiyat: Yüksekten Düşüğe</option>
-              <option value="newest">En Yeniler</option>
-            </select>
+          <div className="kamatas-view-switcher">
+            <button type="button" className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`} onClick={() => setViewMode('grid')}>
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </button>
+            <button type="button" className={`view-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => setViewMode('list')}>
+              <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" strokeWidth="2" fill="none"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
           </div>
         </div>
 
-        {/* Active Filter Badges */}
-        {hasActiveFilters ? (
-          <div className="active-filters-strip">
-            {filters.search ? (
-              <span className="active-filter-tag">
-                &ldquo;{filters.search}&rdquo;
-                <button type="button" onClick={() => setFilters({ ...filters, search: "" })}>×</button>
-              </span>
-            ) : null}
-            {filters.category !== "all" ? (
-              <span className="active-filter-tag">
-                {filters.category}
-                <button type="button" onClick={() => setFilters({ ...filters, category: "all" })}>×</button>
-              </span>
-            ) : null}
-            {filters.color !== "all" ? (
-              <span className="active-filter-tag">
-                {filters.color}
-                <button type="button" onClick={() => setFilters({ ...filters, color: "all" })}>×</button>
-              </span>
-            ) : null}
-            {filters.minPrice || filters.maxPrice ? (
-              <span className="active-filter-tag">
-                {filters.minPrice || "0"}₺ - {filters.maxPrice || "∞"}₺
-                <button type="button" onClick={() => setFilters({ ...filters, minPrice: "", maxPrice: "" })}>×</button>
-              </span>
-            ) : null}
-            <button type="button" className="clear-all-text-btn" onClick={resetFilters}>
-              Temizle
-            </button>
-          </div>
-        ) : null}
-
-        {/* Product Cards Grid — Clean Simple Cards */}
-        <div className="catalog-grid">
+        {/* Product Cards Grid — Kamatas Match */}
+        <div className={`kamatas-product-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
           {filteredProducts.length ? (
             filteredProducts.map((product) => {
               const effectivePrice = product.salePrice ?? product.price;
               return (
-                <article className="catalog-card" key={product.id}>
-                  <Link href={`/urunler/${product.slug}`} className="catalog-card-image-wrap">
+                <Link href={`/urunler/${product.slug}`} className="kamatas-product-card" key={product.id}>
+                  <div className="k-card-image">
+                    <div className="kamatas-badge-taksit">
+                      PEŞİN<br/>FİYATINA<br/><b>3 TAKSİT</b>
+                    </div>
                     <Image
                       unoptimized
                       src={product.image || "/images/catalog/diamond.webp"}
                       alt={product.name}
                       fill
                       sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                      className="catalog-card-image"
+                      style={{ objectFit: 'contain' }}
                     />
-                    {product.salePrice && product.salePrice < product.price ? (
-                      <span className="card-badge red">İndirim</span>
-                    ) : null}
-                  </Link>
-
-                  <div className="catalog-card-body">
-                    <span className="card-category-tag">{product.category}</span>
-                    <h3 className="card-title">
-                      <Link href={`/urunler/${product.slug}`}>{product.name}</Link>
-                    </h3>
-
-                    <div className="card-price-row">
-                      <div className="price-block">
-                        <strong>{formatMoney(effectivePrice, product.currency)}</strong>
-                        {product.salePrice && product.salePrice < product.price ? (
-                          <del>{formatMoney(product.price, product.currency)}</del>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    <div className="card-actions-row">
-                      <button
-                        type="button"
-                        className={`card-add-cart-btn ${addingId === product.id ? "loading" : ""}`}
-                        disabled={addingId === product.id || product.stock <= 0}
-                        onClick={(e) => handleQuickAdd(product, e)}
-                      >
-                        {addingId === product.id ? (
-                          "Ekleniyor…"
-                        ) : product.stock <= 0 ? (
-                          "Tükendi"
-                        ) : (
-                          <>+ Sepete Ekle</>
-                        )}
-                      </button>
-                    </div>
                   </div>
-                </article>
+                  <div className="k-card-body">
+                    <div className="k-card-brand">Marel</div>
+                    <h3 className="k-card-title">{product.name}</h3>
+                    <div className="k-card-stars">
+                      <span className="stars">★★★★★</span>
+                      <span className="reviews">{Math.floor(Math.random() * 100) + 1} Yorum</span>
+                    </div>
+                    <div className="k-card-price">
+                      {product.salePrice && product.salePrice < product.price ? (
+                        <>
+                          <span className="price-old">{formatMoney(product.price, product.currency)}</span>
+                          <span className="price-new">{formatMoney(product.salePrice, product.currency)}</span>
+                        </>
+                      ) : (
+                        <span className="price-new">{formatMoney(product.price, product.currency)}</span>
+                      )}
+                    </div>
+                    <div className="k-card-colors">1 Renk</div>
+                  </div>
+                </Link>
               );
             })
           ) : (
             <div className="catalog-empty-state">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="48" height="48">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <h3>Aradığınız kriterlere uygun ürün bulunamadı.</h3>
-              <p>Filtreleri sıfırlayarak tüm ürünleri görüntüleyebilirsiniz.</p>
-              <button type="button" className="btn-gold" onClick={resetFilters}>
-                Filtreleri Sıfırla
-              </button>
+              <p>Aradığınız kriterlere uygun ürün bulunamadı.</p>
+              <button type="button" onClick={resetFilters}>Filtreleri Sıfırla</button>
             </div>
           )}
         </div>

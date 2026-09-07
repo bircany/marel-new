@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { GlobalSearch } from "./global-search";
 import type { CatalogProduct } from "@/db";
 import { formatMoney } from "@/app/lib/commerce";
 
@@ -69,155 +70,6 @@ const menuGroups = [
   },
 ] as const;
 
-function SearchAutocomplete() {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [results, setResults] = useState<CatalogProduct[]>([]);
-  const [open, setOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [selectedIdx, setSelectedIdx] = useState(-1);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const search = useCallback(async (q: string) => {
-    if (q.length < 2) {
-      setResults([]);
-      setOpen(false);
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/search?q=${encodeURIComponent(q)}&limit=6`);
-      if (res.ok) {
-        const data = (await res.json()) as { results: CatalogProduct[] };
-        setResults(data.results);
-        setOpen(data.results.length > 0);
-      }
-    } catch {
-      /* ignore */
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const handleChange = (value: string) => {
-    setQuery(value);
-    setSelectedIdx(-1);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => search(value.trim()), 300);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setOpen(false);
-    if (query.trim()) {
-      router.push(`/urunler?q=${encodeURIComponent(query.trim())}`);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!open || results.length === 0) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setSelectedIdx((prev) => (prev < results.length - 1 ? prev + 1 : 0));
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setSelectedIdx((prev) => (prev > 0 ? prev - 1 : results.length - 1));
-    } else if (e.key === "Enter" && selectedIdx >= 0) {
-      e.preventDefault();
-      const product = results[selectedIdx];
-      if (product) {
-        setOpen(false);
-        router.push(`/urunler/${product.slug}`);
-      }
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  };
-
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className="header-search-wrapper" ref={wrapperRef}>
-      <form className="header-search" onSubmit={handleSubmit}>
-        <input
-          name="q"
-          type="search"
-          placeholder="Ürün, seri veya kategori ara…"
-          aria-label="Ürün ara"
-          autoComplete="off"
-          value={query}
-          onChange={(e) => handleChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          onFocus={() => {
-            if (results.length > 0) setOpen(true);
-          }}
-        />
-        <button type="submit" aria-label="Ara">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" width="18" height="18">
-            <circle cx="11" cy="11" r="7" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
-        </button>
-      </form>
-
-      {open && results.length > 0 && (
-        <div className="search-dropdown" role="listbox">
-          {results.map((product, idx) => {
-            const effectivePrice = product.salePrice ?? product.price;
-            return (
-              <Link
-                key={product.id}
-                href={`/urunler/${product.slug}`}
-                className={`search-dropdown-item${idx === selectedIdx ? " selected" : ""}`}
-                role="option"
-                aria-selected={idx === selectedIdx}
-                onClick={() => setOpen(false)}
-              >
-                <div className="search-item-img">
-                  <Image
-                    unoptimized
-                    src={product.image || "/images/kamatas-logo.png"}
-                    alt={product.name}
-                    width={44}
-                    height={44}
-                    style={{ objectFit: "cover", borderRadius: "6px" }}
-                  />
-                </div>
-                <div className="search-item-info">
-                  <span className="search-item-name">{product.name}</span>
-                  <span className="search-item-cat">{product.category}</span>
-                </div>
-                <strong className="search-item-price">{formatMoney(effectivePrice, product.currency)}</strong>
-              </Link>
-            );
-          })}
-          <Link
-            href={`/urunler?q=${encodeURIComponent(query.trim())}`}
-            className="search-dropdown-all"
-            onClick={() => setOpen(false)}
-          >
-            Tüm sonuçları gör →
-          </Link>
-        </div>
-      )}
-      {loading && query.length >= 2 && (
-        <div className="search-dropdown">
-          <div className="search-dropdown-loading">Aranıyor…</div>
-        </div>
-      )}
-    </div>
-  );
-}
-
 export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
   const [cartPulse, setCartPulse] = useState(false);
@@ -269,17 +121,30 @@ export function SiteHeader() {
   return (
     <>
       <div className="benefit-bar" aria-label="Alışveriş avantajları">
-        <span>HAVALEDE EK %10 İNDİRİM</span>
-        <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
-        <span>PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
+        <div className="benefit-marquee">
+          <span>HAVALEDE EK %10 İNDİRİM</span>
+          <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
+          <span>PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
+          <span aria-hidden="true">HAVALEDE EK %10 İNDİRİM</span>
+          <span aria-hidden="true">1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
+          <span aria-hidden="true">PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
+        </div>
       </div>
       <header className="shop-header">
         <div className="shop-header-main shop-container">
-          <Link className="shop-logo" href="/" aria-label="Kamataş ana sayfa">
-            <span className="kamatas-logo-text">Kamataş</span>
+          <Link className="shop-logo" href="/" aria-label="Marel ana sayfa">
+            <Image
+              unoptimized
+              src="/images/marel-logo.png"
+              alt="Marel Plise Perde"
+              width={260}
+              height={34}
+              priority
+              style={{ objectFit: "contain", width: "auto", height: "32px" }}
+            />
           </Link>
 
-          <nav className="category-nav header-primary-nav" aria-label="Ürün kategorileri">
+          <nav className="header-primary-nav" aria-label="Ürün kategorileri">
             {menuGroups.map((group) =>
               group.items.length > 0 ? (
                 <details className="nav-dropdown" key={group.label}>
@@ -305,9 +170,9 @@ export function SiteHeader() {
           </nav>
 
           <div className="shop-actions">
-            <SearchAutocomplete />
+            <GlobalSearch />
             <a
-              href="https://wa.me/905303842837"
+              href="https://wa.me/905467356602"
               target="_blank"
               rel="noreferrer"
               className="header-whatsapp-btn"

@@ -14,6 +14,7 @@ export type ServerCartItem = {
     stock: number;
     in_stock: boolean;
   } | null;
+  configuration?: string | Record<string, unknown>;
   unit_price: number;
   line_total: number;
 };

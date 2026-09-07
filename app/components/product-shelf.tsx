@@ -80,7 +80,7 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
               style={{ objectPosition: product.imagePosition ?? "center" }}
             />
             {product.badge ? <b>{product.badge}</b> : null}
-            <span className="product-code">{product.code}</span>
+            <span className="product-code" style={{ top: "auto", bottom: 8, right: 8, height: "auto", width: "auto" }}>{product.code}</span>
           </Link>
           <div className="shop-product-copy">
             <small>{product.category}</small>

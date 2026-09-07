@@ -126,6 +126,17 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
     const body: Record<string, unknown> = {
       paymentMethod,
       notes: form.get("notes"),
+      items: cart.items.map((item) => ({
+        product_id: item.product?.id ? String(item.product.id) : null,
+        sku: item.product?.sku ?? "",
+        name: item.product?.name ?? "Marel Plise Perde",
+        unit_price: Math.round(item.unit_price * 100),
+        quantity: item.quantity,
+        configuration: item.configuration || {},
+      })),
+      subtotal: subtotalKurus,
+      shipping_cost: shipping,
+      total: subtotalKurus + shipping,
     };
 
     if (user && selectedAddressId) {
