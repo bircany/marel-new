@@ -66,10 +66,32 @@ export function StorefrontHero() {
   const slide = slides[active];
 
   return (
-    <section className="store-hero kamatas-hero" aria-roledescription="carousel" aria-label="Kampanyalar">
-      <Image unoptimized key={slide.image} src={slide.image} alt={slide.title} fill priority sizes="100vw" style={{ objectPosition: slide.position, objectFit: "cover" }} />
-      <div className="store-hero-shade" />
-      <div className="shop-container store-hero-content">
+    <section className="store-hero kamatas-hero" aria-roledescription="carousel" aria-label="Kampanyalar" style={{ position: "relative", overflow: "hidden" }}>
+      {slides.map((s, idx) => (
+        <div
+          key={s.image}
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: idx === active ? 1 : 0,
+            transition: "opacity 0.8s ease-in-out",
+            zIndex: idx === active ? 1 : 0,
+            pointerEvents: "none",
+          }}
+        >
+          <Image
+            src={s.image}
+            alt={s.title}
+            fill
+            priority={idx === 0}
+            loading={idx === 0 ? "eager" : "eager"}
+            sizes="100vw"
+            style={{ objectPosition: s.position, objectFit: "cover" }}
+          />
+        </div>
+      ))}
+      <div className="store-hero-shade" style={{ zIndex: 2 }} />
+      <div className="shop-container store-hero-content" style={{ zIndex: 3 }}>
         <p>{slide.eyebrow}</p>
         
         {slide.useLogo ? (
@@ -90,9 +112,9 @@ export function StorefrontHero() {
         <span style={{ fontSize: slide.useLogo ? "1.2rem" : undefined }}>{slide.text}</span>
         <Link href={slide.href}>{slide.button} →</Link>
       </div>
-      <button className="hero-arrow hero-prev" type="button" onClick={() => setActive((active + slides.length - 1) % slides.length)} aria-label="Önceki kampanya">‹</button>
-      <button className="hero-arrow hero-next" type="button" onClick={() => setActive((active + 1) % slides.length)} aria-label="Sonraki kampanya">›</button>
-      <div className="hero-dots">{slides.map((item, index) => <button type="button" key={index} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`${index + 1}. kampanyayı göster`} />)}</div>
+      <button className="hero-arrow hero-prev" style={{ zIndex: 4 }} type="button" onClick={() => setActive((active + slides.length - 1) % slides.length)} aria-label="Önceki kampanya">‹</button>
+      <button className="hero-arrow hero-next" style={{ zIndex: 4 }} type="button" onClick={() => setActive((active + 1) % slides.length)} aria-label="Sonraki kampanya">›</button>
+      <div className="hero-dots" style={{ zIndex: 4 }}>{slides.map((item, index) => <button type="button" key={index} className={index === active ? "active" : ""} onClick={() => setActive(index)} aria-label={`${index + 1}. kampanyayı göster`} />)}</div>
     </section>
   );
 }

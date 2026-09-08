@@ -23,13 +23,13 @@ export default function ReturnsCancellationPage() {
 
         <div className="legal-layout shop-container">
           <aside className="legal-sidebar-nav">
-            <Link href="/pages/gizlilikguvenlikpolitikasi">Gizlilik Güvenlik Politikası</Link>
-            <Link href="/pages/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
-            <Link href="/pages/tuketici-haklari-cayma-iptal-iade-kosullari" className="active">
+            <Link href="/gizlilik-politikasi">Gizlilik Güvenlik Politikası</Link>
+            <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
+            <Link href="/iade-ve-iptal-kosullari" className="active">
               İade ve İptal Koşulları
             </Link>
-            <Link href="/pages/kisisel-veriler-politikasi">Kişisel Veriler Politikası (KVKK)</Link>
-            <Link href="/pages/iletisim">İletişim & Danışma</Link>
+            <Link href="/kvkk-aydinlatma-metni">Kişisel Veriler Politikası (KVKK)</Link>
+            <Link href="/iletisim">İletişim & Danışma</Link>
           </aside>
 
           <article className="legal-content-body">

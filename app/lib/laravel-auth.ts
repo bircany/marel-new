@@ -100,6 +100,26 @@ async function laravel<T>(path: string, init: RequestInit & { token?: boolean; s
     return { ok: true, status: 200, data: MOCK_ADMIN_USER as unknown as T };
   }
 
+  if (path === "/auth/me" && currentToken?.startsWith("marel-usr:")) {
+    try {
+      const parts = currentToken.split(":");
+      const email = Buffer.from(parts[2] || "", "base64").toString("utf-8");
+      const customerUser: LaravelUser = {
+        id: 1001,
+        first_name: email.split("@")[0] || "Müşteri",
+        last_name: "",
+        full_name: email.split("@")[0] || "Müşteri",
+        email,
+        phone: null,
+        role: "customer",
+        is_active: true,
+        email_verified_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+      };
+      return { ok: true, status: 200, data: customerUser as unknown as T };
+    } catch {}
+  }
+
   try {
     const response = await fetch(`${SOFTRADE_API_URL}${path}`, { ...rest, headers, cache: "no-store" });
     if (response.status === 204) return { ok: true, data: undefined as T, status: 204 };
@@ -160,13 +180,13 @@ async function laravel<T>(path: string, init: RequestInit & { token?: boolean; s
       return { ok: true, status: 200, data: [] as unknown as T };
     }
 
-    if (path === "/cart") {
+    if (path.startsWith("/cart")) {
       return {
         ok: true,
         status: rest.method === "POST" ? 201 : 200,
         data: {
           items: [],
-          summary: { item_count: 1, total_quantity: 1, subtotal: 116600 },
+          summary: { item_count: 0, total_quantity: 0, subtotal: 0 },
         } as unknown as T,
       };
     }

@@ -89,11 +89,13 @@ export function SiteHeader() {
           items?: Array<{ quantity?: number }>;
         };
         if (!cancelled) {
-          setCartCount(
-            cart.summary?.total_quantity ??
-              cart.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) ??
-              0,
-          );
+          const count =
+            !cart.items || cart.items.length === 0
+              ? 0
+              : cart.summary?.total_quantity ??
+                cart.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) ??
+                0;
+          setCartCount(count);
         }
       } catch {
         if (!cancelled) setCartCount(0);

@@ -43,9 +43,11 @@ export async function addToServerCart(productId: string | number, quantity = 1):
 }
 
 export function cartCountFromServer(cart: ServerCart): number {
-  return cart.summary?.total_quantity ?? cart.items?.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  if (!cart || !cart.items || cart.items.length === 0) return 0;
+  return cart.summary?.total_quantity ?? cart.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
 }
 
 export function cartSubtotalToKurus(cart: ServerCart): number {
+  if (!cart || !cart.items || cart.items.length === 0) return 0;
   return Math.round((cart.summary?.subtotal ?? 0) * 100);
 }

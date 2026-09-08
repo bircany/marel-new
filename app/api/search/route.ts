@@ -4,13 +4,26 @@ import type { CatalogProduct } from "@/db";
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = (searchParams.get("q") ?? "").trim().toLowerCase();
-
-  if (!q || q.length < 2) {
-    return Response.json({ results: [] });
-  }
+  const isFeatured = searchParams.get("featured") === "true" || searchParams.get("bestsellers") === "true";
+  const limit = Number(searchParams.get("limit")) || 12;
 
   try {
     const allProducts = await stListProducts(false, "Marel");
+
+    // If featured query: return admin-flagged featured products
+    if (isFeatured) {
+      let featuredList = allProducts.filter((p) => Boolean(p.featured) && p.active !== 0);
+      if (featuredList.length < limit) {
+        // Fallback: append in-stock products to fill the quota
+        const others = allProducts.filter((p) => !p.featured && p.active !== 0 && p.stock > 0);
+        featuredList = [...featuredList, ...others];
+      }
+      return Response.json({ results: featuredList.slice(0, limit), categories: [] });
+    }
+
+    if (!q || q.length < 2) {
+      return Response.json({ results: [] });
+    }
 
     const keywords = q.split(/\s+/).filter(Boolean);
 
@@ -67,7 +80,6 @@ export async function GET(request: Request) {
     // Sort by score descending, then by name
     scored.sort((a, b) => b.score - a.score || a.product.name.localeCompare(b.product.name, "tr"));
 
-    const limit = Number(searchParams.get("limit")) || 12;
     const results = scored.slice(0, limit).map((s) => s.product);
 
     return Response.json({ results, categories: matchingCategories });

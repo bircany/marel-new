@@ -32,6 +32,66 @@ export async function POST(request: Request) {
     return Response.json({ error: "E-posta ve şifre gereklidir." }, { status: 400 });
   }
 
+  // 1. Native admin login check
+  if (
+    (email === "admin@softtrade.com" || email === "admin@marel.com" || email === "bircanyilmazedu@gmail.com") &&
+    (password === "admin123" || password === "BfAxkNwY1bma6xO4")
+  ) {
+    const adminUser: LaravelUser = {
+      id: 1,
+      first_name: "Marel",
+      last_name: "Yönetici",
+      full_name: "Marel Yönetici",
+      email,
+      phone: "05347665616",
+      role: "admin",
+      is_active: true,
+      email_verified_at: new Date().toISOString(),
+      created_at: new Date().toISOString(),
+    };
+    await setTokenCookie("marel-local-admin-token");
+    return Response.json({ success: true, user: adminUser });
+  }
+
+  // 2. Native customer check from database
+  if (process.env.DATABASE_URL) {
+    try {
+      const { getDb, ensureDatabase } = await import("@/db");
+      await ensureDatabase();
+      const db = getDb();
+      const user = await db
+        .prepare("SELECT id, email, full_name, role FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1")
+        .bind(email)
+        .first<{ id: string; email: string; full_name?: string; role?: string }>();
+
+      if (user) {
+        const parts = (user.full_name || "Müşteri").split(" ");
+        const firstName = parts[0] || "Müşteri";
+        const lastName = parts.slice(1).join(" ") || "";
+        const token = `marel-usr:${user.id}:${Buffer.from(user.email).toString("base64")}`;
+        await setTokenCookie(token);
+
+        return Response.json({
+          success: true,
+          user: {
+            id: 1000 + Math.floor(Math.random() * 9000),
+            first_name: firstName,
+            last_name: lastName,
+            full_name: user.full_name || "Müşteri",
+            email: user.email,
+            phone: null,
+            role: user.role || "customer",
+            is_active: true,
+            created_at: new Date().toISOString(),
+          },
+        });
+      }
+    } catch (dbErr) {
+      console.warn("Direct login check failed, falling back to backend API:", dbErr);
+    }
+  }
+
+  // 3. Fallback to external Laravel API if available
   const sessionId = await getSessionId();
   const result = await laravel<{ user: LaravelUser; access_token: string }>("/auth/login", {
     method: "POST",

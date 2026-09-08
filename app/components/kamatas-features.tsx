@@ -106,7 +106,7 @@ export function KamatasOrderTracking() {
   };
 
   return (
-    <section className="order-track kamatas-order-track" id="takip" style={{ background: "#0f172a", color: "#ffffff", padding: "70px 0" }}>
+    <section className="kamatas-features-track" id="takip" style={{ background: "#0f172a", color: "#ffffff", padding: "70px 0" }}>
       <div className="shop-container">
         <div style={{ maxWidth: 840, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 35 }}>
@@ -139,13 +139,13 @@ export function KamatasOrderTracking() {
               border: "1px solid #334155",
             }}
           >
-            <form onSubmit={handleTrackSubmit}>
+            <form onSubmit={handleTrackSubmit} style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", margin: 0 }}>
               <div
                 style={{
                   display: "grid",
                   gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
                   gap: 20,
-                  marginBottom: 24,
+                  width: "100%",
                 }}
               >
                 <div>
@@ -161,13 +161,15 @@ export function KamatasOrderTracking() {
                     placeholder="ornek@mail.com"
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      height: 50,
+                      padding: "0 16px",
                       borderRadius: 10,
                       background: "#0f172a",
-                      border: "1px solid #475569",
+                      border: "1.5px solid #475569",
                       color: "#ffffff",
-                      fontSize: "0.92rem",
+                      fontSize: "0.95rem",
                       boxSizing: "border-box",
+                      outline: "none",
                     }}
                   />
                 </div>
@@ -181,46 +183,49 @@ export function KamatasOrderTracking() {
                     type="text"
                     value={orderNumber}
                     onChange={(e) => setOrderNumber(e.target.value)}
-                    placeholder="Örn: ORD-20260906-00001"
+                    placeholder="Örn: ORD-20260906-00001 veya 1001"
                     style={{
                       width: "100%",
-                      padding: "14px 16px",
+                      height: 50,
+                      padding: "0 16px",
                       borderRadius: 10,
                       background: "#0f172a",
-                      border: "1px solid #475569",
+                      border: "1.5px solid #475569",
                       color: "#ffffff",
-                      fontSize: "0.92rem",
+                      fontSize: "0.95rem",
                       boxSizing: "border-box",
+                      outline: "none",
                     }}
                   />
                 </div>
               </div>
 
               {error && (
-                <div style={{ padding: "12px 16px", background: "rgba(239, 68, 68, 0.15)", border: "1px solid #ef4444", color: "#fca5a5", borderRadius: 8, fontSize: "0.84rem", marginBottom: 20 }}>
+                <div style={{ padding: "12px 16px", background: "rgba(239, 68, 68, 0.15)", border: "1px solid #ef4444", color: "#fca5a5", borderRadius: 8, fontSize: "0.84rem" }}>
                   {error}
                 </div>
               )}
 
-              {/* Action Buttons - Clean 2-column flex row */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 16, width: "100%" }}>
+              {/* Action Buttons - Generous height, proper spacing, side by side or responsive */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, width: "100%", marginTop: 4 }}>
                 <button
                   type="submit"
                   disabled={loading}
                   style={{
-                    padding: "15px 24px",
+                    height: 52,
+                    padding: "0 24px",
                     borderRadius: 10,
                     background: "#2563eb",
                     color: "#ffffff",
                     border: "none",
                     fontWeight: 800,
-                    fontSize: "0.95rem",
+                    fontSize: "0.96rem",
                     cursor: loading ? "not-allowed" : "pointer",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 10,
-                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.3)",
+                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
                     transition: "background 0.2s ease, transform 0.1s ease",
                   }}
                   onMouseOver={(e) => (e.currentTarget.style.background = "#1d4ed8")}
@@ -236,18 +241,20 @@ export function KamatasOrderTracking() {
                 <Link
                   href="/siparis-takip"
                   style={{
-                    padding: "15px 24px",
+                    height: 52,
+                    padding: "0 24px",
                     borderRadius: 10,
                     background: "rgba(255, 255, 255, 0.05)",
-                    color: "#e2e8f0",
+                    color: "#f1f5f9",
                     border: "1.5px solid #475569",
                     fontWeight: 700,
-                    fontSize: "0.92rem",
+                    fontSize: "0.94rem",
                     textDecoration: "none",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
                     gap: 8,
+                    boxSizing: "border-box",
                     transition: "all 0.2s ease",
                   }}
                   onMouseOver={(e) => {
@@ -257,7 +264,7 @@ export function KamatasOrderTracking() {
                   }}
                   onMouseOut={(e) => {
                     e.currentTarget.style.borderColor = "#475569";
-                    e.currentTarget.style.color = "#e2e8f0";
+                    e.currentTarget.style.color = "#f1f5f9";
                     e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
                   }}
                 >

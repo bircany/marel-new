@@ -23,6 +23,9 @@ const DEFAULT_ORIGINS = [
   "http://localhost:3006",
   "http://127.0.0.1:3000",
   "http://127.0.0.1:3006",
+  "https://marelpliseperde.com.tr",
+  "https://www.marelpliseperde.com.tr",
+  "https://marel-new.vercel.app",
 ];
 
 export function getAllowedOrigins(): string[] {
@@ -30,14 +33,31 @@ export function getAllowedOrigins(): string[] {
     typeof process !== "undefined" && process.env?.CORS_ALLOWED_ORIGINS
       ? process.env.CORS_ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean)
       : [];
-  return fromEnv.length ? fromEnv : DEFAULT_ORIGINS;
+  return fromEnv.length ? [...DEFAULT_ORIGINS, ...fromEnv] : DEFAULT_ORIGINS;
 }
 
 export function resolveCorsOrigin(requestOrigin: string | null): string | null {
   if (!requestOrigin) return null;
   const allowed = getAllowedOrigins();
   if (allowed.includes("*")) return "*";
-  return allowed.includes(requestOrigin) ? requestOrigin : null;
+  if (allowed.includes(requestOrigin)) return requestOrigin;
+
+  // Dynamically match any official Marel subdomain, Vercel preview, or local port
+  try {
+    const url = new URL(requestOrigin);
+    const host = url.hostname.toLowerCase();
+    if (
+      host === "marelpliseperde.com.tr" ||
+      host.endsWith(".marelpliseperde.com.tr") ||
+      host.endsWith(".vercel.app") ||
+      host === "localhost" ||
+      host === "127.0.0.1"
+    ) {
+      return requestOrigin;
+    }
+  } catch {}
+
+  return null;
 }
 
 export function applyCorsHeaders(headers: Headers, request: Request, allowCredentials = true): void {

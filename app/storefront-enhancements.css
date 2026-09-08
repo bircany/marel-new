@@ -2083,12 +2083,17 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .simple-auth-field {
   display: flex;
   flex-direction: column;
   gap: 5px;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .simple-auth-field label {
@@ -2103,6 +2108,8 @@
 }
 
 .simple-auth-field input {
+  width: 100%;
+  box-sizing: border-box;
   height: 44px;
   border: 1px solid #d1d5db;
   border-radius: 8px;

@@ -15,6 +15,61 @@ export async function POST(request: Request) {
   }
 
   const sessionId = await getSessionId();
+
+  // 1. Native Supabase PostgreSQL registration
+  if (process.env.DATABASE_URL) {
+    try {
+      const { getDb, ensureDatabase } = await import("@/db");
+      await ensureDatabase();
+      const db = getDb();
+
+      const existing = await db
+        .prepare("SELECT id, email FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1")
+        .bind(email)
+        .first<{ id: string; email: string }>();
+
+      if (existing) {
+        return Response.json(
+          { error: "Bu e-posta adresi ile kayıtlı bir hesap zaten bulunmaktadır." },
+          { status: 400 }
+        );
+      }
+
+      const userId = "usr-" + crypto.randomUUID();
+      const fullName = `${firstName} ${lastName}`.trim();
+      await db
+        .prepare(
+          "INSERT INTO users (id, email, full_name, role, created_at, updated_at) VALUES (?, ?, ?, 'customer', NOW(), NOW())"
+        )
+        .bind(userId, email, fullName)
+        .run();
+
+      const token = `marel-usr:${userId}:${Buffer.from(email).toString("base64")}`;
+      await setTokenCookie(token);
+
+      return Response.json(
+        {
+          success: true,
+          user: {
+            id: 1000 + Math.floor(Math.random() * 9000),
+            first_name: firstName,
+            last_name: lastName,
+            full_name: fullName,
+            email,
+            phone: phone || null,
+            role: "customer",
+            is_active: true,
+            created_at: new Date().toISOString(),
+          },
+        },
+        { status: 201 }
+      );
+    } catch (dbErr) {
+      console.warn("Direct Supabase registration failed, falling back to backend API:", dbErr);
+    }
+  }
+
+  // 2. Fallback to external backend API if running
   const result = await laravel<{ user: LaravelUser; access_token: string }>("/auth/register", {
     method: "POST",
     body: JSON.stringify({

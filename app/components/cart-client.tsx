@@ -63,7 +63,7 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
     };
   }, [user]);
 
-  const subtotalKurus = cart ? Math.round((cart.summary?.subtotal ?? 0) * 100) : 0;
+  const subtotalKurus = cart && cart.items && cart.items.length > 0 ? Math.round((cart.summary?.subtotal ?? 0) * 100) : 0;
   const shipping = subtotalKurus >= payment.freeShippingMin * 100 || subtotalKurus === 0 ? 0 : 9900;
   const totalKurus = subtotalKurus + shipping;
 

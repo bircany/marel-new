@@ -49,7 +49,7 @@ export async function proxy(request: NextRequest) {
   // CORS origin check for API routes
   if (isApi) {
     const origin = request.headers.get("origin");
-    if (origin && !resolveCorsOrigin(origin)) {
+    if (origin && origin !== request.nextUrl.origin && !resolveCorsOrigin(origin)) {
       return NextResponse.json({ error: "CORS: origin izinli değil." }, { status: 403 });
     }
   }

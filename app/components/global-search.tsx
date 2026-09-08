@@ -51,7 +51,7 @@ export function GlobalSearch() {
   // Load initial bestsellers on first open
   useEffect(() => {
     if (open && bestsellers.length === 0) {
-      fetch("/api/search?q=plise&limit=4")
+      fetch("/api/search?featured=true&limit=4")
         .then((res) => res.json() as Promise<{ results?: CatalogProduct[] }>)
         .then((data) => {
           if (data?.results?.length) {

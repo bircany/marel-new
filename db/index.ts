@@ -554,35 +554,75 @@ async function seedCoupons(db: D1Database): Promise<void> {
   ).bind(crypto.randomUUID(), "HOSGELDIN10", "PERCENT", 10, 50000, 100, 0, now, now).run();
 }
 
+interface ProductCacheEntry {
+  data: CatalogProduct[];
+  timestamp: number;
+}
+let activeProductsCache: ProductCacheEntry | null = null;
+let allProductsCache: ProductCacheEntry | null = null;
+const CACHE_TTL_MS = 60 * 1000;
+
+export function invalidateProductCache(): void {
+  activeProductsCache = null;
+  allProductsCache = null;
+}
+
 export async function listProducts(includeInactive = false): Promise<CatalogProduct[]> {
+  const cached = includeInactive ? allProductsCache : activeProductsCache;
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL_MS) {
+    return cached.data;
+  }
+
   try {
     await ensureDatabase();
     const where = includeInactive ? "" : "WHERE p.active = 1";
-    const { results } = await getDb()
+    const db = getDb();
+    const { results: products } = await db
       .prepare(
-        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
       )
-      .all<CatalogProduct & { imagesJson?: string }>();
+      .all<CatalogProduct>();
 
-    if (results && results.length > 0) {
-      return results.map((row) => {
-        let images: string[] = [];
-        if (row.imagesJson) {
-          try {
-            images = typeof row.imagesJson === "string" ? JSON.parse(row.imagesJson) : (Array.isArray(row.imagesJson) ? row.imagesJson : []);
-          } catch {}
+    if (products && products.length > 0) {
+      const { results: imageRows } = await db
+        .prepare(`SELECT product_id, source_url FROM product_images ORDER BY sort_order ASC, created_at ASC`)
+        .all<{ product_id: string; source_url: string }>();
+
+      const imagesByProduct = new Map<string, string[]>();
+      if (imageRows) {
+        for (const img of imageRows) {
+          const list = imagesByProduct.get(img.product_id);
+          if (list) {
+            list.push(img.source_url);
+          } else {
+            imagesByProduct.set(img.product_id, [img.source_url]);
+          }
         }
-        if (!images || images.length === 0) {
-          images = [row.image];
-        }
+      }
+
+      const mapped: CatalogProduct[] = products.map((row) => {
+        const productImages = imagesByProduct.get(row.id) || [];
+        const primaryImage = productImages[0] || "/images/catalog/diamond.webp";
+        const images = productImages.length > 0 ? productImages : [primaryImage];
+
         return {
           ...row,
+          image: primaryImage,
           images,
           installments: row.installments ?? 3,
           installmentText: row.installmentText || "Peşin Fiyatına 3 Taksit",
           dimensions: row.dimensions || "Özel Ölçüye Göre Üretim",
         };
       });
+
+      const entry: ProductCacheEntry = { data: mapped, timestamp: Date.now() };
+      if (includeInactive) {
+        allProductsCache = entry;
+      } else {
+        activeProductsCache = entry;
+      }
+
+      return mapped;
     }
   } catch (err) {
     console.warn("[db] listProducts fallback to generated catalog:", err);
@@ -713,6 +753,7 @@ export async function createProductRecord(data: {
       .run();
   }
 
+  invalidateProductCache();
   const created = await getProductBySlug(slug);
   return created || ({} as CatalogProduct);
 }
@@ -817,6 +858,7 @@ export async function updateProductRecord(
       }
     }
   }
+  invalidateProductCache();
 }
 
 export async function deleteProductRecord(id: string): Promise<void> {
@@ -825,6 +867,7 @@ export async function deleteProductRecord(id: string): Promise<void> {
   await db.prepare("DELETE FROM product_images WHERE product_id = ?").bind(id).run();
   await db.prepare("DELETE FROM reviews WHERE product_id = ?").bind(id).run();
   await db.prepare("DELETE FROM products WHERE id = ? OR slug = ? OR sku = ?").bind(id, id, id).run();
+  invalidateProductCache();
 }
 
 export async function duplicateProductRecord(id: string): Promise<CatalogProduct> {
@@ -879,6 +922,7 @@ export async function duplicateProductRecord(id: string): Promise<CatalogProduct
     }
   }
 
+  invalidateProductCache();
   const copy = await getProductBySlug(newSlug);
   return copy || ({} as CatalogProduct);
 }
