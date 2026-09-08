@@ -266,13 +266,26 @@ export function getProductImagesBucket(): R2Bucket {
   };
 }
 
+let dbReady = false;
 let initialization: Promise<void> | null = null;
 
 export async function ensureDatabase(): Promise<void> {
   const sql = getPostgresClient();
   if (!sql) return;
+  if (dbReady) return;
   if (initialization) return initialization;
-  initialization = initializeDatabase().catch((error) => {
+  initialization = (async () => {
+    try {
+      const db = getDb();
+      const check = await db.prepare("SELECT 1 FROM products LIMIT 1").first();
+      if (check) {
+        dbReady = true;
+        return;
+      }
+    } catch {}
+    await initializeDatabase();
+    dbReady = true;
+  })().catch((error) => {
     console.error("[db] Database initialization error:", error);
     initialization = null;
   });
@@ -280,8 +293,10 @@ export async function ensureDatabase(): Promise<void> {
 }
 
 export async function forceReseedDatabase(): Promise<void> {
+  dbReady = false;
   initialization = null;
   await initializeDatabase();
+  dbReady = true;
 }
 
 async function initializeDatabase(): Promise<void> {
@@ -967,13 +982,20 @@ export async function createOrderInDb(data: {
     for (const item of data.items) {
       const itemId = crypto.randomUUID();
       const configStr = typeof item.configuration === "string" ? item.configuration : JSON.stringify(item.configuration || {});
+      let resolvedProductId: string | null = item.productId ?? null;
+      if (resolvedProductId) {
+        const prodExists = await db.prepare("SELECT 1 FROM products WHERE id = ?").bind(resolvedProductId).first();
+        if (!prodExists) {
+          resolvedProductId = null;
+        }
+      }
       await db.prepare(
         `INSERT INTO order_items (id, order_id, product_id, sku, name, unit_price, quantity, configuration) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
       ).bind(
         itemId,
         id,
-        item.productId ?? null,
+        resolvedProductId,
         item.sku ?? "",
         item.name,
         item.unitPrice,
@@ -983,7 +1005,7 @@ export async function createOrderInDb(data: {
       savedItems.push({
         id: itemId,
         orderId: id,
-        productId: item.productId ?? null,
+        productId: resolvedProductId,
         sku: item.sku ?? "",
         name: item.name,
         unitPrice: item.unitPrice,
@@ -1020,58 +1042,103 @@ export async function createOrderInDb(data: {
   };
 }
 
+function normalizeOrder(o: any): OrderRecord {
+  return {
+    id: o.id,
+    orderNumber: o.orderNumber || o.ordernumber || o.order_number,
+    userId: o.userId ?? o.userid ?? o.user_id ?? null,
+    email: o.email,
+    customerName: o.customerName || o.customername || o.customer_name,
+    phone: o.phone,
+    status: o.status,
+    paymentMethod: o.paymentMethod || o.paymentmethod || o.payment_method,
+    paymentStatus: o.paymentStatus || o.paymentstatus || o.payment_status,
+    subtotal: Number(o.subtotal || 0),
+    shipping: Number(o.shipping || 0),
+    total: Number(o.total || 0),
+    currency: o.currency || "TRY",
+    city: o.city ?? null,
+    district: o.district ?? null,
+    shippingAddress: o.shippingAddress || o.shippingaddress || o.shipping_address,
+    notes: o.notes || "",
+    cargoCompany: o.cargoCompany ?? o.cargocompany ?? o.cargo_company ?? null,
+    trackingNumber: o.trackingNumber ?? o.trackingnumber ?? o.tracking_number ?? null,
+    trackingUrl: o.trackingUrl ?? o.trackingurl ?? o.tracking_url ?? null,
+    createdAt: o.createdAt || o.createdat || o.created_at,
+    updatedAt: o.updatedAt || o.updatedat || o.updated_at,
+  };
+}
+
+function normalizeOrderItem(it: any): OrderItemRecord {
+  return {
+    id: it.id,
+    orderId: it.orderId || it.orderid || it.order_id,
+    productId: it.productId ?? it.productid ?? it.product_id ?? null,
+    sku: it.sku,
+    name: it.name,
+    unitPrice: Number(it.unitPrice ?? it.unitprice ?? it.unit_price ?? 0),
+    quantity: Number(it.quantity || 1),
+    configuration: it.configuration || "{}",
+  };
+}
+
 export async function listOrdersWithDetails(): Promise<OrderRecord[]> {
   await ensureDatabase();
   const db = getDb();
   const { results: orders } = await db.prepare(
-    `SELECT id, order_number AS orderNumber, user_id AS userId, email, customer_name AS customerName, phone, status, 
-            payment_method AS paymentMethod, payment_status AS paymentStatus, subtotal, shipping, total, currency, 
-            city, district, shipping_address AS shippingAddress, notes, cargo_company AS cargoCompany, 
-            tracking_number AS trackingNumber, tracking_url AS trackingUrl, created_at AS createdAt, updated_at AS updatedAt 
+    `SELECT id, order_number AS "orderNumber", user_id AS "userId", email, customer_name AS "customerName", phone, status, 
+            payment_method AS "paymentMethod", payment_status AS "paymentStatus", subtotal, shipping, total, currency, 
+            city, district, shipping_address AS "shippingAddress", notes, cargo_company AS "cargoCompany", 
+            tracking_number AS "trackingNumber", tracking_url AS "trackingUrl", created_at AS "createdAt", updated_at AS "updatedAt" 
      FROM orders ORDER BY created_at DESC`
-  ).all<OrderRecord>();
+  ).all<any>();
 
   if (!orders || orders.length === 0) return [];
 
   const { results: allItems } = await db.prepare(
-    `SELECT id, order_id AS orderId, product_id AS productId, sku, name, unit_price AS unitPrice, quantity, configuration 
+    `SELECT id, order_id AS "orderId", product_id AS "productId", sku, name, unit_price AS "unitPrice", quantity, configuration 
      FROM order_items`
-  ).all<OrderItemRecord>();
+  ).all<any>();
 
   const itemMap = new Map<string, OrderItemRecord[]>();
-  for (const it of allItems || []) {
+  for (const rawIt of allItems || []) {
+    const it = normalizeOrderItem(rawIt);
     const list = itemMap.get(it.orderId) || [];
     list.push(it);
     itemMap.set(it.orderId, list);
   }
 
-  return orders.map((o) => ({
-    ...o,
-    items: itemMap.get(o.id) || [],
-  }));
+  return orders.map((rawO) => {
+    const o = normalizeOrder(rawO);
+    return {
+      ...o,
+      items: itemMap.get(o.id) || [],
+    };
+  });
 }
 
 export async function getOrderDetailsById(idOrNumber: string): Promise<OrderRecord | null> {
   await ensureDatabase();
   const db = getDb();
-  const order = await db.prepare(
-    `SELECT id, order_number AS orderNumber, user_id AS userId, email, customer_name AS customerName, phone, status, 
-            payment_method AS paymentMethod, payment_status AS paymentStatus, subtotal, shipping, total, currency, 
-            city, district, shipping_address AS shippingAddress, notes, cargo_company AS cargoCompany, 
-            tracking_number AS trackingNumber, tracking_url AS trackingUrl, created_at AS createdAt, updated_at AS updatedAt 
+  const rawOrder = await db.prepare(
+    `SELECT id, order_number AS "orderNumber", user_id AS "userId", email, customer_name AS "customerName", phone, status, 
+            payment_method AS "paymentMethod", payment_status AS "paymentStatus", subtotal, shipping, total, currency, 
+            city, district, shipping_address AS "shippingAddress", notes, cargo_company AS "cargoCompany", 
+            tracking_number AS "trackingNumber", tracking_url AS "trackingUrl", created_at AS "createdAt", updated_at AS "updatedAt" 
      FROM orders WHERE id = ? OR order_number = ? LIMIT 1`
-  ).bind(idOrNumber, idOrNumber).first<OrderRecord>();
+  ).bind(idOrNumber, idOrNumber).first<any>();
 
-  if (!order) return null;
+  if (!rawOrder) return null;
+  const order = normalizeOrder(rawOrder);
 
-  const { results: items } = await db.prepare(
-    `SELECT id, order_id AS orderId, product_id AS productId, sku, name, unit_price AS unitPrice, quantity, configuration 
+  const { results: rawItems } = await db.prepare(
+    `SELECT id, order_id AS "orderId", product_id AS "productId", sku, name, unit_price AS "unitPrice", quantity, configuration 
      FROM order_items WHERE order_id = ?`
-  ).bind(order.id).all<OrderItemRecord>();
+  ).bind(order.id).all<any>();
 
   return {
     ...order,
-    items: items || [],
+    items: (rawItems || []).map(normalizeOrderItem),
   };
 }
 
@@ -1194,19 +1261,29 @@ export async function listCustomersFromDb(): Promise<CustomerRecord[]> {
   const db = getDb();
   const { results } = await db.prepare(
     `SELECT 
-        COALESCE(u.id, MIN(o.id)) AS id,
-        COALESCE(NULLIF(o.customer_name, ''), u.full_name, 'Misafir Müşteri') AS fullName,
-        LOWER(TRIM(o.email)) AS email,
-        COALESCE(o.phone, '') AS phone,
-        COUNT(o.id) AS orderCount,
-        COALESCE(SUM(o.total), 0) AS totalSpent,
-        MAX(o.created_at) AS lastOrderDate,
-        COALESCE(u.created_at, MIN(o.created_at)) AS createdAt
+        COALESCE(MIN(u.id), MIN(o.id)) AS "id",
+        COALESCE(NULLIF(MAX(o.customer_name), ''), MAX(u.full_name), 'Misafir Müşteri') AS "fullName",
+        LOWER(TRIM(o.email)) AS "email",
+        COALESCE(MAX(o.phone), '') AS "phone",
+        COUNT(o.id) AS "orderCount",
+        COALESCE(SUM(o.total), 0) AS "totalSpent",
+        MAX(o.created_at) AS "lastOrderDate",
+        COALESCE(MIN(u.created_at), MIN(o.created_at)) AS "createdAt"
      FROM orders o
      LEFT JOIN users u ON o.user_id = u.id OR LOWER(TRIM(o.email)) = LOWER(TRIM(u.email))
      GROUP BY LOWER(TRIM(o.email))
-     ORDER BY lastOrderDate DESC`
-  ).all<CustomerRecord>();
-  return results || [];
+     ORDER BY "lastOrderDate" DESC`
+  ).all<any>();
+
+  return (results || []).map((c) => ({
+    id: c.id || "cust-unknown",
+    fullName: c.fullName || c.fullname || "Misafir Müşteri",
+    email: c.email || "",
+    phone: c.phone || "",
+    orderCount: Number(c.orderCount ?? c.ordercount ?? 0),
+    totalSpent: Number(c.totalSpent ?? c.totalspent ?? 0),
+    lastOrderDate: c.lastOrderDate ?? c.lastorderdate ?? null,
+    createdAt: c.createdAt ?? c.createdat ?? new Date().toISOString(),
+  }));
 }
 

@@ -181,6 +181,7 @@ export async function POST(request: Request) {
     };
 
     return Response.json({
+      ...orderPayload,
       order: orderPayload,
       cargo: cargoPayload,
     });

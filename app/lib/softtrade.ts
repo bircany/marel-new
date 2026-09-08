@@ -287,6 +287,17 @@ export async function stUploadImages(id: string, files: File[]): Promise<Array<{
 }
 
 export async function stListOrders(): Promise<OrderRecord[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const db = getDb();
+      const { results } = await db
+        .prepare(
+          `SELECT id, order_number AS "orderNumber", user_id AS "userId", email, customer_name AS "customerName", phone, status, subtotal, shipping, total, currency, shipping_address AS "shippingAddress", notes, cargo_company AS "cargoCompany", tracking_number AS "trackingNumber", tracking_url AS "trackingUrl", created_at AS "createdAt", updated_at AS "updatedAt" FROM orders ORDER BY created_at DESC`,
+        )
+        .all<OrderRecord>();
+      return results || [];
+    } catch {}
+  }
   try {
     const orders = await request<Array<{
       id: number;
@@ -363,6 +374,17 @@ export async function stUpdateOrderStatus(
 }
 
 export async function stListReviews(): Promise<ReviewRecord[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const db = getDb();
+      const { results } = await db
+        .prepare(
+          "SELECT r.id, r.user_id AS userId, r.product_id AS productId, COALESCE(p.name, 'Genel Marel Deneyimi') AS productName, COALESCE(u.full_name, 'Müşteri') AS authorName, r.rating, r.title, r.body, r.status, r.admin_reply AS adminReply, r.created_at AS createdAt, r.updated_at AS updatedAt FROM reviews r LEFT JOIN products p ON r.product_id = p.id LEFT JOIN users u ON r.user_id = u.id ORDER BY r.created_at DESC"
+        )
+        .all<ReviewRecord>();
+      return results || [];
+    } catch {}
+  }
   try {
     const reviews = await request<Array<{
       id: number;
@@ -499,6 +521,15 @@ export type SoftTradeContactMessage = {
 };
 
 export async function stListContactMessages(): Promise<ContactMessageRecord[]> {
+  if (process.env.DATABASE_URL) {
+    try {
+      const db = getDb();
+      const { results } = await db
+        .prepare("SELECT id, name, email, phone, subject, message, status, created_at AS createdAt, updated_at AS updatedAt FROM contact_messages ORDER BY created_at DESC")
+        .all<ContactMessageRecord>();
+      return results || [];
+    } catch {}
+  }
   try {
     const response = await fetch(`${SOFTRADE_API_URL}/admin/contact-messages?per_page=100`, {
       headers: { authorization: `Bearer ${await getAdminToken()}` },

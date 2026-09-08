@@ -29,7 +29,8 @@
     "katalog:import": "node scripts/import-katalog-photos.mjs",
     "katalog:import:dry": "node scripts/import-katalog-photos.mjs --dry-run",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next --ignore-pattern SoftTrade --ignore-pattern backend",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "db:setup": "node setup-supabase.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

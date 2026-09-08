@@ -19,7 +19,7 @@ export function AdminSidebar({ adminUser, pendingOrdersCount = 0 }: AdminSidebar
     if (!window.confirm("Yönetim panelinden çıkmak istediğinize emin misiniz?")) return;
     setLoggingOut(true);
     try {
-      await fetch("/api/admin/auth/logout", { method: "POST" });
+      await fetch("/api/auth/logout", { method: "POST" });
       router.push("/admin");
       router.refresh();
     } catch {

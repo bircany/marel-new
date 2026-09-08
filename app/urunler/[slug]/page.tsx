@@ -21,6 +21,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title: `${category.title} Modelleri ve Fiyatları`,
       description: category.description,
       alternates: { canonical: absoluteUrl(`/urunler/${category.slug}`) },
+      openGraph: {
+        title: `${category.title} Modelleri ve Fiyatları`,
+        description: category.description,
+        type: "website" as const,
+        url: absoluteUrl(`/urunler/${category.slug}`),
+        images: category.image ? [absoluteUrl(category.image)] : undefined,
+      },
     };
   }
   const product = await stGetProductBySlug(slug);
