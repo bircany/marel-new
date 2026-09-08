@@ -277,7 +277,7 @@ export function CatalogBrowser({
         {/* Product Cards Grid — Kamatas Match */}
         <div className={`kamatas-product-grid ${viewMode === 'list' ? 'list-view' : ''}`}>
           {filteredProducts.length ? (
-            filteredProducts.map((product) => {
+            filteredProducts.map((product, index) => {
               const effectivePrice = product.salePrice ?? product.price;
               return (
                 <Link href={`/urunler/${product.slug}`} className="kamatas-product-card" key={product.id}>
@@ -290,6 +290,8 @@ export function CatalogBrowser({
                       src={product.image || "/images/catalog/diamond.webp"}
                       alt={product.name}
                       fill
+                      priority={index < 8}
+                      loading="eager"
                       sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       style={{ objectFit: 'contain' }}
                     />

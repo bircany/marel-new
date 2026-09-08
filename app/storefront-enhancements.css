@@ -2667,6 +2667,8 @@
 
 /* ==========================================================================
    KAMATAS CATEGORY LAYOUT REBUILD
+/* ==========================================================================
+   KAMATAS CATEGORY & CATALOG RESPONSIVE LAYOUT
    ========================================================================== */
 .kamatas-catalog-layout {
   display: grid;
@@ -2675,17 +2677,9 @@
   align-items: start;
 }
 
-@media(max-width: 900px) {
-  .kamatas-catalog-layout {
-    grid-template-columns: 1fr;
-  }
-  .kamatas-catalog-sidebar {
-    display: none;
-  }
-}
-
 .kamatas-sidebar-widget {
   background: #fff;
+  margin-bottom: 24px;
 }
 .kamatas-sidebar-widget .widget-title {
   font-size: 1rem;
@@ -2723,13 +2717,30 @@
   margin-left: auto;
 }
 
+.kamatas-sidebar-search-input {
+  width: 100%;
+  height: 42px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0 14px;
+  font-size: 0.88rem;
+  outline: none;
+  background: #f9fafb;
+  box-sizing: border-box;
+}
+.kamatas-sidebar-search-input:focus {
+  border-color: #df2016;
+  background: #fff;
+}
+
 .kamatas-sorting-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
   border-bottom: 1px solid #eaeaea;
   padding-bottom: 15px;
-  margin-bottom: 25px;
+  margin-bottom: 22px;
 }
 .kamatas-sorting-tabs button {
   background: transparent;
@@ -2738,7 +2749,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   color: #666;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -2748,10 +2759,32 @@
   background: #fff5f5;
 }
 
+.kamatas-view-switcher {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+.kamatas-view-switcher .view-btn {
+  padding: 6px 10px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: #6b7280;
+}
+.kamatas-view-switcher .view-btn.active {
+  border-color: #df2016;
+  color: #df2016;
+  background: #fff5f5;
+}
+
+/* Product Cards Grid: Desktop */
 .kamatas-product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 22px;
 }
 
 .kamatas-product-card {
@@ -2761,62 +2794,531 @@
   color: inherit;
   transition: transform 0.2s, box-shadow 0.2s;
   background: #fff;
-  border-radius: 6px;
+  border: 1px solid #f1f3f5;
+  border-radius: 8px;
+  overflow: hidden;
 }
 .kamatas-product-card:hover {
   transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+  border-color: #e2e8f0;
 }
 .kamatas-product-card .k-card-image {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
   background: #f8f8f8;
-  margin-bottom: 15px;
-  border-radius: 6px;
   overflow: hidden;
 }
+.kamatas-badge-taksit {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 2;
+  background: #df2016;
+  color: #fff;
+  font-size: 0.58rem;
+  font-weight: 700;
+  line-height: 1.15;
+  padding: 4px 7px;
+  border-radius: 4px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(223, 32, 22, 0.35);
+}
+.kamatas-badge-taksit b {
+  font-weight: 900;
+  display: block;
+}
+.kamatas-product-card .k-card-body {
+  padding: 12px 14px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 .kamatas-product-card .k-card-brand {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   font-weight: 750;
   color: #11166b;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 .kamatas-product-card .k-card-title {
-  font-size: 0.9rem;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 8px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 6px;
   line-height: 1.3;
+  min-height: 2.6em;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .kamatas-product-card .k-card-stars {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-bottom: 10px;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 .kamatas-product-card .k-card-stars .stars {
-  color: #fbbf24;
-  font-size: 0.95rem;
+  color: #f59e0b;
+  font-size: 0.85rem;
   letter-spacing: 1px;
 }
 .kamatas-product-card .k-card-stars .reviews {
-  font-size: 0.75rem;
-  color: #777;
+  font-size: 0.72rem;
+  color: #6b7280;
 }
 .kamatas-product-card .k-card-price {
-  font-size: 1.1rem;
+  font-size: 1.12rem;
   font-weight: 850;
-  color: #111;
-  margin-bottom: 8px;
+  color: #111827;
+  margin-top: auto;
+  margin-bottom: 6px;
 }
 .kamatas-product-card .k-card-price .price-old {
-  font-size: 0.85rem;
-  color: #999;
+  font-size: 0.82rem;
+  color: #9ca3af;
   text-decoration: line-through;
   margin-right: 8px;
   font-weight: 400;
 }
 .kamatas-product-card .k-card-colors {
-  font-size: 0.75rem;
-  color: #666;
+  font-size: 0.72rem;
+  color: #6b7280;
 }
+
+/* ==========================================================================
+   TABLET RESPONSIVE (641px - 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) {
+  /* Navigation Bar Hide on Tablet & Mobile */
+  .header-primary-nav {
+    display: none !important;
+  }
+
+  .shop-mobile-menu {
+    display: block !important;
+  }
+
+  .shop-header-main {
+    min-height: 60px !important;
+    padding: 8px 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+  }
+
+  .shop-logo img {
+    height: 26px !important;
+    max-width: 150px !important;
+    width: auto !important;
+  }
+
+  .shop-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: auto !important;
+  }
+
+  .header-search-btn,
+  .header-whatsapp-btn,
+  .header-account-btn,
+  .cart-action {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 8px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Mobile Hamburger Drawer */
+  .shop-mobile-menu summary {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 1.35rem !important;
+    background: #f8f9fa !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    cursor: pointer !important;
+    color: #111827 !important;
+    list-style: none !important;
+  }
+  .shop-mobile-menu summary::-webkit-details-marker {
+    display: none !important;
+  }
+
+  .shop-mobile-menu[open] summary {
+    background: #fee2e2 !important;
+    color: #df2016 !important;
+    border-color: #fca5a5 !important;
+  }
+
+  .shop-mobile-menu nav {
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: calc(100vh - 60px) !important;
+    background: #ffffff !important;
+    z-index: 99998 !important;
+    padding: 16px 20px 60px 20px !important;
+    overflow-y: auto !important;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+  }
+
+  .shop-mobile-menu nav a {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 14px 8px !important;
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+    color: #1e293b !important;
+    border-bottom: 1px solid #f1f5f9 !important;
+    text-decoration: none !important;
+  }
+  .shop-mobile-menu nav a:hover {
+    color: #df2016 !important;
+  }
+  .shop-mobile-menu nav a::after {
+    content: "›";
+    font-size: 1.3rem;
+    color: #94a3b8;
+    font-weight: 400;
+  }
+
+  /* Catalog Layout on Tablet */
+  .kamatas-catalog-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+
+  .catalog-mobile-bar {
+    display: flex !important;
+    gap: 10px !important;
+    width: 100% !important;
+    margin-bottom: 14px !important;
+  }
+
+  .catalog-mobile-filter-btn {
+    flex: 1 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    height: 44px !important;
+    background: #ffffff !important;
+    border: 1.5px solid #df2016 !important;
+    color: #df2016 !important;
+    border-radius: 8px !important;
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    cursor: pointer !important;
+    box-shadow: 0 1px 4px rgba(223, 32, 22, 0.08) !important;
+  }
+
+  .catalog-sort-select.mobile {
+    flex: 1 !important;
+    display: block !important;
+    height: 44px !important;
+    border: 1.5px solid #d1d5db !important;
+    border-radius: 8px !important;
+    background: #ffffff !important;
+    padding: 0 12px !important;
+    font-size: 0.85rem !important;
+    font-weight: 600 !important;
+    color: #111827 !important;
+  }
+
+  /* Desktop sidebar hidden on tablet/mobile by default */
+  .kamatas-catalog-sidebar {
+    display: none;
+  }
+
+  /* When mobileFilterOpen is true, full-screen drawer */
+  .kamatas-catalog-sidebar.mobile-open {
+    display: flex !important;
+    flex-direction: column !important;
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    background: #ffffff !important;
+    z-index: 999999 !important;
+    padding: 24px 20px 80px 20px !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    box-sizing: border-box !important;
+    animation: drawerSlideIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .filter-sidebar-header.mobile-only {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-bottom: 16px !important;
+    margin-bottom: 16px !important;
+    border-bottom: 1.5px solid #f1f5f9 !important;
+  }
+
+  .filter-sidebar-header.mobile-only h3 {
+    font-size: 1.25rem !important;
+    font-weight: 800 !important;
+    color: #0f172a !important;
+    margin: 0 !important;
+  }
+
+  .filter-sidebar-header.mobile-only button {
+    background: #f1f5f9 !important;
+    border: none !important;
+    width: 38px !important;
+    height: 38px !important;
+    border-radius: 50% !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    color: #475569 !important;
+    display: grid !important;
+    place-items: center !important;
+    cursor: pointer !important;
+  }
+
+  /* Tablet Product Grid: 3 columns */
+  .kamatas-product-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+  }
+
+  .kamatas-sorting-tabs {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    scrollbar-width: none !important;
+    padding-bottom: 8px !important;
+    gap: 8px !important;
+  }
+  .kamatas-sorting-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+  .kamatas-sorting-tabs button {
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  .kamatas-view-switcher {
+    display: none !important;
+  }
+}
+
+/* ==========================================================================
+   MOBILE RESPONSIVE (<= 640px)
+   ========================================================================== */
+@media (max-width: 640px) {
+  /* Container Padding on Mobile */
+  .shop-container {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+    box-sizing: border-box !important;
+  }
+
+  /* Clean up top bars */
+  .benefit-marquee {
+    gap: 20px !important;
+    font-size: 0.7rem !important;
+  }
+  .red-ticker {
+    font-size: 0.72rem !important;
+  }
+
+  /* Hero Slider on Mobile: Compact & Elegant */
+  .store-hero.kamatas-hero,
+  .store-hero {
+    height: 440px !important;
+    min-height: 440px !important;
+  }
+
+  .store-hero-content {
+    padding: 0 16px !important;
+  }
+  .store-hero-content p {
+    font-size: 0.72rem !important;
+    letter-spacing: 0.12em !important;
+    margin-bottom: 6px !important;
+  }
+  .store-hero-content h1 {
+    font-size: clamp(1.35rem, 5.5vw, 1.8rem) !important;
+    line-height: 1.15 !important;
+    margin-bottom: 8px !important;
+  }
+  .store-hero-content span {
+    font-size: 0.85rem !important;
+    line-height: 1.35 !important;
+    margin-bottom: 14px !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .store-hero-content a {
+    height: 42px !important;
+    padding: 0 18px !important;
+    font-size: 0.82rem !important;
+  }
+  .hero-arrow {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 1.2rem !important;
+  }
+  .hero-dots {
+    bottom: 10px !important;
+  }
+
+  /* Catalog Layout on Mobile */
+  .kamatas-catalog-layout {
+    gap: 10px !important;
+  }
+
+  .kamatas-sorting-tabs {
+    display: none !important; /* Controlled by mobile top select dropdown */
+  }
+
+  /* Product Grid: 2 Columns on Mobile - Turkish E-commerce Standard */
+  .kamatas-product-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .kamatas-product-card {
+    border: 1px solid #f0f0f0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;
+    background: #ffffff !important;
+  }
+
+  .kamatas-product-card .k-card-image {
+    aspect-ratio: 1 !important;
+    margin-bottom: 4px !important;
+    border-radius: 0 !important;
+  }
+
+  .kamatas-badge-taksit {
+    top: 6px !important;
+    left: 6px !important;
+    padding: 3px 5px !important;
+    font-size: 0.52rem !important;
+    line-height: 1.1 !important;
+    border-radius: 3px !important;
+  }
+
+  .kamatas-product-card .k-card-body {
+    padding: 6px 8px 10px 8px !important;
+  }
+
+  .kamatas-product-card .k-card-brand {
+    font-size: 0.65rem !important;
+    margin-bottom: 2px !important;
+  }
+
+  .kamatas-product-card .k-card-title {
+    font-size: 0.8rem !important;
+    font-weight: 600 !important;
+    line-height: 1.25 !important;
+    margin-bottom: 4px !important;
+    min-height: 2.5em !important;
+    overflow: hidden !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+  }
+
+  .kamatas-product-card .k-card-stars {
+    gap: 4px !important;
+    margin-bottom: 4px !important;
+  }
+  .kamatas-product-card .k-card-stars .stars {
+    font-size: 0.72rem !important;
+  }
+  .kamatas-product-card .k-card-stars .reviews {
+    font-size: 0.65rem !important;
+  }
+
+  .kamatas-product-card .k-card-price {
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 4px !important;
+  }
+  .kamatas-product-card .k-card-price .price-old {
+    font-size: 0.72rem !important;
+    margin-right: 4px !important;
+  }
+
+  .kamatas-product-card .k-card-colors {
+    font-size: 0.68rem !important;
+  }
+
+  /* Cart Layout on Mobile */
+  .cart-layout {
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+  .cart-line {
+    grid-template-columns: 75px 1fr !important;
+    grid-template-rows: auto auto !important;
+    gap: 12px !important;
+    position: relative !important;
+    padding: 14px 0 !important;
+  }
+  .cart-line-image {
+    width: 75px !important;
+    height: 75px !important;
+    grid-row: 1 / 3 !important;
+  }
+  .cart-line label {
+    grid-column: 2 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .cart-line input {
+    width: 56px !important;
+    height: 36px !important;
+  }
+  .cart-line-remove {
+    position: absolute !important;
+    top: 12px !important;
+    right: 0 !important;
+  }
+  .checkout-card {
+    padding: 20px 16px !important;
+    border-radius: 12px !important;
+  }
+}
+
+@keyframes drawerSlideIn {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+

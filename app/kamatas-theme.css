@@ -763,8 +763,9 @@ body {
   }
   
   .header-search,
-  .category-nav {
-    display: none;
+  .category-nav,
+  .header-primary-nav {
+    display: none !important;
   }
   
   .shop-mobile-menu {
@@ -837,15 +838,7 @@ body {
   }
   
   .shop-actions {
-    gap: 12px;
-  }
-  
-  .shop-actions a:first-child {
-    display: none;
-  }
-  
-  .shop-actions small {
-    display: none;
+    gap: 8px;
   }
   
   .red-ticker div {

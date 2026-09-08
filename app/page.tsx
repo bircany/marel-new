@@ -9,7 +9,7 @@ import { KamatasFeatures, KamatasOrderTracking } from "./components/kamatas-feat
 import { listProducts, listApprovedReviews, type CatalogProduct } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata = {
   title: "Marel Plise Perde | Sineklik, Perde ve Aksesuar Çözümleri",

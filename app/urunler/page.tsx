@@ -5,7 +5,7 @@ import { CatalogBrowser } from "../components/catalog-browser";
 import { listProducts, type CatalogProduct } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export const metadata = {
   title: "Marel Ürünleri | Plise Perde, Jaluzi, Zip Perde ve Sineklik Sistemleri",
