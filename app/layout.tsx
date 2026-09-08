@@ -13,6 +13,7 @@ import "./admin-panel.css";
 import "./kamatas-theme.css";
 import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
 import { GoogleTag } from "./components/google-tag";
+import { GoogleTagNoScript } from "./components/google-tag-noscript";
 import { ConsentBanner } from "./components/consent-banner";
 import { ScrollingTitle } from "./components/scrolling-title";
 import { absoluteUrl, siteUrl } from "./lib/site";
@@ -53,6 +54,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" href="/favicon.png" />
       </head>
       <body className={inter.variable}>
+        <GoogleTagNoScript />
         <ScrollingTitle text="Marel Plise Perde Elbistan" />
         {children}
         <WhatsAppAdvisor />

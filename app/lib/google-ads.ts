@@ -16,8 +16,25 @@ declare global {
 }
 
 export function trackCommerceEvent(event: string, value: number, items: GoogleItem[], extra: Record<string, unknown> = {}): void {
-  if (typeof window === "undefined" || !window.gtag) return;
-  window.gtag("event", event, { currency: "TRY", value, items, ...extra });
+  if (typeof window === "undefined") return;
+  
+  // GTM DataLayer E-commerce format
+  window.dataLayer = window.dataLayer || [];
+  window.dataLayer.push({ ecommerce: null }); // Clear previous ecommerce object
+  window.dataLayer.push({
+    event,
+    ecommerce: {
+      currency: "TRY",
+      value,
+      items,
+      ...extra,
+    }
+  });
+
+  // gtag fallback
+  if (window.gtag) {
+    window.gtag("event", event, { currency: "TRY", value, items, ...extra });
+  }
 }
 
 export function trackAdsConversion(value: number, transactionId: string): void {

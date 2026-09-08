@@ -75,13 +75,34 @@ export default async function Home() {
             "@context": "https://schema.org",
             "@graph": [
               {
-                "@type": "Organization",
+                "@type": "HomeAndConstructionBusiness",
                 "@id": `${absoluteUrl("/")}#organization`,
                 name: "Marel Plise Perde",
                 url: absoluteUrl("/"),
                 logo: absoluteUrl("/icon.png"),
+                image: absoluteUrl("/og.png"),
                 email: "info@marelpliseperde.com",
                 telephone: "+905467356602",
+                address: {
+                  "@type": "PostalAddress",
+                  streetAddress: "Elbistan",
+                  addressLocality: "Elbistan",
+                  addressRegion: "Kahramanmaraş",
+                  addressCountry: "TR",
+                },
+                geo: {
+                  "@type": "GeoCoordinates",
+                  latitude: 38.2045,
+                  longitude: 37.1983
+                },
+                openingHoursSpecification: [
+                  {
+                    "@type": "OpeningHoursSpecification",
+                    dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                    opens: "08:30",
+                    closes: "19:00"
+                  }
+                ],
                 sameAs: ["https://wa.me/905467356602"],
               },
               {
