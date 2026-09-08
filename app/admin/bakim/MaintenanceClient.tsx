@@ -40,8 +40,8 @@ export function MaintenanceClient({ initialSettings }: MaintenanceClientProps) {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Bakım modu güncellenemedi.");
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data?.error || "Bakım modu güncellenemedi.");
 
       setToast({
         type: "success",

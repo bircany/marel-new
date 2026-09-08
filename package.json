@@ -6,8 +6,9 @@
     "node": ">=22.13.0"
   },
   "scripts": {
-    "dev": "vinext dev",
-    "dev:storefront": "vinext dev --port 3000",
+    "dev": "next dev",
+    "dev:vinext": "vinext dev",
+    "dev:storefront": "next dev --port 3000",
     "backend:up": "docker compose -f SoftTrade/docker-compose.yml up -d --build",
     "backend:down": "docker compose -f SoftTrade/docker-compose.yml down",
     "backend:logs": "docker compose -f SoftTrade/docker-compose.yml logs -f backend",
@@ -18,8 +19,10 @@
     "backend:key": "cd backend && php artisan key:generate",
     "backend:link": "cd backend && php artisan storage:link",
     "dev:backend": "npm run backend:up",
-    "build": "vinext build",
-    "start": "vinext start",
+    "build": "next build",
+    "build:vinext": "vinext build",
+    "start": "next start",
+    "start:vinext": "vinext start",
     "test": "npm run build && node --experimental-loader ./tests/cloudflare-loader.mjs --test tests/rendered-html.test.mjs",
     "test:smoke": "node --test tests/smoke-local.mjs",
     "test:security": "node --experimental-strip-types --test tests/security.test.mjs",
@@ -33,6 +36,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "drizzle-orm": "^0.45.2",
     "next": "16.2.6",
+    "postgres": "^3.4.9",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },

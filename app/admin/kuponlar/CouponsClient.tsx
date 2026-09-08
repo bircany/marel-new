@@ -54,8 +54,8 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Kupon oluşturulamadı.");
+      const data = (await res.json()) as any;
+      if (!res.ok) throw new Error(data?.error || "Kupon oluşturulamadı.");
 
       setCoupons((prev) => [data, ...prev]);
       setCode(createCouponCode());

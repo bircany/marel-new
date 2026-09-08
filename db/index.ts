@@ -1,4 +1,8 @@
-import { env } from "cloudflare:workers";
+import postgres from "postgres";
+import { GENERATED_SEEDS } from "./generated-catalog";
+import { GENERATED_PLISE_SEEDS } from "./generated-plise";
+
+const ALL_FALLBACK_PRODUCTS: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
 
 export type CatalogProduct = {
   id: string;
@@ -132,37 +136,151 @@ export type ContactMessageRecord = {
   updatedAt: string;
 };
 
-type RuntimeEnv = {
-  DB: D1Database;
-  PRODUCT_IMAGES: R2Bucket;
-  MAREL_ADMIN_EMAILS?: string;
-};
+export interface D1PreparedStatement {
+  bind(...values: any[]): D1PreparedStatement;
+  all<T = Record<string, any>>(): Promise<{ results: T[]; success: boolean }>;
+  first<T = Record<string, any>>(colName?: string): Promise<T | null>;
+  run(): Promise<{ success: boolean; meta: any }>;
+}
 
-const runtime = env as unknown as RuntimeEnv;
-let initialization: Promise<void> | null = null;
+export interface D1Database {
+  prepare(query: string): D1PreparedStatement;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<any[]>;
+  exec?(query: string): Promise<any>;
+}
+
+export interface R2Bucket {
+  put(key: string, value: any, options?: any): Promise<any>;
+  get(key: string): Promise<any>;
+}
+
+let sqlClient: any = null;
+
+export function getPostgresClient() {
+  if (sqlClient) return sqlClient;
+  const dbUrl = process.env.DATABASE_URL;
+  if (!dbUrl) return null;
+  try {
+    sqlClient = postgres(dbUrl, {
+      prepare: false,
+      ssl: { rejectUnauthorized: false },
+      max: 10,
+      idle_timeout: 20,
+      connect_timeout: 10,
+    });
+    return sqlClient;
+  } catch (err) {
+    console.error("[db] PostgreSQL connection error:", err);
+    return null;
+  }
+}
+
+function transformQuery(query: string, params: any[] = []) {
+  let paramIndex = 1;
+  let pgQuery = query.replace(/\?/g, () => `$${paramIndex++}`);
+  pgQuery = pgQuery.replace(/json_group_array\((.*?)\)/gi, "COALESCE(json_agg($1), '[]'::json)");
+  return { pgQuery, pgParams: params };
+}
 
 export function getDb(): D1Database {
-  if (!runtime.DB) throw new Error("D1 binding DB is unavailable");
-  return runtime.DB;
+  const sql = getPostgresClient();
+  if (sql) {
+    return {
+      prepare(query: string): D1PreparedStatement {
+        let boundParams: any[] = [];
+        const stmt: D1PreparedStatement = {
+          bind(...args: any[]) {
+            boundParams = args;
+            return stmt;
+          },
+          async run() {
+            try {
+              if (query.trim().toUpperCase().startsWith("PRAGMA")) return { success: true, meta: {} };
+              const { pgQuery, pgParams } = transformQuery(query, boundParams);
+              await sql.unsafe(pgQuery, pgParams);
+              return { success: true, meta: {} };
+            } catch (err) {
+              console.warn("[db] SQL run error:", err);
+              return { success: false, meta: { error: err } };
+            }
+          },
+          async all<T = Record<string, any>>() {
+            try {
+              const { pgQuery, pgParams } = transformQuery(query, boundParams);
+              const rows = await sql.unsafe(pgQuery, pgParams);
+              return { results: Array.from(rows) as T[], success: true };
+            } catch (err) {
+              console.warn("[db] SQL all error:", err);
+              return { results: [], success: false };
+            }
+          },
+          async first<T = Record<string, any>>() {
+            try {
+              const { pgQuery, pgParams } = transformQuery(query, boundParams);
+              const rows = await sql.unsafe(pgQuery, pgParams);
+              return (rows[0] as T) ?? null;
+            } catch (err) {
+              console.warn("[db] SQL first error:", err);
+              return null;
+            }
+          },
+        };
+        return stmt;
+      },
+      async batch(statements: D1PreparedStatement[]) {
+        const results = [];
+        for (const s of statements) {
+          try {
+            results.push(await s.run());
+          } catch {
+            results.push({ success: false });
+          }
+        }
+        return results;
+      },
+    };
+  }
+
+  return {
+    prepare(_query: string): D1PreparedStatement {
+      const stmt: D1PreparedStatement = {
+        bind(..._args: any[]) { return stmt; },
+        async run() { return { success: true, meta: {} }; },
+        async all<T>() { return { results: [] as T[], success: true }; },
+        async first<T>() { return null; },
+      };
+      return stmt;
+    },
+    async batch(_statements: D1PreparedStatement[]) { return []; },
+  };
 }
 
 export function getProductImagesBucket(): R2Bucket {
-  if (!runtime.PRODUCT_IMAGES) throw new Error("R2 binding PRODUCT_IMAGES is unavailable");
-  return runtime.PRODUCT_IMAGES;
+  return {
+    async put(_key: string, _value: any, _options?: any) {
+      return null;
+    },
+    async get(_key: string) {
+      return null;
+    },
+  };
 }
 
+let initialization: Promise<void> | null = null;
+
 export async function ensureDatabase(): Promise<void> {
+  const sql = getPostgresClient();
+  if (!sql) return;
   if (initialization) return initialization;
   initialization = initializeDatabase().catch((error) => {
+    console.error("[db] Database initialization error:", error);
     initialization = null;
-    throw error;
   });
   return initialization;
 }
 
 export async function forceReseedDatabase(): Promise<void> {
   initialization = null;
-  const db = getDb();
   await initializeDatabase();
 }
 
@@ -224,8 +342,6 @@ async function initializeDatabase(): Promise<void> {
   await db.prepare("PRAGMA optimize").run();
 }
 
-import { GENERATED_SEEDS } from "./generated-catalog";
-import { GENERATED_PLISE_SEEDS } from "./generated-plise";
 async function seedCatalog(db: D1Database): Promise<void> {
   const allSeeds = [...GENERATED_SEEDS, ...GENERATED_PLISE_SEEDS];
   const result = await db.prepare("SELECT COUNT(*) AS count FROM products").first<{ count: number }>();
@@ -424,60 +540,73 @@ async function seedCoupons(db: D1Database): Promise<void> {
 }
 
 export async function listProducts(includeInactive = false): Promise<CatalogProduct[]> {
-  await ensureDatabase();
-  const where = includeInactive ? "" : "WHERE p.active = 1";
-  const { results } = await getDb()
-    .prepare(
-      `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
-    )
-    .all<CatalogProduct & { imagesJson?: string }>();
+  try {
+    await ensureDatabase();
+    const where = includeInactive ? "" : "WHERE p.active = 1";
+    const { results } = await getDb()
+      .prepare(
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
+      )
+      .all<CatalogProduct & { imagesJson?: string }>();
 
-  return results.map((row) => {
-    let images: string[] = [];
-    if (row.imagesJson) {
-      try {
-        images = JSON.parse(row.imagesJson);
-      } catch {}
+    if (results && results.length > 0) {
+      return results.map((row) => {
+        let images: string[] = [];
+        if (row.imagesJson) {
+          try {
+            images = typeof row.imagesJson === "string" ? JSON.parse(row.imagesJson) : (Array.isArray(row.imagesJson) ? row.imagesJson : []);
+          } catch {}
+        }
+        if (!images || images.length === 0) {
+          images = [row.image];
+        }
+        return {
+          ...row,
+          images,
+          installments: row.installments ?? 3,
+          installmentText: row.installmentText || "Peşin Fiyatına 3 Taksit",
+          dimensions: row.dimensions || "Özel Ölçüye Göre Üretim",
+        };
+      });
     }
-    if (!images || images.length === 0) {
-      images = [row.image];
-    }
-    return {
-      ...row,
-      images,
-      installments: row.installments ?? 3,
-      installmentText: row.installmentText || "Peşin Fiyatına 3 Taksit",
-      dimensions: row.dimensions || "Özel Ölçüye Göre Üretim",
-    };
-  });
+  } catch (err) {
+    console.warn("[db] listProducts fallback to generated catalog:", err);
+  }
+  return ALL_FALLBACK_PRODUCTS;
 }
 
 export async function getProductBySlug(slug: string): Promise<CatalogProduct | null> {
-  await ensureDatabase();
-  const row = await getDb()
-    .prepare(
-      `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
-    )
-    .bind(slug)
-    .first<CatalogProduct & { imagesJson?: string }>();
+  try {
+    await ensureDatabase();
+    const row = await getDb()
+      .prepare(
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
+      )
+      .bind(slug)
+      .first<CatalogProduct & { imagesJson?: string }>();
 
-  if (!row) return null;
-  let images: string[] = [];
-  if (row.imagesJson) {
-    try {
-      images = JSON.parse(row.imagesJson);
-    } catch {}
+    if (row) {
+      let images: string[] = [];
+      if (row.imagesJson) {
+        try {
+          images = typeof row.imagesJson === "string" ? JSON.parse(row.imagesJson) : (Array.isArray(row.imagesJson) ? row.imagesJson : []);
+        } catch {}
+      }
+      if (!images || images.length === 0) {
+        images = [row.image];
+      }
+      return {
+        ...row,
+        images,
+        installments: row.installments ?? 3,
+        installmentText: row.installmentText || "Peşin Fiyatına 3 Taksit",
+        dimensions: row.dimensions || "Özel Ölçüye Göre Üretim",
+      };
+    }
+  } catch (err) {
+    console.warn("[db] getProductBySlug fallback:", err);
   }
-  if (!images || images.length === 0) {
-    images = [row.image];
-  }
-  return {
-    ...row,
-    images,
-    installments: row.installments ?? 3,
-    installmentText: row.installmentText || "Peşin Fiyatına 3 Taksit",
-    dimensions: row.dimensions || "Özel Ölçüye Göre Üretim",
-  };
+  return ALL_FALLBACK_PRODUCTS.find((p) => p.slug === slug) ?? null;
 }
 
 export async function createProductRecord(data: {

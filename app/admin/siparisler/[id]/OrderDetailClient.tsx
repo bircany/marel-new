@@ -63,8 +63,8 @@ export function OrderDetailClient({ order: initialOrder }: OrderDetailClientProp
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Güncelleme başarısız.");
+      const data = (await res.json()) as any;
+      if (!res.ok) throw new Error(data?.error || "Güncelleme başarısız.");
 
       if (data.order) {
         setOrder(data.order);

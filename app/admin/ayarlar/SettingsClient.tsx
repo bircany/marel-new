@@ -30,8 +30,8 @@ export function SettingsClient({ initialSettings }: SettingsClientProps) {
         body: JSON.stringify({ settings }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Ayarlar kaydedilemedi.");
+      const data = (await res.json()) as { error?: string };
+      if (!res.ok) throw new Error(data?.error || "Ayarlar kaydedilemedi.");
 
       setToast({ type: "success", text: "Site ve operasyon ayarları başarıyla güncellendi!" });
       router.refresh();
