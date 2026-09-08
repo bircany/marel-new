@@ -41,10 +41,8 @@ yarn-error.log*
 /backend/vendor/
 /SoftTrade/node_modules/
 /backend/node_modules/
-/SoftTrade/softtrade-client/node_modules/
-/backend/softtrade-client/node_modules/
-/SoftTrade/softtrade-client/.next/
-/backend/softtrade-client/.next/
+/SoftTrade/softtrade-client/
+/backend/softtrade-client/
 /SoftTrade/storage/logs/*
 /backend/storage/logs/*
 /SoftTrade/storage/framework/cache/*

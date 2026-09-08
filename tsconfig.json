@@ -31,5 +31,17 @@
     ".next/dev/types/**/*.ts",
     "**/*.mts"
   ],
-  "exclude": ["node_modules", "SoftTrade", "dist", "build", "worker", "scratch", "marel-katalog-fotolar", "vite.config.ts"]
+  "exclude": [
+    "node_modules",
+    "backend",
+    "backend/**/*",
+    "SoftTrade",
+    "SoftTrade/**/*",
+    "dist",
+    "build",
+    "worker",
+    "scratch",
+    "marel-katalog-fotolar",
+    "vite.config.ts"
+  ]
 }
