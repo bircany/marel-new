@@ -3,7 +3,7 @@ import { getProductBySlug, createProductRecord, updateProductRecord } from "@/db
 
 export async function POST(request: Request) {
   try {
-    const { products } = await request.json();
+    const { products } = (await request.json()) as { products: any[] };
 
     if (!products || !Array.isArray(products)) {
       return NextResponse.json({ error: "Invalid payload format. Expected an array of products." }, { status: 400 });

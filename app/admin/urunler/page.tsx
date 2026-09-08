@@ -48,7 +48,7 @@ export default function ProductsAdminPage() {
             body: JSON.stringify({ products: results.data }),
           });
 
-          const data = await res.json();
+          const data = (await res.json()) as any;
           if (!res.ok) throw new Error(data.error || "İçe aktarım sırasında bir hata oluştu.");
 
           const successMsg = `${data.created} ürün eklendi, ${data.updated} ürün güncellendi.`;

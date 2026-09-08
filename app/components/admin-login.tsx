@@ -152,7 +152,7 @@ export function AdminLogin({
             ) : (
               <span className="btn-normal-content">
                 Yönetim Paneline Giriş Yap
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 19 12 12 19" />
                 </svg>
@@ -163,7 +163,7 @@ export function AdminLogin({
 
         <footer className="admin-login-footer">
           <Link href="/" className="admin-back-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <line x1="19" y1="12" x2="5" y2="12" />
               <polyline points="12 19 5 12 12 5" />
             </svg>
