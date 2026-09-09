@@ -1,9 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { formatMoney } from "@/app/lib/commerce";
 
 export function KamatasFeatures() {
   return (
@@ -51,59 +48,8 @@ export function KamatasFeatures() {
   );
 }
 
-const statusLabels: Record<string, { label: string; bg: string; color: string }> = {
-  pending: { label: "Sipariş Alındı", bg: "#fef3c7", color: "#b45309" },
-  awaiting_measurement: { label: "Ölçü Onayı Bekleniyor", bg: "#e0e7ff", color: "#3730a3" },
-  measure_ok: { label: "Ölçü Onaylandı", bg: "#dbeafe", color: "#1e40af" },
-  processing: { label: "Üretimde", bg: "#dcfce7", color: "#166534" },
-  shipped: { label: "Kargoya Verildi (Yurtiçi Kargo)", bg: "#ecfdf5", color: "#065f46" },
-  delivered: { label: "Teslim Edildi", bg: "#d1fae5", color: "#047857" },
-  cancelled: { label: "İptal Edildi", bg: "#fee2e2", color: "#b91c1c" },
-};
-
 export function KamatasOrderTracking() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
   const [orderNumber, setOrderNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [previewResult, setPreviewResult] = useState<any | null>(null);
-
-  const handleTrackSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanEmail = email.trim();
-    let cleanOrder = orderNumber.trim();
-    if (cleanOrder.startsWith("#")) cleanOrder = cleanOrder.slice(1);
-
-    if (!cleanEmail || !cleanOrder) {
-      // If user clicked button without filling fields, redirect to tracking page directly
-      router.push("/siparis-takip");
-      return;
-    }
-
-    setLoading(true);
-    setError("");
-    setPreviewResult(null);
-
-    try {
-      const res = await fetch("/api/orders/track", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: cleanEmail, orderNumber: cleanOrder }),
-      });
-
-      const data = (await res.json()) as { error?: string; [key: string]: unknown };
-      if (!res.ok || data.error) {
-        setError(data.error || "Girdiğiniz bilgilere ait sipariş bulunamadı. Lütfen e-posta ve sipariş numaranızı kontrol ediniz.");
-      } else {
-        setPreviewResult(data as any);
-      }
-    } catch {
-      setError("Bağlantı hatası oluştu. Lütfen tekrar deneyiniz.");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <section className="kamatas-features-track" id="takip" style={{ background: "#0f172a", color: "#ffffff", padding: "70px 0" }}>
@@ -121,15 +67,6 @@ export function KamatasOrderTracking() {
             </p>
           </div>
 
-          <div
-            style={{
-              background: "#1e293b",
-              borderRadius: 18,
-              padding: "36px 32px",
-              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
-              border: "1px solid #334155",
-            }}
-          >
           <div
             style={{
               background: "#1e293b",
