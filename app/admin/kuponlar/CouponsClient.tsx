@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { CouponRecord } from "@/db";
 
@@ -27,6 +27,24 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
   const [loading, setLoading] = useState(false);
   const [toast, setToast] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [filter, setFilter] = useState<"all" | "active" | "inactive" | "expired">("all");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/admin/coupons", { cache: "no-store" })
+      .then(async (res) => {
+        const data = (await res.json()) as CouponRecord[] | { error?: string };
+        if (!res.ok) throw new Error("error" in data ? data.error : "Kuponlar yüklenemedi.");
+        if (!cancelled && Array.isArray(data)) setCoupons(data);
+      })
+      .catch((error) => {
+        if (!cancelled) setToast({ type: "error", text: error instanceof Error ? error.message : "Kuponlar yüklenemedi." });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
@@ -88,6 +106,27 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
       setToast({ type: "error", text: err instanceof Error ? err.message : "Silme başarısız." });
     }
   };
+
+  const handleToggle = async (coupon: CouponRecord) => {
+    try {
+      const res = await fetch("/api/admin/coupons", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: coupon.id, active: !coupon.active }),
+      });
+      const data = (await res.json()) as CouponRecord & { error?: string };
+      if (!res.ok) throw new Error(data?.error || "Kupon güncellenemedi.");
+      setCoupons((prev) => prev.map((item) => item.id === coupon.id ? data : item));
+    } catch (err) {
+      setToast({ type: "error", text: err instanceof Error ? err.message : "Kupon güncellenemedi." });
+    }
+  };
+
+  const filteredCoupons = coupons.filter((coupon) => {
+    const expired = Boolean(coupon.expiresAt && new Date(coupon.expiresAt) < new Date());
+    return (!search || coupon.code.toLowerCase().includes(search.toLowerCase())) &&
+      (filter === "all" || (filter === "active" && coupon.active && !expired) || (filter === "inactive" && !coupon.active) || (filter === "expired" && expired));
+  });
 
   return (
     <div style={{ maxWidth: 1200, margin: "0 auto", paddingBottom: 60 }}>
@@ -356,11 +395,18 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
             <h2 style={{ margin: 0, fontSize: "1.1rem", color: "#0f172a" }}>
               Aktif & Geçmiş Kuponlar ({coupons.length})
             </h2>
+            <a href="/api/admin/coupons?format=csv" download style={{ color: "#334155", fontSize: "0.8rem", fontWeight: 600 }}>CSV dışa aktar</a>
+          </div>
+          <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Kod ara…" style={{ flex: 1, padding: "8px 10px", border: "1px solid #cbd5e1", borderRadius: 6 }} />
+            <select value={filter} onChange={(e) => setFilter(e.target.value as typeof filter)} style={{ padding: "8px", border: "1px solid #cbd5e1", borderRadius: 6 }}>
+              <option value="all">Tümü</option><option value="active">Aktif</option><option value="inactive">Pasif</option><option value="expired">Süresi dolan</option>
+            </select>
           </div>
 
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {coupons.length > 0 ? (
-              coupons.map((coupon) => {
+            {filteredCoupons.length > 0 ? (
+              filteredCoupons.map((coupon) => {
                 const discountText =
                   coupon.discountType === "PERCENT"
                     ? `%${coupon.discountValue} İndirim`
@@ -428,6 +474,13 @@ export function CouponsClient({ initialCoupons }: CouponsClientProps) {
                     </div>
 
                     <div>
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(coupon)}
+                        style={{ backgroundColor: "#fff", border: "1px solid #cbd5e1", color: "#334155", padding: "6px 10px", borderRadius: 6, fontSize: "0.78rem", fontWeight: 600, cursor: "pointer", marginRight: 6 }}
+                      >
+                        {coupon.active ? "Pasifleştir" : "Aktifleştir"}
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDelete(coupon.id, coupon.code)}

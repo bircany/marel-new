@@ -166,6 +166,7 @@ CREATE TABLE IF NOT EXISTS coupons (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE INDEX IF NOT EXISTS idx_coupons_active_expiry ON coupons(active, expires_at);
 
 CREATE TABLE IF NOT EXISTS site_settings (
   key TEXT PRIMARY KEY,

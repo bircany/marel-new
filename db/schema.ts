@@ -4,7 +4,9 @@ export const users = sqliteTable("users", {
   id: text("id").primaryKey(),
   email: text("email").notNull(),
   fullName: text("full_name"),
+  phone: text("phone"),
   role: text("role").notNull().default("customer"),
+  status: text("status").notNull().default("active"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [uniqueIndex("idx_users_email").on(table.email)]);
@@ -161,7 +163,10 @@ export const coupons = sqliteTable("coupons", {
   expiresAt: text("expires_at"),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
-}, (table) => [uniqueIndex("idx_coupons_code").on(table.code)]);
+}, (table) => [
+  uniqueIndex("idx_coupons_code").on(table.code),
+  index("idx_coupons_active_expiry").on(table.active, table.expiresAt),
+]);
 
 export const settings = sqliteTable("settings", {
   key: text("key").primaryKey(),

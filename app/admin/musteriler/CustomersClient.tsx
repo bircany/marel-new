@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { formatMoney } from "@/app/lib/commerce";
 import type { CustomerRecord } from "@/db";
@@ -10,19 +10,40 @@ interface CustomersClientProps {
 }
 
 export function CustomersClient({ initialCustomers }: CustomersClientProps) {
-  const [customers] = useState<CustomerRecord[]>(initialCustomers);
+  const [customers, setCustomers] = useState<CustomerRecord[]>(initialCustomers);
   const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [editing, setEditing] = useState<CustomerRecord | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/admin/customers", { cache: "no-store" })
+      .then(async (res) => {
+        const data = (await res.json()) as CustomerRecord[] | { error?: string };
+        if (!res.ok) throw new Error("error" in data ? data.error : "Müşteriler yüklenemedi.");
+        if (!cancelled && Array.isArray(data)) setCustomers(data);
+      })
+      .catch(() => {
+        // Keep the server-rendered list visible if the client refresh is unavailable.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase().trim();
-    if (!q) return customers;
+    if (!q && !status) return customers;
     return customers.filter(
-      (c) =>
+      (c) => (!status || c.status === status) && (
+        !q ||
         (c.fullName || "").toLowerCase().includes(q) ||
         (c.email || "").toLowerCase().includes(q) ||
-        (c.phone || "").includes(q),
+        (c.phone || "").includes(q)
+      ),
     );
-  }, [customers, search]);
+  }, [customers, search, status]);
 
   const stats = useMemo(() => {
     const total = customers.length;
@@ -38,6 +59,33 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
     const clean = raw.startsWith("0") ? `9${raw}` : raw.startsWith("90") ? raw : `90${raw}`;
     const msg = `Merhaba Sn. ${name},\nMarel Plise Perde müşteri hizmetlerinden yazıyoruz. Size nasıl yardımcı olabiliriz?`;
     window.open(`https://wa.me/${clean}?text=${encodeURIComponent(msg)}`, "_blank");
+  };
+
+  const saveCustomer = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!editing) return;
+    setSaving(true);
+    const form = new FormData(event.currentTarget);
+    const response = await fetch(editing.id ? `/api/admin/customers/${encodeURIComponent(editing.id)}` : "/api/admin/customers", {
+      method: editing.id ? "PATCH" : "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        fullName: form.get("fullName"),
+        email: form.get("email"),
+        phone: form.get("phone"),
+        status: form.get("status"),
+      }),
+    });
+    const data = (await response.json()) as CustomerRecord | { error?: string };
+    setSaving(false);
+    if (!response.ok || "error" in data || !("id" in data)) {
+      alert("error" in data ? data.error : "Müşteri güncellenemedi.");
+      return;
+    }
+    setCustomers((current) => editing.id
+      ? current.map((customer) => customer.id === editing.id ? data : customer)
+      : [data, ...current]);
+    setEditing(null);
   };
 
   return (
@@ -75,6 +123,12 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
           <strong style={{ color: "#6366f1" }}>{formatMoney(stats.totalRevenue)}</strong>
           <small>Toplam müşteri cirosu</small>
         </div>
+        <select value={status} onChange={(e) => setStatus(e.target.value)} aria-label="Müşteri durumu" style={{ maxWidth: 180 }}>
+          <option value="">Tüm durumlar</option>
+          <option value="active">Aktif</option>
+          <option value="inactive">Pasif</option>
+          <option value="blocked">Engelli</option>
+        </select>
       </div>
 
       {/* Toolbar */}
@@ -90,7 +144,37 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
             placeholder="İsim, e-posta veya telefon ile ara..."
           />
         </div>
+        <button type="button" className="admin-btn-gold" onClick={() => setEditing({
+          id: "",
+          fullName: "",
+          email: "",
+          phone: "",
+          orderCount: 0,
+          totalSpent: 0,
+          lastOrderDate: null,
+          createdAt: new Date().toISOString(),
+          status: "active",
+          favoriteProducts: [],
+        })}>
+          + Müşteri ekle
+        </button>
       </div>
+
+      {editing && (
+        <form onSubmit={saveCustomer} className="admin-card" style={{ marginBottom: 20, display: "grid", gap: 12, gridTemplateColumns: "repeat(4, minmax(0, 1fr))" }}>
+          <input name="fullName" defaultValue={editing.fullName} placeholder="Ad soyad" required />
+          <input name="email" type="email" defaultValue={editing.email} placeholder="E-posta" required />
+          <input name="phone" defaultValue={editing.phone} placeholder="Telefon" />
+          <select name="status" defaultValue={editing.status}>
+            <option value="active">Aktif</option>
+            <option value="inactive">Pasif</option>
+          </select>
+          <div style={{ gridColumn: "1 / -1", display: "flex", gap: 8 }}>
+            <button type="submit" className="admin-btn-gold" disabled={saving}>{saving ? "Kaydediliyor..." : "Kaydet"}</button>
+            <button type="button" className="admin-btn-secondary" onClick={() => setEditing(null)}>İptal</button>
+          </div>
+        </form>
+      )}
 
       {/* Customer Cards / Table */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -132,6 +216,9 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <strong style={{ fontSize: "1rem", color: "#0f172a" }}>{customer.fullName}</strong>
+                    <span style={{ fontSize: "0.7rem", color: customer.status === "active" ? "#15803d" : "#b45309" }}>
+                      {customer.status === "active" ? "Aktif" : customer.status === "blocked" ? "Engelli" : "Pasif"}
+                    </span>
                     {customer.orderCount > 1 && (
                       <span
                         style={{
@@ -221,7 +308,7 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
                   </a>
                 )}
                 <Link
-                  href={`/admin/siparisler`}
+                  href={`/admin/musteriler/${encodeURIComponent(customer.id)}`}
                   style={{
                     backgroundColor: "#0f172a",
                     color: "#ffffff",
@@ -232,8 +319,11 @@ export function CustomersClient({ initialCustomers }: CustomersClientProps) {
                     textDecoration: "none",
                   }}
                 >
-                  Siparişleri Gör →
+                  Detayları Gör →
                 </Link>
+                <button type="button" className="admin-btn-secondary" onClick={() => setEditing(customer)}>
+                  Düzenle
+                </button>
               </div>
             </div>
           ))
