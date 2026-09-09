@@ -108,25 +108,16 @@ export function KamatasOrderTracking() {
   return (
     <section className="kamatas-features-track" id="takip" style={{ background: "#0f172a", color: "#ffffff", padding: "70px 0" }}>
       <div className="shop-container">
-        <div style={{ maxWidth: 840, margin: "0 auto" }}>
+        <div style={{ maxWidth: 640, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 35 }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "rgba(56, 189, 248, 0.1)", border: "1px solid rgba(56, 189, 248, 0.3)", borderRadius: 30, padding: "6px 16px", marginBottom: 12 }}>
-              {/* Yurtiçi Kargo Mini Logo Icon */}
-              <svg viewBox="0 0 120 30" width="90" height="24" fill="none">
-                <rect width="120" height="30" rx="4" fill="#003580"/>
-                <path d="M12 5 L22 15 L12 25 L8 21 L14 15 L8 9 Z" fill="#FFCC00"/>
-                <path d="M18 5 L28 15 L18 25 L14 21 L20 15 L14 9 Z" fill="#ED1C24"/>
-                <text x="32" y="20" fill="#ffffff" fontFamily="Arial, Helvetica, sans-serif" fontWeight="900" fontSize="11" letterSpacing="0.5">YURTİÇİ KARGO</text>
-              </svg>
-              <span style={{ color: "#38bdf8", fontSize: "0.78rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase" }}>
-                CANLI ENTEGRASYON
-              </span>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+              <img src="https://www.yurticikargo.com/Content/theme/img/logo.png" alt="Yurtiçi Kargo" style={{ height: 28, filter: "brightness(0) invert(1)" }} />
             </div>
             <h2 style={{ fontSize: "2rem", fontWeight: 900, color: "#ffffff", margin: "6px 0 10px" }}>
-              Sipariş & Kargo Takibi
+              Kargonuz Nerede?
             </h2>
             <p style={{ color: "#94a3b8", fontSize: "0.94rem", maxWidth: 580, margin: "0 auto" }}>
-              Siparişinizin atölye üretim aşamasını ve Yurtiçi Kargo gönderinizi tek tıkla canlı sorgulayın.
+              Gönderi takip numaranızı girerek kargonuzun durumunu anında Yurtiçi Kargo üzerinden sorgulayabilirsiniz.
             </p>
           </div>
 
@@ -139,242 +130,75 @@ export function KamatasOrderTracking() {
               border: "1px solid #334155",
             }}
           >
-            <form onSubmit={handleTrackSubmit} style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", margin: 0 }}>
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-                  gap: 20,
-                  width: "100%",
-                }}
-              >
-                <div>
-                  <label htmlFor="track-email" style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "#cbd5e1", marginBottom: 8 }}>
-                    E-posta Adresiniz
-                  </label>
-                  <input
-                    id="track-email"
-                    name="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ornek@mail.com"
-                    style={{
-                      width: "100%",
-                      height: 50,
-                      padding: "0 16px",
-                      borderRadius: 10,
-                      background: "#0f172a",
-                      border: "1.5px solid #475569",
-                      color: "#ffffff",
-                      fontSize: "0.95rem",
-                      boxSizing: "border-box",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-                <div>
-                  <label htmlFor="track-order" style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "#cbd5e1", marginBottom: 8 }}>
-                    Sipariş No (xxxx veya ORD-...)
-                  </label>
-                  <input
-                    id="track-order"
-                    name="order"
-                    type="text"
-                    value={orderNumber}
-                    onChange={(e) => setOrderNumber(e.target.value)}
-                    placeholder="Örn: ORD-20260906-00001 veya 1001"
-                    style={{
-                      width: "100%",
-                      height: 50,
-                      padding: "0 16px",
-                      borderRadius: 10,
-                      background: "#0f172a",
-                      border: "1.5px solid #475569",
-                      color: "#ffffff",
-                      fontSize: "0.95rem",
-                      boxSizing: "border-box",
-                      outline: "none",
-                    }}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div style={{ padding: "12px 16px", background: "rgba(239, 68, 68, 0.15)", border: "1px solid #ef4444", color: "#fca5a5", borderRadius: 8, fontSize: "0.84rem" }}>
-                  {error}
-                </div>
-              )}
-
-              {/* Action Buttons - Generous height, proper spacing, side by side or responsive */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, width: "100%", marginTop: 4 }}>
-                <button
-                  type="submit"
-                  disabled={loading}
+          <div
+            style={{
+              background: "#1e293b",
+              borderRadius: 18,
+              padding: "36px 32px",
+              boxShadow: "0 20px 40px rgba(0, 0, 0, 0.3)",
+              border: "1px solid #334155",
+            }}
+          >
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!orderNumber.trim()) return;
+                window.open(`https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${encodeURIComponent(orderNumber.trim())}`, "_blank");
+              }}
+              style={{ display: "flex", flexDirection: "column", gap: 20, width: "100%", margin: 0 }}
+            >
+              <div>
+                <label htmlFor="track-order" style={{ display: "block", fontSize: "0.85rem", fontWeight: 700, color: "#cbd5e1", marginBottom: 8 }}>
+                  Yurtiçi Kargo Takip Numarası
+                </label>
+                <input
+                  id="track-order"
+                  name="order"
+                  type="text"
+                  value={orderNumber}
+                  onChange={(e) => setOrderNumber(e.target.value)}
+                  placeholder="Örn: 123456789012"
                   style={{
+                    width: "100%",
                     height: 52,
-                    padding: "0 24px",
+                    padding: "0 16px",
                     borderRadius: 10,
-                    background: "#2563eb",
-                    color: "#ffffff",
-                    border: "none",
-                    fontWeight: 800,
-                    fontSize: "0.96rem",
-                    cursor: loading ? "not-allowed" : "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 10,
-                    boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
-                    transition: "background 0.2s ease, transform 0.1s ease",
-                  }}
-                  onMouseOver={(e) => (e.currentTarget.style.background = "#1d4ed8")}
-                  onMouseOut={(e) => (e.currentTarget.style.background = "#2563eb")}
-                >
-                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2.2">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                  </svg>
-                  {loading ? "Sorgulanıyor..." : "Siparişinizi Takip Edin"}
-                </button>
-
-                <Link
-                  href="/siparis-takip"
-                  style={{
-                    height: 52,
-                    padding: "0 24px",
-                    borderRadius: 10,
-                    background: "rgba(255, 255, 255, 0.05)",
-                    color: "#f1f5f9",
+                    background: "#0f172a",
                     border: "1.5px solid #475569",
-                    fontWeight: 700,
-                    fontSize: "0.94rem",
-                    textDecoration: "none",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8,
+                    color: "#ffffff",
+                    fontSize: "1rem",
                     boxSizing: "border-box",
-                    transition: "all 0.2s ease",
+                    outline: "none",
                   }}
-                  onMouseOver={(e) => {
-                    e.currentTarget.style.borderColor = "#38bdf8";
-                    e.currentTarget.style.color = "#38bdf8";
-                    e.currentTarget.style.background = "rgba(56, 189, 248, 0.08)";
-                  }}
-                  onMouseOut={(e) => {
-                    e.currentTarget.style.borderColor = "#475569";
-                    e.currentTarget.style.color = "#f1f5f9";
-                    e.currentTarget.style.background = "rgba(255, 255, 255, 0.05)";
-                  }}
-                >
-                  Detaylı Takip Sayfasına Git ↗
-                </Link>
+                />
               </div>
-            </form>
 
-            {/* Instant Live Preview Box */}
-            {previewResult && (
-              <div
+              <button
+                type="submit"
                 style={{
-                  marginTop: 26,
-                  padding: "22px 24px",
-                  background: "#0f172a",
-                  borderRadius: 12,
-                  border: "1.5px solid #38bdf8",
-                  animation: "fadeIn 0.3s ease",
+                  height: 52,
+                  width: "100%",
+                  borderRadius: 10,
+                  background: "#2563eb",
+                  color: "#ffffff",
+                  border: "none",
+                  fontWeight: 800,
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 10,
+                  boxShadow: "0 4px 14px rgba(37, 99, 235, 0.35)",
+                  transition: "background 0.2s ease",
+                  marginTop: 10
                 }}
+                onMouseOver={(e) => (e.currentTarget.style.background = "#1d4ed8")}
+                onMouseOut={(e) => (e.currentTarget.style.background = "#2563eb")}
               >
-                <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid #1e293b", paddingBottom: 14 }}>
-                  <div>
-                    <span style={{ color: "#94a3b8", fontSize: "0.76rem" }}>Sipariş Numarası</span>
-                    <h3 style={{ margin: "2px 0 0", fontSize: "1.2rem", fontWeight: 900, color: "#ffffff" }}>
-                      {previewResult.order.order_number}
-                    </h3>
-                  </div>
-                  {(() => {
-                    const st = statusLabels[previewResult.order.status] || {
-                      label: previewResult.order.status,
-                      bg: "#334155",
-                      color: "#f8fafc",
-                    };
-                    return (
-                      <span style={{ padding: "6px 14px", borderRadius: 20, background: st.bg, color: st.color, fontSize: "0.82rem", fontWeight: 800 }}>
-                        {st.label}
-                      </span>
-                    );
-                  })()}
-                </div>
-
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 14, marginBottom: 18 }}>
-                  <div>
-                    <small style={{ color: "#94a3b8", display: "block", fontSize: "0.72rem" }}>Müşteri</small>
-                    <strong style={{ color: "#e2e8f0", fontSize: "0.88rem" }}>{previewResult.order.customer_name || email}</strong>
-                  </div>
-                  <div>
-                    <small style={{ color: "#94a3b8", display: "block", fontSize: "0.72rem" }}>Toplam Tutar</small>
-                    <strong style={{ color: "#e2e8f0", fontSize: "0.88rem" }}>
-                      {previewResult.order.formatted_total ||
-                        formatMoney(
-                          previewResult.order.total > 10000
-                            ? previewResult.order.total
-                            : Math.round(previewResult.order.total * 100)
-                        )}
-                    </strong>
-                  </div>
-                  <div>
-                    <small style={{ color: "#94a3b8", display: "block", fontSize: "0.72rem" }}>Kargo Şirketi</small>
-                    <strong style={{ color: "#38bdf8", fontSize: "0.88rem" }}>Yurtiçi Kargo</strong>
-                  </div>
-                  <div>
-                    <small style={{ color: "#94a3b8", display: "block", fontSize: "0.72rem" }}>Takip Numarası</small>
-                    <strong style={{ color: "#f59e0b", fontSize: "0.88rem" }}>
-                      {previewResult.cargo?.tracking_number || "Hazırlanıyor"}
-                    </strong>
-                  </div>
-                </div>
-
-                {/* Direct Yurtiçi Action or Redirect Button */}
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", paddingTop: 12, borderTop: "1px solid #1e293b" }}>
-                  {previewResult.cargo?.tracking_url ? (
-                    <a
-                      href={previewResult.cargo.tracking_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      style={{
-                        padding: "9px 18px",
-                        borderRadius: 8,
-                        background: "#0284c7",
-                        color: "#ffffff",
-                        fontSize: "0.82rem",
-                        fontWeight: 800,
-                        textDecoration: "none",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 6,
-                      }}
-                    >
-                      📦 Yurtiçi Kargo Canlı Takip ↗
-                    </a>
-                  ) : null}
-
-                  <Link
-                    href={`/siparis-takip?order=${encodeURIComponent(previewResult.order.order_number)}&email=${encodeURIComponent(email)}`}
-                    style={{
-                      padding: "9px 18px",
-                      borderRadius: 8,
-                      background: "#334155",
-                      color: "#ffffff",
-                      fontSize: "0.82rem",
-                      fontWeight: 750,
-                      textDecoration: "none",
-                    }}
-                  >
-                    Tüm Detayları Gör →
-                  </Link>
-                </div>
-              </div>
-            )}
+                Sorgula ↗
+              </button>
+            </form>
           </div>
         </div>
       </div>
