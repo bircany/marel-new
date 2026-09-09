@@ -4,10 +4,12 @@ import type { NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Admin paneli ve API yolları bakım modundan etkilenmez
+  // Yönetim, kimlik doğrulama ve bakım ayarları erişilebilir kalmalıdır.
   if (
     pathname.startsWith('/admin') ||
-    pathname.startsWith('/api') ||
+    pathname.startsWith('/api/admin') ||
+    pathname.startsWith('/api/auth') ||
+    pathname === '/api/settings/public' ||
     pathname.startsWith('/_next') ||
     pathname === '/bakim' ||
     pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|webp)$/i)
@@ -20,15 +22,14 @@ export async function middleware(request: NextRequest) {
     const res = await fetch(new URL('/api/settings/public', request.url), {
       next: { revalidate: 30 } // 30 saniye cache'le
     });
-    
     if (res.ok) {
-      const data = await res.json();
+      const data = (await res.json()) as { maintenance_mode?: string | boolean };
       if (data.maintenance_mode === 'true' || data.maintenance_mode === true) {
         return NextResponse.rewrite(new URL('/bakim', request.url));
       }
     }
-  } catch (err) {
-    // API hatası olursa sessizce geç
+  } catch (error) {
+    console.warn('[maintenance] Ayar kontrolü yapılamadı; istek normal akışta devam ediyor.', error);
   }
 
   return NextResponse.next();

@@ -528,6 +528,12 @@ export function AdminConsole({
   const missingCargoCount = orders.filter((o) => !o.trackingNumber && o.status !== "delivered" && o.status !== "cancelled").length;
   const activeOrdersCount = orders.filter((o) => o.status !== "delivered" && o.status !== "cancelled").length;
   const totalRevenue = orders.reduce((acc, order) => acc + (order.status !== "cancelled" ? order.total : 0), 0);
+  const completedOrdersCount = orders.filter((o) => o.status === "delivered").length;
+  const cancelledOrdersCount = orders.filter((o) => o.status === "cancelled").length;
+  const averageOrderValue = orders.length > 0 ? totalRevenue / Math.max(orders.length - cancelledOrdersCount, 1) : 0;
+  const fulfillmentRate = orders.length > 0 ? Math.round((completedOrdersCount / orders.length) * 100) : 0;
+  const lowStockCount = products.filter((p) => p.active !== 0 && p.stock > 0 && p.stock <= 5).length;
+  const activeCouponsCount = coupons.filter((coupon) => Boolean(coupon.active)).length;
 
   // Filtered Products
   const rootCategories = useMemo(
@@ -879,6 +885,25 @@ export function AdminConsole({
               </div>
             </header>
 
+            <div className="admin-quick-actions">
+              <button type="button" className="admin-quick-action peach" onClick={() => setTab("coupons")}>
+                <strong>Yeni kupon oluştur</strong>
+                <span>İndirim kodu veya sabit tutar tanımla ↗</span>
+              </button>
+              <button type="button" className="admin-quick-action blue" onClick={() => setTab("announcements")}>
+                <strong>Duyuru yayınla</strong>
+                <span>Mağazada yeni bilgilendirme paylaş ↗</span>
+              </button>
+              <button type="button" className="admin-quick-action green" onClick={() => setTab("products")}>
+                <strong>Ürün kataloğunu düzenle</strong>
+                <span>Stok ve vitrin durumunu güncelle ↗</span>
+              </button>
+              <button type="button" className="admin-quick-action lilac" onClick={() => setTab("contacts")}>
+                <strong>Mesajları kontrol et</strong>
+                <span>{newContactsCount} yeni müşteri talebi bulunuyor ↗</span>
+              </button>
+            </div>
+
             <div className="admin-stats-grid">
               <div className="admin-stat-card">
                 <div className="admin-stat-card-top">
@@ -952,29 +977,92 @@ export function AdminConsole({
               </div>
             </div>
 
-            {/* Quick Actions Shortcuts */}
-            <div className="admin-toolbar" style={{ marginTop: 20 }}>
-              <div className="admin-filter-group">
-                <strong style={{ fontSize: "0.85rem", color: "#0f172a", fontWeight: 800 }}>Hızlı İşlemler:</strong>
-                <button className="admin-filter-pill" onClick={() => setTab("cargo")} type="button">
-                  Kargo Takip Modülü
-                </button>
-                <button className="admin-filter-pill" onClick={() => setTab("orders")} type="button">
-                  Siparişleri Yönet
-                </button>
-                <button className="admin-filter-pill" onClick={() => setTab("products")} type="button">
-                  Ürün & Stok Güncelle
-                </button>
-                <button className="admin-filter-pill" onClick={() => setTab("reviews")} type="button">
-                  Yorumları Onayla ({pendingReviewsCount})
-                </button>
-                <button className="admin-filter-pill" onClick={() => setTab("contacts")} type="button">
-                  Mesajları Yanıtla ({newContactsCount})
-                </button>
-                <button className="admin-filter-pill" onClick={() => setTab("announcements")} type="button">
-                  Yeni Duyuru Ekle
-                </button>
+            <section className="admin-analytics-panel" aria-label="Operasyon analitikleri">
+              <div className="admin-analytics-heading">
+                <div>
+                  <span>PERFORMANS ÖZETİ</span>
+                  <h2>Bugün neye odaklanmalı?</h2>
+                </div>
+                <small>Mevcut sipariş, katalog ve topluluk verilerinden hesaplanır.</small>
               </div>
+              <div className="admin-analytics-grid">
+                <div className="admin-analytics-item">
+                  <small>Ortalama Sipariş</small>
+                  <strong>{formatMoney(averageOrderValue)}</strong>
+                  <span>İptal edilenler hariç</span>
+                </div>
+                <div className="admin-analytics-item">
+                  <small>Teslimat Oranı</small>
+                  <strong>{fulfillmentRate}%</strong>
+                  <span>{completedOrdersCount} teslim edilen sipariş</span>
+                </div>
+                <div className="admin-analytics-item warning">
+                  <small>Düşük Stok Riski</small>
+                  <strong>{lowStockCount}</strong>
+                  <span>5 ve altı stoklu aktif ürün</span>
+                </div>
+                <div className="admin-analytics-item">
+                  <small>Aktif Kampanyalar</small>
+                  <strong>{activeCouponsCount}</strong>
+                  <span>{announcements.filter((announcement) => Boolean(announcement.published)).length} yayınlanan duyuru</span>
+                </div>
+              </div>
+            </section>
+
+            <div className="admin-dashboard-lower">
+              <section className="admin-chart-card">
+                <div className="admin-chart-header">
+                  <div>
+                    <span>SİPARİŞ ANALİTİĞİ</span>
+                    <h2>Operasyon görünümü</h2>
+                  </div>
+                  <div className="admin-chart-switcher">
+                    <button type="button">Günlük</button>
+                    <button type="button">Haftalık</button>
+                    <button type="button" className="active">Aylık</button>
+                  </div>
+                </div>
+                <div className="admin-bar-chart" aria-label="Sipariş durum dağılımı">
+                  {[
+                    ["Bekliyor", orders.filter((o) => o.status === "pending").length],
+                    ["Onay", orders.filter((o) => o.status === "measure_ok").length],
+                    ["Üretim", orders.filter((o) => o.status === "processing").length],
+                    ["Kargo", orders.filter((o) => o.status === "shipped").length],
+                    ["Teslim", completedOrdersCount],
+                    ["İptal", cancelledOrdersCount],
+                  ].map(([label, value]) => (
+                    <div className="admin-bar-column" key={label}>
+                      <div className="admin-bar-value" style={{ height: `${Math.max(Number(value) * 18, 12)}px` }} />
+                      <span>{label}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="admin-chart-footer">
+                  <strong>{orders.length} toplam sipariş</strong>
+                  <span>Aktif operasyon ve teslimat takibi</span>
+                </div>
+              </section>
+
+              <aside className="admin-insights-column">
+                <section className="admin-insight-card">
+                  <div className="admin-insight-title"><h3>Müşteri içgörüleri</h3><span>↗</span></div>
+                  <div className="admin-insight-row"><span>Yeni müşteriler</span><strong>{customers.length}</strong></div>
+                  <div className="admin-insight-row"><span>Toplam yorum</span><strong>{reviews.length}</strong></div>
+                  <div className="admin-insight-row"><span>Teslim edilen sipariş</span><strong>{completedOrdersCount}</strong></div>
+                  <div className="admin-progress"><span style={{ width: `${Math.min(fulfillmentRate, 100)}%` }} /></div>
+                  <small>Müşteri memnuniyeti için teslimat oranını takip edin.</small>
+                </section>
+                <section className="admin-insight-card">
+                  <div className="admin-insight-title"><h3>Aktif kampanyalar</h3><button type="button" onClick={() => setTab("coupons")}>Tümünü gör</button></div>
+                  {coupons.slice(0, 2).map((coupon) => (
+                    <div className="admin-promotion-row" key={coupon.id}>
+                      <span>{coupon.code}</span>
+                      <strong>{coupon.discountType === "PERCENT" ? `%${coupon.discountValue}` : formatMoney(coupon.discountValue)}</strong>
+                    </div>
+                  ))}
+                  {coupons.length === 0 ? <small>Henüz aktif kampanya yok.</small> : null}
+                </section>
+              </aside>
             </div>
           </>
         )}
@@ -1214,7 +1302,7 @@ export function AdminConsole({
                   </button>
                 </div>
               </div>
-            </div>
+              </div>
 
             {/* List Header & Select All */}
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 4px", marginBottom: 8, fontSize: "0.8rem", color: "#64748b" }}>
