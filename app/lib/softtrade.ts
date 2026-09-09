@@ -1,5 +1,5 @@
 import type { CatalogProduct, ContactMessageRecord, OrderRecord, ReviewRecord } from "@/db";
-import { listProducts as dbListProducts, getProductBySlug as dbGetProductBySlug, getDb } from "@/db";
+import { listProducts as dbListProducts, getProductBySlug as dbGetProductBySlug, getDb, ensureDatabase } from "@/db";
 
 type RuntimeEnv = {
   SOFTRADE_API_URL?: string;
@@ -521,6 +521,9 @@ export type SoftTradeContactMessage = {
 };
 
 export async function stListContactMessages(): Promise<ContactMessageRecord[]> {
+  try {
+    await ensureDatabase();
+  } catch {}
   if (process.env.DATABASE_URL) {
     try {
       const db = getDb();

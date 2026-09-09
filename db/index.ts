@@ -365,10 +365,12 @@ async function initializeDatabase(): Promise<void> {
   try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS district TEXT").run(); } catch {}
 
-  // Fix Turkish characters in seeded contact messages
-  try { await db.prepare("UPDATE contact_messages SET name = 'Elif Aydın', message = 'Siparişim hazır olduğunda montaj için uygun tarihleri paylaşabilir misiniz?' WHERE id = 'cm-002'").run(); } catch {}
-  try { await db.prepare("UPDATE contact_messages SET name = 'Mehmet Demir', subject = 'Ölçü & Kumaş Desteği', message = 'Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.' WHERE id = 'cm-001'").run(); } catch {}
-  try { await db.prepare("UPDATE contact_messages SET name = 'Bora Çelik', message = 'Salon ve balkon için birlikte teklif almak istiyorum. Ölçüleri WhatsApp üzerinden iletebilirim.' WHERE id = 'cm-003'").run(); } catch {}
+  // Fix Turkish characters and timestamps in seeded contact messages
+  try { await db.prepare("UPDATE contact_messages SET name = 'Elif Aydın', message = 'Siparişim hazır olduğunda montaj için uygun tarihleri paylaşabilir misiniz?' WHERE id = 'cm-002' OR name LIKE '%Elif Ayd%'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Mehmet Demir', subject = 'Ölçü & Kumaş Desteği', message = 'Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.' WHERE id = 'cm-001' OR name LIKE '%Mehmet Demir%'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Bora Çelik', message = 'Salon ve balkon için birlikte teklif almak istiyorum. Ölçüleri WhatsApp üzerinden iletebilirim.' WHERE id = 'cm-003' OR name LIKE '%Bora %'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET created_at = datetime('now') WHERE created_at IS NULL OR created_at = '' OR created_at LIKE '%Invalid%'").run(); } catch {}
+
 
   await seedCatalog(db);
   await seedAnnouncements(db);
