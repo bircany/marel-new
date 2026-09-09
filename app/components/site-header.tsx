@@ -73,6 +73,7 @@ const menuGroups = [
 export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
   const [cartPulse, setCartPulse] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     let pulseTimer: ReturnType<typeof setTimeout> | null = null;
@@ -146,7 +147,23 @@ export function SiteHeader() {
             />
           </Link>
 
-          <nav className="header-primary-nav" aria-label="Ürün kategorileri">
+          {/* Hamburger Menu Toggle (Mobile Only) */}
+          <button 
+            type="button" 
+            className="mobile-menu-toggle"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label="Menüyü Aç/Kapat"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              {isMobileMenuOpen ? (
+                <path d="M18 6L6 18M6 6l12 12" />
+              ) : (
+                <path d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+
+          <nav className={`header-primary-nav ${isMobileMenuOpen ? "open" : ""}`} aria-label="Ürün kategorileri">
             {menuGroups.map((group) =>
               group.items.length > 0 ? (
                 <details className="nav-dropdown" key={group.label}>

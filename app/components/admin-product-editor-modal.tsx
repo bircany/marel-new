@@ -108,6 +108,7 @@ export function AdminProductEditorModal({
   const [installmentText, setInstallmentText] = useState("Peşin Fiyatına 3 Taksit");
   const [dimensions, setDimensions] = useState("Özel Ölçüye Göre Üretim");
   const [description, setDescription] = useState("");
+  const [optionsText, setOptionsText] = useState("");
   
   // Colors state
   const [colorList, setColorList] = useState<ColorOption[]>([]);
@@ -148,6 +149,8 @@ export function AdminProductEditorModal({
 
       const parsedColors = parseColors(product.colors);
       setColorList(parsedColors);
+      
+      setOptionsText(product.options ? (typeof product.options === "string" ? product.options : JSON.stringify(product.options, null, 2)) : "");
 
       const allImages = product.images && product.images.length > 0 ? [...product.images] : [product.image];
       setCoverImage(product.image || allImages[0] || "/images/catalog/diamond.webp");
@@ -175,6 +178,7 @@ export function AdminProductEditorModal({
         { name: "Antrasit", code: "#334155" },
         { name: "Krem", code: "#fbf8ee" },
       ]);
+      setOptionsText("");
       setCoverImage("/images/catalog/diamond.webp");
       setGalleryImages(["/images/catalog/diamond.webp"]);
     }
@@ -301,6 +305,7 @@ export function AdminProductEditorModal({
         installmentText: installmentText.trim() || `Peşin Fiyatına ${installments} Taksit`,
         dimensions: dimensions.trim() || "Özel Ölçüye Göre Üretim",
         colors: JSON.stringify(colorList),
+        options: optionsText.trim(),
         image: coverImage || galleryImages[0] || "/images/catalog/diamond.webp",
         images: galleryImages.length > 0 ? galleryImages : [coverImage],
       };
@@ -368,6 +373,13 @@ export function AdminProductEditorModal({
             onClick={() => setActiveTab("description")}
           >
             Açıklama & Detaylar
+          </button>
+          <button
+            type="button"
+            className={`admin-modal-tab-btn ${activeTab === "options" as any ? "active" : ""}`}
+            onClick={() => setActiveTab("options" as any)}
+          >
+            Gelişmiş Seçenekler
           </button>
         </div>
 
@@ -902,6 +914,25 @@ export function AdminProductEditorModal({
                     placeholder="Ürünün teknik kumaş yapısı, yalıtım kabiliyeti, montaj aparatları ve kullanım alanları hakkında detaylı bilgi girin…"
                   />
                   <span className="admin-field-hint">Ürün detay sayfasında açıklama ve özellikler tabında gösterilir.</span>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: OPTIONS (Gelişmiş Seçenekler) */}
+            {(activeTab as any) === "options" && (
+              <div className="admin-form-section">
+                <div className="admin-field-group">
+                  <label>Gelişmiş Seçenekler (JSON Formatında)</label>
+                  <p style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '8px' }}>
+                    Burada ürünün profil renkleri, kumaş renkleri, aksesuarları ve ekstra sekmelerini içeren JSON verisini düzenleyebilirsiniz. JSON formatının doğru olduğuna emin olun.
+                  </p>
+                  <textarea
+                    rows={20}
+                    value={optionsText}
+                    onChange={(e) => setOptionsText(e.target.value)}
+                    style={{ fontFamily: "monospace", fontSize: "0.9rem" }}
+                    placeholder='{"fabricColors": [...], "profileColors": [...], "accessories": [...], "tabs": [...]}'
+                  />
                 </div>
               </div>
             )}

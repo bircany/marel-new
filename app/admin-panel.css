@@ -1357,16 +1357,57 @@ body {
 }
 
 @media (max-width: 900px) {
+  .admin-mobile-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .admin-mobile-toggle {
+    display: flex;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #17191d;
+    padding: 6px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .admin-mobile-toggle svg {
+    width: 24px;
+    height: 24px;
+  }
+
   .admin-sidebar {
-    width: 100%;
-    min-width: 0;
-    min-height: auto;
+    position: fixed;
+    top: 0;
+    left: -100%;
+    width: 280px;
+    height: 100vh;
+    z-index: 1000;
+    transition: left 0.3s ease;
+    overflow-y: auto;
+  }
+
+  .admin-sidebar.open {
+    left: 0;
+  }
+
+  .admin-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    backdrop-filter: blur(2px);
   }
 
   .admin-nav-menu,
   .admin-sidebar-nav {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-direction: column;
   }
 
   .admin-analytics-grid {
@@ -1443,6 +1484,10 @@ body {
   background: #ffffff;
   color: #626a75;
   border-right: 1px solid #edf0f4;
+}
+
+.admin-mobile-header {
+  display: none;
 }
 
 .admin-brand-card,

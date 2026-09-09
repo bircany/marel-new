@@ -87,6 +87,8 @@ export function AdminConsole({
   const tabParam = searchParams.get("tab") as Tab | null;
   const [tab, setTab] = useState<Tab>(tabParam && ["dashboard", "products", "orders", "cargo", "coupons", "customers", "settings", "reviews", "announcements", "contacts"].includes(tabParam) ? tabParam : "dashboard");
 
+  const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);
+
   useEffect(() => {
     if (tabParam && ["dashboard", "products", "orders", "cargo", "coupons", "customers", "settings", "reviews", "announcements", "contacts"].includes(tabParam)) {
       setTab(tabParam);
@@ -665,8 +667,16 @@ export function AdminConsole({
 
   return (
     <div className="admin-shell">
+      {/* Mobile Sidebar Overlay */}
+      {isAdminSidebarOpen && (
+        <div 
+          className="admin-sidebar-overlay" 
+          onClick={() => setIsAdminSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Navigation */}
-      <aside className="admin-sidebar">
+      <aside className={`admin-sidebar ${isAdminSidebarOpen ? "open" : ""}`}>
         <div className="admin-brand-card">
           <span className="admin-brand-icon">M</span>
           <div className="admin-brand-meta">
@@ -849,18 +859,6 @@ export function AdminConsole({
         </nav>
 
         <div className="admin-sidebar-footer">
-          {adminUser ? (
-            <div className="admin-sidebar-user">
-              <div className="admin-sidebar-user-avatar">
-                {adminUser.first_name ? adminUser.first_name.charAt(0).toUpperCase() : "A"}
-              </div>
-              <div className="admin-sidebar-user-info">
-                <strong>{adminUser.full_name || "Yönetici"}</strong>
-                <small>{adminUser.email}</small>
-              </div>
-            </div>
-          ) : null}
-
           <Link href="/" className="admin-sidebar-ext-link" target="_blank">
             <span>Mağazayı Görüntüle</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -878,6 +876,18 @@ export function AdminConsole({
 
       {/* Main Workspace */}
       <main className="admin-workspace">
+        <div className="admin-mobile-header">
+          <button 
+            className="admin-mobile-toggle" 
+            onClick={() => setIsAdminSidebarOpen(true)}
+            aria-label="Menüyü Aç"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
         {message ? (
           <div className="admin-toast-message">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e5b94c" strokeWidth="2">

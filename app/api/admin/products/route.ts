@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       active: body.active !== undefined ? (body.active ? 1 : 0) : 1,
       featured: body.featured ? 1 : 0,
       colors: typeof body.colors === "string" ? body.colors : JSON.stringify(body.colors || []),
+      options: typeof body.options === "string" ? body.options : JSON.stringify(body.options || null),
       dimensions: body.dimensions || "Özel Ölçüye Göre Üretim",
       installments: body.installments ? Number(body.installments) : 3,
       installmentText: body.installmentText || "Peşin Fiyatına 3 Taksit",

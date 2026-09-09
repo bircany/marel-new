@@ -72,30 +72,14 @@ export function ProductReviewsSection({
       });
 
       if (res.ok) {
-        const newRev: ReviewRecord = {
-          id: `rev-user-${Date.now()}`,
-          userId: null,
-          productId,
-          productName,
-          authorName: formName || "Değerli Müşterimiz",
-          rating: formRating,
-          title: formTitle || "Müşteri Değerlendirmesi",
-          body: formComment,
-          status: "approved",
-          adminReply: "",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-
-        setReviews([newRev, ...reviews]);
-        setSuccessMessage("Yorumunuz başarıyla kaydedildi! Teşekkür ederiz.");
+        setSuccessMessage("Yorumunuz başarıyla kaydedildi! Onaylandıktan sonra yayınlanacaktır.");
         setFormTitle("");
         setFormComment("");
         setFormName("");
         setTimeout(() => {
           setIsModalOpen(false);
           setSuccessMessage("");
-        }, 2000);
+        }, 3000);
       } else {
         alert("Yorum gönderilirken bir hata oluştu.");
       }

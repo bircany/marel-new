@@ -27,6 +27,7 @@ export type CatalogProduct = {
   installmentText?: string;
   image: string;
   images?: string[];
+  options?: any;
   createdAt: string;
   updatedAt: string;
 };
@@ -335,6 +336,7 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
   ]);
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS options TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS root_category TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installments INTEGER NOT NULL DEFAULT 3").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installment_text TEXT NOT NULL DEFAULT 'Peşin Fiyatına 3 Taksit'").run(); } catch {}
@@ -599,7 +601,7 @@ export async function listProducts(includeInactive = false): Promise<CatalogProd
     const db = getDb();
     const { results: products } = await db
       .prepare(
-        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.options, p.created_at AS createdAt, p.updated_at AS updatedAt FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
       )
       .all<CatalogProduct>();
 
@@ -655,7 +657,7 @@ export async function getProductBySlug(slug: string): Promise<CatalogProduct | n
     await ensureDatabase();
     const row = await getDb()
       .prepare(
-        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.options, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
       )
       .bind(slug)
       .first<CatalogProduct & { imagesJson?: string }>();
@@ -699,6 +701,7 @@ export async function createProductRecord(data: {
   active?: boolean | number;
   featured?: boolean | number;
   colors?: string;
+  options?: string;
   dimensions?: string;
   installments?: number;
   installmentText?: string;
@@ -728,11 +731,12 @@ export async function createProductRecord(data: {
   const installmentText = data.installmentText || `Peşin Fiyatına ${installments} Taksit`;
   const dimensions = data.dimensions || "Özel Ölçüye Göre Üretim";
   const colors = data.colors || "[]";
+  const options = data.options || null;
   const description = data.description || "";
 
   await db
     .prepare(
-      `INSERT INTO products (id, slug, sku, name, category, root_category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, dimensions, installments, installment_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, ?, ?, 'Home & Garden > Decor > Window Treatments', ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO products (id, slug, sku, name, category, root_category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, options, dimensions, installments, installment_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, ?, ?, 'Home & Garden > Decor > Window Treatments', ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       id,
@@ -750,6 +754,7 @@ export async function createProductRecord(data: {
       active,
       featured,
       colors,
+      options,
       dimensions,
       installments,
       installmentText,
