@@ -1,11 +1,25 @@
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { createCouponInDb, deleteCouponInDb, listCouponsFromDb } from "@/db";
+import { createCouponInDb, deleteCouponInDb, listCouponsWithFiltersFromDb, setCouponActiveInDb } from "@/db";
 
-export async function GET() {
+export async function GET(request: Request) {
   const admin = await requireAdminApi();
   if (admin instanceof Response) return admin;
   try {
-    const coupons = await listCouponsFromDb();
+    const { searchParams } = new URL(request.url);
+    const format = searchParams.get("format");
+    const coupons = await listCouponsWithFiltersFromDb({
+      active: searchParams.has("active") ? searchParams.get("active") === "true" : undefined,
+      search: searchParams.get("search") || undefined,
+      expired: searchParams.has("expired") ? searchParams.get("expired") === "true" : undefined,
+    });
+    if (format === "csv") {
+      const header = "Kod,Tip,Değer,Minimum Sepet,Kullanım,Kullanım Limiti,Aktif,Bitiş,Tarih";
+      const rows = coupons.map((c) => [c.code, c.discountType, c.discountValue, c.minimumSubtotal / 100, c.usageCount, c.usageLimit ?? "", c.active ? "Evet" : "Hayır", c.expiresAt ?? "", c.createdAt]
+        .map((value) => `"${String(value).replaceAll('"', '""')}"`).join(","));
+      return new Response(`\uFEFF${[header, ...rows].join("\r\n")}`, {
+        headers: { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=coupons.csv" },
+      });
+    }
     return Response.json(coupons);
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Kuponlar yüklenemedi." }, { status: 500 });
@@ -78,5 +92,21 @@ export async function DELETE(request: Request) {
     return Response.json({ ok: true });
   } catch (error) {
     return Response.json({ error: error instanceof Error ? error.message : "Kupon silinemedi." }, { status: 500 });
+  }
+}
+
+export async function PATCH(request: Request) {
+  const admin = await requireAdminApi();
+  if (admin instanceof Response) return admin;
+  const body = (await request.json().catch(() => ({}))) as { id?: string; active?: boolean };
+  if (!body.id || typeof body.active !== "boolean") {
+    return Response.json({ error: "Kupon ID'si ve aktiflik durumu zorunludur." }, { status: 400 });
+  }
+  try {
+    const coupon = await setCouponActiveInDb(body.id, body.active);
+    if (!coupon) return Response.json({ error: "Kupon bulunamadı." }, { status: 404 });
+    return Response.json(coupon);
+  } catch (error) {
+    return Response.json({ error: error instanceof Error ? error.message : "Kupon güncellenemedi." }, { status: 500 });
   }
 }

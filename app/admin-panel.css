@@ -1867,6 +1867,117 @@ body {
   gap: 14px;
 }
 
+/* Keep the final admin navigation treatment consistent after responsive overrides. */
+.admin-sidebar {
+  width: 286px;
+  min-width: 286px;
+  background: #f8fafc;
+  color: #334155;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-header {
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 8px 24px rgba(148, 163, 184, 0.12);
+}
+
+.admin-brand-icon {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.admin-brand-text strong,
+.admin-sidebar-user-info strong {
+  color: #1e293b;
+}
+
+.admin-brand-text small,
+.admin-sidebar-user-info small {
+  color: #64748b;
+}
+
+.admin-sidebar-nav {
+  gap: 6px;
+}
+
+.admin-nav-btn {
+  min-height: 46px;
+  padding: 10px 12px;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  font-weight: 650;
+}
+
+.admin-nav-btn-left {
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-nav-btn-left svg {
+  width: 20px;
+  height: 20px;
+}
+
+.admin-nav-btn:hover {
+  background: #eaf2ff;
+  color: #1d4ed8;
+}
+
+.admin-nav-btn.active {
+  background: #dbeafe;
+  color: #1e40af;
+  box-shadow: inset 3px 0 0 #3b82f6;
+}
+
+.admin-nav-btn.active .admin-nav-btn-left svg {
+  stroke-width: 2.25;
+}
+
+.admin-badge,
+.admin-nav-badge {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  font-size: 0.78rem !important;
+}
+
+.admin-nav-btn.active .admin-badge,
+.admin-nav-btn.active .admin-nav-badge {
+  background: #bfdbfe !important;
+  color: #1e3a8a !important;
+}
+
+.admin-sidebar-footer {
+  border-top: 1px solid #e2e8f0;
+}
+
+.admin-sidebar-user {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+
+.admin-workspace {
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.admin-page-header-left p,
+.admin-card p,
+.admin-stat-card small {
+  line-height: 1.5;
+}
+
+input,
+select,
+textarea,
+button {
+  line-height: 1.4;
+}
+
 .admin-insight-card {
   padding: 18px;
 }

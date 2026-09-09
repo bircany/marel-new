@@ -10,6 +10,7 @@ export type PaymentSettings = {
   whatsappPhone: string;
   paymentNote: string;
   freeShippingMin: number;
+  shippingFee: number;
 };
 
 const defaults: PaymentSettings = {
@@ -21,6 +22,7 @@ const defaults: PaymentSettings = {
     process.env.NEXT_PUBLIC_MAREL_PAYMENT_NOTE ??
     "Açıklamaya sipariş numaranızı yazın. Dekontu WhatsApp üzerinden gönderin.",
   freeShippingMin: 1000,
+  shippingFee: 99,
 };
 
 export function getPaymentSettingsSync(): PaymentSettings {

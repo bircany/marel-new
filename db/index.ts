@@ -92,6 +92,8 @@ export type CustomerRecord = {
   totalSpent: number;
   lastOrderDate: string | null;
   createdAt: string;
+  status: string;
+  favoriteProducts: { name: string; quantity: number }[];
 };
 
 export type SiteSettingsRecord = Record<string, string>;
@@ -198,8 +200,8 @@ export function getDb(): D1Database {
             try {
               if (query.trim().toUpperCase().startsWith("PRAGMA")) return { success: true, meta: {} };
               const { pgQuery, pgParams } = transformQuery(query, boundParams);
-              await sql.unsafe(pgQuery, pgParams);
-              return { success: true, meta: {} };
+              const result = await sql.unsafe(pgQuery, pgParams);
+              return { success: true, meta: { changes: Number(result.count ?? 0) } };
             } catch (err) {
               console.warn("[db] SQL run error:", err);
               return { success: false, meta: { error: err } };
@@ -303,7 +305,7 @@ export async function forceReseedDatabase(): Promise<void> {
 async function initializeDatabase(): Promise<void> {
   const db = getDb();
   await db.batch([
-    db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, full_name TEXT, role TEXT NOT NULL DEFAULT 'customer', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY NOT NULL, email TEXT NOT NULL, full_name TEXT, phone TEXT, role TEXT NOT NULL DEFAULT 'customer', status TEXT NOT NULL DEFAULT 'active', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)"),
     db.prepare("CREATE TABLE IF NOT EXISTS products (id TEXT PRIMARY KEY NOT NULL, slug TEXT NOT NULL, sku TEXT NOT NULL, name TEXT NOT NULL, category TEXT NOT NULL, description TEXT NOT NULL DEFAULT '', price INTEGER NOT NULL DEFAULT 0, sale_price INTEGER, currency TEXT NOT NULL DEFAULT 'TRY', stock INTEGER NOT NULL DEFAULT 0, availability TEXT NOT NULL DEFAULT 'in_stock', brand TEXT NOT NULL DEFAULT 'Marel', google_product_category TEXT NOT NULL DEFAULT 'Home & Garden > Decor > Window Treatments', active INTEGER NOT NULL DEFAULT 1, featured INTEGER NOT NULL DEFAULT 0, colors TEXT NOT NULL DEFAULT '[]', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_products_slug ON products(slug)"),
@@ -335,6 +337,20 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code)"),
     db.prepare("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
   ]);
+  try { await db.prepare("ALTER TABLE products ADD COLUMN colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN root_category TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN installments INTEGER NOT NULL DEFAULT 3").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN installment_text TEXT NOT NULL DEFAULT 'Peşin Fiyatına 3 Taksit'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN dimensions TEXT NOT NULL DEFAULT 'Özel Ölçüye Göre Üretim'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN cargo_company TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_number TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_url TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'bank_transfer'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'pending'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN city TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN district TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE users ADD COLUMN phone TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS options TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS root_category TEXT").run(); } catch {}
@@ -474,14 +490,20 @@ async function seedUsers(db: D1Database): Promise<void> {
     ["usr-102", "burak@example.com", "Burak Kaya", "customer"],
     ["usr-103", "ayse@example.com", "Ayşe Tan", "customer"],
     ["usr-guest", "guest@marel.com", "Müşteri (Misafir)", "customer"],
+    ["usr-ahmet", "ahmet@example.com", "Ahmet Yılmaz", "customer"],
+    ["usr-mehmet", "mehmet@example.com", "Mehmet Kaya", "customer"],
+    ["usr-ayse", "ayse@example.com", "Ayşe Demir", "customer"],
+    ["usr-can", "can@example.com", "Can Öztürk", "customer"],
+    ["usr-zeynep", "zeynep@example.com", "Zeynep Şahin", "customer"],
+    ["usr-mustafa", "mustafa@example.com", "Mustafa Yıldız", "customer"],
   ] as const;
 
   for (const [id, email, fullName, role] of seedUsersList) {
     const existing = await db.prepare("SELECT 1 FROM users WHERE id = ?").bind(id).first();
     if (!existing) {
       await db.prepare(
-        "INSERT INTO users (id, email, full_name, role, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?)"
-      ).bind(id, email, fullName, role, now, now).run();
+        "INSERT INTO users (id, email, full_name, phone, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, 'active', ?, ?)"
+      ).bind(id, email, fullName, null, role, now, now).run();
     }
   }
 }
@@ -1257,14 +1279,37 @@ export async function updateOrderInDb(
 }
 
 export async function listCouponsFromDb(): Promise<CouponRecord[]> {
+  return listCouponsWithFiltersFromDb({});
+}
+
+export async function listCouponsWithFiltersFromDb(filters: {
+  active?: boolean;
+  search?: string;
+  expired?: boolean;
+}): Promise<CouponRecord[]> {
   await ensureDatabase();
   const db = getDb();
+  const conditions: string[] = [];
+  const bindings: (string | number)[] = [];
+  if (filters.active !== undefined) {
+    conditions.push("active = ?");
+    bindings.push(filters.active ? 1 : 0);
+  }
+  if (filters.search) {
+    conditions.push("LOWER(code) LIKE ?");
+    bindings.push(`%${filters.search.trim().toLowerCase()}%`);
+  }
+  if (filters.expired === true) conditions.push("expires_at IS NOT NULL AND date(expires_at) < date(?)");
+  if (filters.expired === true) bindings.push(new Date().toISOString());
+  if (filters.expired === false) conditions.push("(expires_at IS NULL OR date(expires_at) >= date(?))");
+  if (filters.expired === false) bindings.push(new Date().toISOString());
+  const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
   const { results } = await db.prepare(
-    `SELECT id, code, discount_type AS discountType, discount_value AS discountValue, 
+    `SELECT id, code, discount_type AS discountType, discount_value AS discountValue,
             minimum_subtotal AS minimumSubtotal, usage_limit AS usageLimit, usage_count AS usageCount, 
             active, expires_at AS expiresAt, created_at AS createdAt, updated_at AS updatedAt 
-     FROM coupons ORDER BY created_at DESC`
-  ).all<CouponRecord>();
+     FROM coupons${where} ORDER BY created_at DESC`
+  ).bind(...bindings).all<CouponRecord>();
   return results || [];
 }
 
@@ -1311,6 +1356,30 @@ export async function deleteCouponInDb(id: string): Promise<void> {
   await getDb().prepare("DELETE FROM coupons WHERE id = ?").bind(id).run();
 }
 
+export async function setCouponActiveInDb(id: string, active: boolean): Promise<CouponRecord | null> {
+  await ensureDatabase();
+  const now = new Date().toISOString();
+  await getDb().prepare("UPDATE coupons SET active = ?, updated_at = ? WHERE id = ?")
+    .bind(active ? 1 : 0, now, id).run();
+  const row = await getDb().prepare(
+    `SELECT id, code, discount_type AS discountType, discount_value AS discountValue,
+            minimum_subtotal AS minimumSubtotal, usage_limit AS usageLimit, usage_count AS usageCount,
+            active, expires_at AS expiresAt, created_at AS createdAt, updated_at AS updatedAt
+     FROM coupons WHERE id = ?`
+  ).bind(id).first<CouponRecord>();
+  return row || null;
+}
+
+export async function incrementCouponUsageInDb(id: string): Promise<boolean> {
+  await ensureDatabase();
+  const result = await getDb().prepare(
+    `UPDATE coupons SET usage_count = usage_count + 1, updated_at = ?
+     WHERE id = ? AND active = 1 AND (usage_limit IS NULL OR usage_count < usage_limit)
+       AND (expires_at IS NULL OR date(expires_at) >= date(?))`
+  ).bind(new Date().toISOString(), id, new Date().toISOString()).run();
+  return (result.meta?.changes || 0) > 0;
+}
+
 export async function getSettingsFromDb(): Promise<SiteSettingsRecord> {
   await ensureDatabase();
   const { results } = await getDb().prepare("SELECT key, value FROM settings").all<{ key: string; value: string }>();
@@ -1345,23 +1414,94 @@ export async function listCustomersFromDb(): Promise<CustomerRecord[]> {
         COUNT(o.id) AS "orderCount",
         COALESCE(SUM(o.total), 0) AS "totalSpent",
         MAX(o.created_at) AS "lastOrderDate",
-        COALESCE(MIN(u.created_at), MIN(o.created_at)) AS "createdAt"
+        COALESCE(MIN(u.created_at), MIN(o.created_at)) AS "createdAt",
+        COALESCE(MAX(u.status), 'active') AS "status",
+        COALESCE(MAX(u.phone), MAX(o.phone), '') AS "userPhone"
      FROM orders o
      LEFT JOIN users u ON o.user_id = u.id OR LOWER(TRIM(o.email)) = LOWER(TRIM(u.email))
      GROUP BY LOWER(TRIM(o.email))
      ORDER BY "lastOrderDate" DESC`
   ).all<any>();
 
-  return (results || []).map((c) => ({
+  const customers: CustomerRecord[] = (results || []).map((c) => ({
     id: c.id || "cust-unknown",
     fullName: c.fullName || c.fullname || "Misafir Müşteri",
     email: c.email || "",
-    phone: c.phone || "",
+    phone: c.userPhone || c.phone || "",
     orderCount: Number(c.orderCount ?? c.ordercount ?? 0),
     totalSpent: Number(c.totalSpent ?? c.totalspent ?? 0),
     lastOrderDate: c.lastOrderDate ?? c.lastorderdate ?? null,
     createdAt: c.createdAt ?? c.createdat ?? new Date().toISOString(),
+    status: c.status || "active",
+    favoriteProducts: [],
   }));
+  for (const customer of customers) {
+    const { results: favorites } = await db.prepare(
+      `SELECT oi.name, SUM(oi.quantity) AS quantity
+       FROM order_items oi JOIN orders o ON o.id = oi.order_id
+       WHERE LOWER(TRIM(o.email)) = LOWER(TRIM(?))
+       GROUP BY oi.name ORDER BY quantity DESC LIMIT 5`
+    ).bind(customer.email).all<{ name: string; quantity: number }>();
+    customer.favoriteProducts = (favorites || []).map((item) => ({ name: item.name, quantity: Number(item.quantity) }));
+  }
+  const { results: userRows } = await db.prepare(
+    "SELECT id, email, full_name, phone, status, created_at FROM users WHERE role = 'customer'"
+  ).all<{ id: string; email: string; full_name: string | null; phone: string | null; status: string; created_at: string }>();
+  const knownEmails = new Set(customers.map((customer) => customer.email.toLowerCase()));
+  for (const user of userRows || []) {
+    if (knownEmails.has(user.email.toLowerCase())) continue;
+    customers.push({
+      id: user.id,
+      fullName: user.full_name || "Müşteri",
+      email: user.email,
+      phone: user.phone || "",
+      orderCount: 0,
+      totalSpent: 0,
+      lastOrderDate: null,
+      createdAt: user.created_at,
+      status: user.status || "active",
+      favoriteProducts: [],
+    });
+  }
+  return customers;
+}
+
+export async function getCustomerByIdFromDb(id: string): Promise<CustomerRecord | null> {
+  const customers = await listCustomersFromDb();
+  return customers.find((customer) => customer.id === id || customer.email === id) ?? null;
+}
+
+export async function createCustomerInDb(data: { fullName: string; email: string; phone?: string; status?: string }): Promise<CustomerRecord> {
+  await ensureDatabase();
+  const now = new Date().toISOString();
+  const id = crypto.randomUUID();
+  await getDb().prepare(
+    "INSERT INTO users (id, email, full_name, phone, role, status, created_at, updated_at) VALUES (?, ?, ?, ?, 'customer', ?, ?, ?)"
+  ).bind(id, data.email.trim().toLowerCase(), data.fullName.trim(), data.phone?.trim() || null, data.status || "active", now, now).run();
+  return (await getCustomerByIdFromDb(id))!;
+}
+
+export async function updateCustomerInDb(id: string, data: { fullName?: string; email?: string; phone?: string; status?: string }): Promise<CustomerRecord | null> {
+  await ensureDatabase();
+  const existing = await getDb().prepare("SELECT id FROM users WHERE id = ?").bind(id).first();
+  if (!existing) return null;
+  const fields: string[] = [];
+  const values: unknown[] = [];
+  if (data.fullName !== undefined) { fields.push("full_name = ?"); values.push(data.fullName.trim()); }
+  if (data.email !== undefined) { fields.push("email = ?"); values.push(data.email.trim().toLowerCase()); }
+  if (data.phone !== undefined) { fields.push("phone = ?"); values.push(data.phone.trim() || null); }
+  if (data.status !== undefined) { fields.push("status = ?"); values.push(data.status); }
+  if (fields.length) {
+    fields.push("updated_at = ?");
+    values.push(new Date().toISOString(), id);
+    await getDb().prepare(`UPDATE users SET ${fields.join(", ")} WHERE id = ?`).bind(...values).run();
+  }
+  return getCustomerByIdFromDb(id);
+}
+
+export async function deleteCustomerInDb(id: string): Promise<void> {
+  await ensureDatabase();
+  await getDb().prepare("DELETE FROM users WHERE id = ? AND role = 'customer'").bind(id).run();
 }
 
 export async function updateCustomerInDb(originalEmail: string, data: { fullName: string; phone: string; email: string }) {
