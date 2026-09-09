@@ -334,18 +334,18 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_coupons_code ON coupons(code)"),
     db.prepare("CREATE TABLE IF NOT EXISTS settings (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL DEFAULT '', updated_at TEXT NOT NULL)"),
   ]);
-  try { await db.prepare("ALTER TABLE products ADD COLUMN colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
-  try { await db.prepare("ALTER TABLE products ADD COLUMN root_category TEXT").run(); } catch {}
-  try { await db.prepare("ALTER TABLE products ADD COLUMN installments INTEGER NOT NULL DEFAULT 3").run(); } catch {}
-  try { await db.prepare("ALTER TABLE products ADD COLUMN installment_text TEXT NOT NULL DEFAULT 'Peşin Fiyatına 3 Taksit'").run(); } catch {}
-  try { await db.prepare("ALTER TABLE products ADD COLUMN dimensions TEXT NOT NULL DEFAULT 'Özel Ölçüye Göre Üretim'").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN cargo_company TEXT").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_number TEXT").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN tracking_url TEXT").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN payment_method TEXT NOT NULL DEFAULT 'bank_transfer'").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN payment_status TEXT NOT NULL DEFAULT 'pending'").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN city TEXT").run(); } catch {}
-  try { await db.prepare("ALTER TABLE orders ADD COLUMN district TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS root_category TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installments INTEGER NOT NULL DEFAULT 3").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installment_text TEXT NOT NULL DEFAULT 'Peşin Fiyatına 3 Taksit'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS dimensions TEXT NOT NULL DEFAULT 'Özel Ölçüye Göre Üretim'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cargo_company TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'bank_transfer'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS district TEXT").run(); } catch {}
   await seedCatalog(db);
   await seedAnnouncements(db);
   await seedMockOrders(db);

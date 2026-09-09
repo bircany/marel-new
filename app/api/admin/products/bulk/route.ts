@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getProductBySlug, createProductRecord, updateProductRecord } from "@/db";
+import { getProductBySlug, createProductRecord, updateProductRecord, invalidateProductCache } from "@/db";
 
 export async function POST(request: Request) {
   try {
@@ -106,6 +106,7 @@ export async function POST(request: Request) {
       }
     }
 
+    invalidateProductCache();
     return NextResponse.json({
       success: true,
       created: createdCount,
