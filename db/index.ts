@@ -1504,7 +1504,7 @@ export async function deleteCustomerInDb(id: string): Promise<void> {
   await getDb().prepare("DELETE FROM users WHERE id = ? AND role = 'customer'").bind(id).run();
 }
 
-export async function updateCustomerInDb(originalEmail: string, data: { fullName: string; phone: string; email: string }) {
+export async function updateCustomerByEmailInDb(originalEmail: string, data: { fullName: string; phone: string; email: string }) {
   await ensureDatabase();
   const db = getDb();
   const now = new Date().toISOString();
