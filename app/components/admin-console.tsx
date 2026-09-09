@@ -502,7 +502,7 @@ export function AdminConsole({
       body: JSON.stringify({ originalEmail, ...data }),
     });
     if (!res.ok) {
-      const err = await res.json();
+      const err = (await res.json()) as { error?: string };
       throw new Error(err.error || "Müşteri kaydedilemedi.");
     }
     window.location.reload();
