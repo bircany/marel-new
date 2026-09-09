@@ -346,6 +346,12 @@ async function initializeDatabase(): Promise<void> {
   try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending'").run(); } catch {}
   try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS district TEXT").run(); } catch {}
+
+  // Fix Turkish characters in seeded contact messages
+  try { await db.prepare("UPDATE contact_messages SET name = 'Elif Aydın', message = 'Siparişim hazır olduğunda montaj için uygun tarihleri paylaşabilir misiniz?' WHERE id = 'cm-002'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Mehmet Demir', subject = 'Ölçü & Kumaş Desteği', message = 'Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.' WHERE id = 'cm-001'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Bora Çelik', message = 'Salon ve balkon için birlikte teklif almak istiyorum. Ölçüleri WhatsApp üzerinden iletebilirim.' WHERE id = 'cm-003'").run(); } catch {}
+
   await seedCatalog(db);
   await seedAnnouncements(db);
   await seedMockOrders(db);
@@ -1351,4 +1357,24 @@ export async function listCustomersFromDb(): Promise<CustomerRecord[]> {
     lastOrderDate: c.lastOrderDate ?? c.lastorderdate ?? null,
     createdAt: c.createdAt ?? c.createdat ?? new Date().toISOString(),
   }));
+}
+
+export async function updateCustomerInDb(originalEmail: string, data: { fullName: string; phone: string; email: string }) {
+  await ensureDatabase();
+  const db = getDb();
+  const now = new Date().toISOString();
+  
+  // 1. Update orders table (customer_name, phone, email)
+  await db.prepare(
+    `UPDATE orders 
+     SET customer_name = ?, phone = ?, email = ?, updated_at = ? 
+     WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))`
+  ).bind(data.fullName, data.phone, data.email, now, originalEmail).run();
+  
+  // 2. Update users table if exists (full_name, email)
+  await db.prepare(
+    `UPDATE users 
+     SET full_name = ?, email = ?, updated_at = ? 
+     WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))`
+  ).bind(data.fullName, data.email, now, originalEmail).run();
 }

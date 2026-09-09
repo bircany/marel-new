@@ -18,6 +18,7 @@ import type {
 } from "@/db";
 import type { LaravelUser } from "@/app/lib/laravel-auth";
 import { AdminProductEditorModal } from "@/app/components/admin-product-editor-modal";
+import { AdminCustomerEditorModal } from "@/app/components/admin-customer-editor-modal";
 
 const orderStatuses = [
   "pending",
@@ -98,6 +99,10 @@ export function AdminConsole({
   const [editingProduct, setEditingProduct] = useState<CatalogProduct | null>(null);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
+  
+  // Customer modal states
+  const [editingCustomer, setEditingCustomer] = useState<CustomerRecord | null>(null);
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
 
   // Product Filters
   const [productSearch, setProductSearch] = useState("");
@@ -485,8 +490,22 @@ export function AdminConsole({
       setMessage("Kupon silindi.");
       window.setTimeout(() => setMessage(""), 3000);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Hata oluştu.");
+      const errData = (await (err as Response).json()) as { error?: string };
+      alert(errData.error || "Bir hata oluştu.");
     }
+  };
+
+  const handleSaveCustomer = async (originalEmail: string, data: { fullName: string; phone: string; email: string }) => {
+    const res = await fetch("/api/admin/customers", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ originalEmail, ...data }),
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || "Müşteri kaydedilemedi.");
+    }
+    window.location.reload();
   };
 
   const handleSaveSettings = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -1522,20 +1541,6 @@ export function AdminConsole({
                 <div className="admin-empty-state">
                   <h3>Aramanıza uygun ürün bulunamadı.</h3>
                   <p>Arama terimini veya filtreleri değiştirerek tekrar deneyebilirsiniz.</p>
-                  <button
-                    type="button"
-                    className="admin-btn-action edit-btn"
-                    style={{ marginTop: 12 }}
-                    onClick={() => {
-                      setProductSearch("");
-                      setProductRootCategoryFilter("all");
-                      setProductCategoryFilter("all");
-                      setProductBrandFilter("all");
-                      setProductStatusFilter("all");
-                    }}
-                  >
-                    Filtreleri Sıfırla
-                  </button>
                 </div>
               )}
             </div>
@@ -2290,31 +2295,40 @@ export function AdminConsole({
 
                         <h3 style={{ margin: "4px 0", fontSize: "1.15rem", fontWeight: 850 }}>{item.name}</h3>
                         <small style={{ color: "var(--admin-text-dim)" }}>
-                          {item.email} · {item.phone || "Telefon belirtilmemiş"} · {new Date(item.createdAt).toLocaleString("tr-TR")}
+                          {item.email} · {item.phone || "Telefon belirtilmemiş"} · {new Date(item.createdAt || (item as any).created_at).toLocaleString("tr-TR")}
                         </small>
 
                         <div className="admin-contact-message-body">{item.message}</div>
                       </div>
 
                       <div className="admin-contact-action-box">
-                        <strong style={{ fontSize: "0.8rem", color: "#fff" }}>Hızlı İletişim & Yanıt</strong>
-                        <div className="admin-quick-reply-row">
+                        <strong style={{ fontSize: "0.8rem", color: "#fff", marginBottom: "8px", display: "block" }}>Hızlı İletişim & Yanıt</strong>
+                        <div className="admin-quick-reply-row" style={{ display: "flex", gap: "10px", marginBottom: "12px" }}>
                           {cleanPhone ? (
                             <a
                               href={`https://wa.me/${formattedPhone}?text=${encodeURIComponent(`Merhaba Sayın ${item.name}, Marel İletişim talebiniz hakkında ulaşıyoruz.`)}`}
                               target="_blank"
                               rel="noreferrer"
                               className="admin-wa-reply-link"
+                              style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", background: "#25D366", color: "#fff", borderRadius: "6px", fontSize: "0.85rem", fontWeight: "600", textDecoration: "none" }}
                             >
-                              💬 WhatsApp ile Yaz
+                              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a5.8 5.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.82 9.82 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+                              </svg>
+                              WhatsApp
                             </a>
                           ) : null}
 
                           <a
                             href={`mailto:${item.email}?subject=${encodeURIComponent(`Marel Destek: ${item.subject}`)}`}
                             className="admin-email-reply-link"
+                            style={{ display: "flex", alignItems: "center", gap: "6px", padding: "8px 12px", background: "#3b82f6", color: "#fff", borderRadius: "6px", fontSize: "0.85rem", fontWeight: "600", textDecoration: "none" }}
                           >
-                            ✉️ E-posta Gönder
+                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                              <polyline points="22,6 12,13 2,6"></polyline>
+                            </svg>
+                            E-posta
                           </a>
                         </div>
 
@@ -2557,7 +2571,7 @@ export function AdminConsole({
                         <th style={{ padding: "12px 10px" }}>SİPARİŞ SAYISI</th>
                         <th style={{ padding: "12px 10px" }}>TOPLAM HARCAMA</th>
                         <th style={{ padding: "12px 10px" }}>SON SİPARİŞ</th>
-                        <th style={{ padding: "12px 10px", textAlign: "right" }}>İLETİŞİM</th>
+                        <th style={{ padding: "12px 10px", textAlign: "right" }}>İŞLEM / İLETİŞİM</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -2566,7 +2580,7 @@ export function AdminConsole({
                         const waPhone = cleanPhone.startsWith("0") ? `9${cleanPhone}` : cleanPhone.startsWith("90") ? cleanPhone : `90${cleanPhone}`;
                         return (
                           <tr key={cust.id} style={{ borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                            <td style={{ padding: "14px 10px", fontWeight: 700, color: "#fff" }}>{cust.fullName}</td>
+                            <td style={{ padding: "14px 10px", fontWeight: 700, color: "var(--admin-text-main)" }}>{cust.fullName}</td>
                             <td style={{ padding: "14px 10px", color: "var(--admin-text-dim)" }}>{cust.email}</td>
                             <td style={{ padding: "14px 10px" }}>{cust.phone || "—"}</td>
                             <td style={{ padding: "14px 10px", fontWeight: 700 }}>
@@ -2578,7 +2592,18 @@ export function AdminConsole({
                             <td style={{ padding: "14px 10px", color: "var(--admin-text-dim)", fontSize: "0.78rem" }}>
                               {cust.lastOrderDate ? new Date(cust.lastOrderDate).toLocaleDateString("tr-TR") : "—"}
                             </td>
-                            <td style={{ padding: "14px 10px", textAlign: "right" }}>
+                            <td style={{ padding: "14px 10px", textAlign: "right", display: "flex", gap: "8px", justifyContent: "flex-end" }}>
+                              <button
+                                onClick={() => {
+                                  setEditingCustomer(cust);
+                                  setIsCustomerModalOpen(true);
+                                }}
+                                className="admin-btn-action"
+                                style={{ background: "var(--admin-card-bg-light)" }}
+                                title="Müşteriyi Düzenle"
+                              >
+                                ✏️ Düzenle
+                              </button>
                               {cust.phone ? (
                                 <a
                                   href={`https://wa.me/${waPhone}`}
@@ -2957,6 +2982,13 @@ export function AdminConsole({
           existingCategories={categories}
           existingBrands={brands}
           existingRootCategories={rootCategories}
+        />
+
+        <AdminCustomerEditorModal
+          isOpen={isCustomerModalOpen}
+          onClose={() => setIsCustomerModalOpen(false)}
+          customer={editingCustomer}
+          onSave={handleSaveCustomer}
         />
       </main>
     </div>
