@@ -29,6 +29,9 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     if (body.colors !== undefined) {
       updates.colors = typeof body.colors === "string" ? body.colors : JSON.stringify(body.colors);
     }
+    if (body.options !== undefined) {
+      updates.options = typeof body.options === "string" ? body.options : JSON.stringify(body.options);
+    }
     if (body.dimensions !== undefined) updates.dimensions = String(body.dimensions);
     if (body.installments !== undefined) updates.installments = Number(body.installments);
     if (body.installmentText !== undefined) updates.installmentText = String(body.installmentText);

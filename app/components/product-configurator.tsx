@@ -50,20 +50,32 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
     return list;
   }, [product.image, product.images]);
 
+  const optionsObj = useMemo(() => {
+    try {
+      return typeof product.options === "string" ? JSON.parse(product.options) : product.options || {};
+    } catch {
+      return {};
+    }
+  }, [product.options]);
+
+  const fabricColors = Array.isArray(optionsObj.fabricColors) && optionsObj.fabricColors.length ? optionsObj.fabricColors : DEFAULT_FABRIC_COLORS;
+  const profileColors = Array.isArray(optionsObj.profileColors) && optionsObj.profileColors.length ? optionsObj.profileColors : PROFILE_COLORS;
+  const accessories = Array.isArray(optionsObj.accessories) ? optionsObj.accessories : [];
+  const tabs = Array.isArray(optionsObj.tabs) ? optionsObj.tabs : [];
+
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedFabric, setSelectedFabric] = useState(DEFAULT_FABRIC_COLORS[0]);
-  const [selectedProfile, setSelectedProfile] = useState(PROFILE_COLORS[0]);
+  const [selectedFabric, setSelectedFabric] = useState(fabricColors[0] || DEFAULT_FABRIC_COLORS[0]);
+  const [selectedProfile, setSelectedProfile] = useState(profileColors[0] || PROFILE_COLORS[0]);
   const [width, setWidth] = useState<number>(80);
   const [height, setHeight] = useState<number>(150);
   const [quantity, setQuantity] = useState<number>(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
 
-  // Upsell switches
-  const [upsell1, setUpsell1] = useState(false);
-  const [upsell2, setUpsell2] = useState(false);
+  // Upsell switch tracking (using accessory IDs as keys)
+  const [selectedAccessories, setSelectedAccessories] = useState<Record<string, boolean>>({});
 
   // Accordion open states
-  const [openAccordion, setOpenAccordion] = useState<string | null>("info");
+  const [openAccordion, setOpenAccordion] = useState<string | null>(tabs.length > 0 ? tabs[0].id : "info");
 
   const [pending, setPending] = useState(false);
   const [addedSuccess, setAddedSuccess] = useState(false);
@@ -73,8 +85,11 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
   const areaM2 = Math.max(1.0, (width * height) / 10000);
   let singleItemPriceKurus = Math.round(basePriceKurus * areaM2);
 
-  if (upsell1) singleItemPriceKurus += 9405; // 94.05 TL
-  if (upsell2) singleItemPriceKurus += 15942; // 159.42 TL
+  accessories.forEach((acc: any) => {
+    if (selectedAccessories[acc.id]) {
+      singleItemPriceKurus += acc.priceKurus || 0;
+    }
+  });
 
   const totalPriceKurus = singleItemPriceKurus * quantity;
   const oldPriceKurus = Math.round(singleItemPriceKurus * 2.16); // ~54% discount simulation
@@ -114,7 +129,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
     }
   };
 
-  const activeImage = galleryImages[activeImageIndex] || product.image;
+  const activeImage = selectedFabric?.image || galleryImages[activeImageIndex] || product.image;
 
   return (
     <div className="kamatas-pdp-layout">
@@ -205,7 +220,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
         <div className="pdp-option-section">
           <label className="pdp-option-label">Perde Rengi</label>
           <div className="pdp-swatches-grid">
-            {DEFAULT_FABRIC_COLORS.map((fabric) => (
+            {fabricColors.map((fabric: any) => (
               <button
                 key={fabric.id}
                 type="button"
@@ -216,8 +231,8 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
                 <span
                   className="pdp-swatch-color"
                   style={{
-                    backgroundColor: fabric.hex,
-                    border: fabric.hex === "#FFFFFF" ? "1px solid #E5E7EB" : "none",
+                    backgroundColor: fabric.hex || fabric.color || "#000",
+                    border: (fabric.hex || fabric.color) === "#FFFFFF" ? "1px solid #E5E7EB" : "none",
                   }}
                 />
               </button>
@@ -229,7 +244,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
         <div className="pdp-option-section">
           <label className="pdp-option-label">Profil Rengi *</label>
           <div className="pdp-profiles-row">
-            {PROFILE_COLORS.map((prof) => (
+            {profileColors.map((prof: any) => (
               <button
                 key={prof.id}
                 type="button"
@@ -238,7 +253,7 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
               >
                 <div
                   className="pdp-profile-sample"
-                  style={{ backgroundColor: prof.color, border: `1px solid ${prof.border}` }}
+                  style={{ backgroundColor: prof.color || prof.hex || "#000", border: `1px solid ${prof.border || "#E5E7EB"}` }}
                 />
                 <span className="pdp-profile-name">{prof.name}</span>
               </button>
@@ -272,66 +287,45 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
           </div>
         </div>
 
-        {/* Upsell Accessories (Gider Süzgeci / Tamir Bandı) */}
-        <div className="pdp-upsell-container">
-          <div className="pdp-upsell-header">Gider Süzgeci ve Ek Aksesuarlar</div>
-
-          <div className="pdp-upsell-row">
-            <label className="pdp-switch">
-              <input
-                type="checkbox"
-                checked={upsell1}
-                onChange={(e) => setUpsell1(e.target.checked)}
-              />
-              <span className="slider round"></span>
-            </label>
-            <div className="pdp-upsell-thumb">
-              <Image
-                unoptimized
-                src="/images/catalog/diamond.webp"
-                alt="Gider Koruyucu"
-                width={48}
-                height={48}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-              />
-            </div>
-            <div className="pdp-upsell-text">
-              <strong>10 Adet Yapışkanlı Banyo Gider Koruyucu Saç Toplayıcı</strong>
-              <div className="pdp-upsell-prices">
-                <span className="upsell-old">₺ 99.00</span>
-                <span className="upsell-new">₺ 94.05</span>
+        {accessories.length > 0 && (
+          <div className="pdp-upsell-container">
+            <div className="pdp-upsell-header">Gider Süzgeci ve Ek Aksesuarlar</div>
+            
+            {accessories.map((acc: any) => (
+              <div key={acc.id} className="pdp-upsell-row">
+                <label className="pdp-switch">
+                  <input
+                    type="checkbox"
+                    checked={!!selectedAccessories[acc.id]}
+                    onChange={(e) => setSelectedAccessories(prev => ({...prev, [acc.id]: e.target.checked}))}
+                  />
+                  <span className="slider round"></span>
+                </label>
+                <div className="pdp-upsell-thumb">
+                  {acc.image && (
+                    <Image
+                      unoptimized
+                      src={acc.image}
+                      alt={acc.name}
+                      width={48}
+                      height={48}
+                      style={{ objectFit: "cover", borderRadius: 4 }}
+                    />
+                  )}
+                </div>
+                <div className="pdp-upsell-text">
+                  <strong>{acc.name}</strong>
+                  <div className="pdp-upsell-prices">
+                    {acc.oldPriceKurus > 0 && (
+                      <span className="upsell-old">₺ {(acc.oldPriceKurus / 100).toFixed(2)}</span>
+                    )}
+                    <span className="upsell-new">₺ {(acc.priceKurus / 100).toFixed(2)}</span>
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
-
-          <div className="pdp-upsell-row">
-            <label className="pdp-switch">
-              <input
-                type="checkbox"
-                checked={upsell2}
-                onChange={(e) => setUpsell2(e.target.checked)}
-              />
-              <span className="slider round"></span>
-            </label>
-            <div className="pdp-upsell-thumb">
-              <Image
-                unoptimized
-                src="/images/catalog/blackout.webp"
-                alt="Sineklik Bandı"
-                width={48}
-                height={48}
-                style={{ objectFit: "cover", borderRadius: 4 }}
-              />
-            </div>
-            <div className="pdp-upsell-text">
-              <strong>Yapışkanlı Sineklik Yaması Tülü Tamir Bandı 50mm x 2m</strong>
-              <div className="pdp-upsell-prices">
-                <span className="upsell-old">₺ 208.43</span>
-                <span className="upsell-new">₺ 159.42</span>
-              </div>
-            </div>
-          </div>
-        </div>
+        )}
 
         {/* Quantity and Sepete Ekle Button */}
         <div className="pdp-cart-actions">
@@ -361,92 +355,25 @@ export function ProductConfigurator({ product }: { product: CatalogProduct }) {
           </button>
         </div>
 
-        {/* Collapsible Accordions */}
-        <div className="pdp-accordion-group">
-          <div className="pdp-accordion-panel">
-            <button
-              type="button"
-              className="pdp-accordion-trigger"
-              onClick={() => setOpenAccordion(openAccordion === "info" ? null : "info")}
-            >
-              <span>Ürün Bilgileri</span>
-              <span>{openAccordion === "info" ? "˄" : "˅"}</span>
-            </button>
-            {openAccordion === "info" && (
-              <div className="pdp-accordion-content">
-                <p>
-                  Marel Plise Perde sistemleri, yüksek kaliteli polyester kumaş ve elektrostatik toz
-                  boyalı alüminyum profiller kullanılarak üretilmektedir. Özel katlanır petek dokusu
-                  sayesinde ısı ve ışık kontrolü sağlar, toz ve leke tutmaz.
-                </p>
-                <ul>
-                  <li>%100 Yerli ve birinci sınıf malzeme kalitesi</li>
-                  <li>Milimetrik özel üretim imkanı</li>
-                  <li>Kolay silinebilir, suya ve neme dayanıklı kumaş</li>
-                </ul>
+        {tabs.length > 0 && (
+          <div className="pdp-accordion-group">
+            {tabs.map((tab: any) => (
+              <div key={tab.id} className="pdp-accordion-panel">
+                <button
+                  type="button"
+                  className="pdp-accordion-trigger"
+                  onClick={() => setOpenAccordion(openAccordion === tab.id ? null : tab.id)}
+                >
+                  <span>{tab.title}</span>
+                  <span>{openAccordion === tab.id ? "˄" : "˅"}</span>
+                </button>
+                {openAccordion === tab.id && (
+                  <div className="pdp-accordion-content" dangerouslySetInnerHTML={{ __html: tab.content }} />
+                )}
               </div>
-            )}
+            ))}
           </div>
-
-          <div className="pdp-accordion-panel">
-            <button
-              type="button"
-              className="pdp-accordion-trigger"
-              onClick={() => setOpenAccordion(openAccordion === "balkon" ? null : "balkon")}
-            >
-              <span>Cam Balkonlarda Ölçü Nasıl Alınır?</span>
-              <span>{openAccordion === "balkon" ? "˄" : "˅"}</span>
-            </button>
-            {openAccordion === "balkon" && (
-              <div className="pdp-accordion-content">
-                <p>
-                  Cam balkon kanatlarının her biri için fitilden fitile cam genişliğini (En) ve üst
-                  alüminyum profilden alt alüminyum profile kadar olan yüksekliği (Boy) ölçün.
-                  Herhangi bir pay düşmenize gerek yoktur.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="pdp-accordion-panel">
-            <button
-              type="button"
-              className="pdp-accordion-trigger"
-              onClick={() => setOpenAccordion(openAccordion === "pvc" ? null : "pvc")}
-            >
-              <span>Alüminyum ve PVC Doğramalarda Ölçü Nasıl Alınır?</span>
-              <span>{openAccordion === "pvc" ? "˄" : "˅"}</span>
-            </button>
-            {openAccordion === "pvc" && (
-              <div className="pdp-accordion-content">
-                <p>
-                  Pencere veya kapı kanadını açtığınızda contalar arasındaki cam boşluğunu ölçün.
-                  Vidalı montaj tercih ediyorsanız çıta ölçülerini baz alabilirsiniz.
-                </p>
-              </div>
-            )}
-          </div>
-
-          <div className="pdp-accordion-panel">
-            <button
-              type="button"
-              className="pdp-accordion-trigger"
-              onClick={() => setOpenAccordion(openAccordion === "montaj" ? null : "montaj")}
-            >
-              <span>Kolay Montaj & Teslimat</span>
-              <span>{openAccordion === "montaj" ? "˄" : "˅"}</span>
-            </button>
-            {openAccordion === "montaj" && (
-              <div className="pdp-accordion-content">
-                <p>
-                  Ürünlerimiz montaja hazır, ipleri gergin ve ayarlı olarak gönderilir. Paket
-                  içerisinden çıkan montaj klipslerini pencerenin köşelerine vidalayarak veya
-                  yapıştırarak perdeyi 5 dakikada kolayca takabilirsiniz.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

@@ -55,7 +55,7 @@ export async function POST(request: Request) {
 
       await db
         .prepare(
-          "INSERT INTO reviews (id, user_id, product_id, rating, title, body, status, admin_reply, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'approved', '', ?, ?)"
+          "INSERT INTO reviews (id, user_id, product_id, rating, title, body, status, admin_reply, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'pending', '', ?, ?)"
         )
         .bind(newId, userId, productIdRaw || null, rating, title || "Müşteri Değerlendirmesi", comment || "", now, now)
         .run();
@@ -66,7 +66,7 @@ export async function POST(request: Request) {
           rating,
           title: title || "Müşteri Değerlendirmesi",
           comment: comment || "",
-          status: "approved",
+          status: "pending",
           is_verified_purchase: true,
           user: { name: authorName, avatar: null },
           created_at: now,

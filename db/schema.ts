@@ -27,6 +27,7 @@ export const products = sqliteTable("products", {
   googleProductCategory: text("google_product_category").notNull().default("Home & Garden > Decor > Window Treatments"),
   active: integer("active", { mode: "boolean" }).notNull().default(true),
   featured: integer("featured", { mode: "boolean" }).notNull().default(false),
+  options: text("options", { mode: "json" }),
   createdAt: text("created_at").notNull(),
   updatedAt: text("updated_at").notNull(),
 }, (table) => [

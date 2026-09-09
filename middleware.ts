@@ -24,8 +24,8 @@ export async function middleware(request: NextRequest) {
     });
     if (res.ok) {
       const data = (await res.json()) as { maintenance_mode?: string | boolean };
-      if (data.maintenance_mode === 'true' || data.maintenance_mode === true) {
-        return NextResponse.redirect(new URL('/bakim', request.url));
+      if (data?.maintenance_mode === 'true' || data?.maintenance_mode === true) {
+        return NextResponse.rewrite(new URL('/bakim', request.url));
       }
     }
   } catch (error) {

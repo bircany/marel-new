@@ -319,7 +319,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Orjin Seperatör Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/orjin-seperator-surme-beyaz-pr-139672.webp",
     images: [
       "/images/products/kamatas/orjin-seperator-surme-beyaz-pr-139672.webp"
@@ -344,7 +344,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Orjin Seperatör Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/orjin-seperator-antrasit-profi-8981f0.webp",
     images: [
       "/images/products/kamatas/orjin-seperator-antrasit-profi-8981f0.webp"
@@ -369,7 +369,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Orjin Seperatör Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/orjin-seperator-kahverengi-pro-a07378.webp",
     images: [
       "/images/products/kamatas/orjin-seperator-kahverengi-pro-a07378.webp"
@@ -394,7 +394,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "%100 Işık Yalıtımlı Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/100-isik-yalitimli-plise-perde-ef9ece.webp",
     images: [
       "/images/products/kamatas/100-isik-yalitimli-plise-perde-ef9ece.webp"
@@ -419,7 +419,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "%100 Işık Yalıtımlı Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/100-isik-yalitimli-surme-plise-1d283e.webp",
     images: [
       "/images/products/kamatas/100-isik-yalitimli-surme-plise-1d283e.webp"
@@ -444,7 +444,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Termal %100 Isı ve Işık Yalıtımlı Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-889967.webp",
     images: [
       "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-889967.webp"
@@ -469,7 +469,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Termal %100 Isı ve Işık Yalıtımlı Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-8f6823.webp",
     images: [
       "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-8f6823.webp"
@@ -494,7 +494,7 @@ export const GENERATED_SEEDS: SeedProduct[] = [
     active: 1,
     featured: 1,
     category: "Termal %100 Isı ve Işık Yalıtımlı Kapılar",
-    rootCategory: "Separatör Kapı",
+    rootCategory: "Seperatör Kapı",
     image: "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-82b56e.webp",
     images: [
       "/images/products/kamatas/termal-100-isi-ve-isik-yalitim-82b56e.webp"

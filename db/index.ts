@@ -27,6 +27,7 @@ export type CatalogProduct = {
   installmentText?: string;
   image: string;
   images?: string[];
+  options?: any;
   createdAt: string;
   updatedAt: string;
 };
@@ -350,6 +351,25 @@ async function initializeDatabase(): Promise<void> {
   try { await db.prepare("ALTER TABLE orders ADD COLUMN district TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE users ADD COLUMN phone TEXT").run(); } catch {}
   try { await db.prepare("ALTER TABLE users ADD COLUMN status TEXT NOT NULL DEFAULT 'active'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS colors TEXT NOT NULL DEFAULT '[]'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS options TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS root_category TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installments INTEGER NOT NULL DEFAULT 3").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS installment_text TEXT NOT NULL DEFAULT 'Peşin Fiyatına 3 Taksit'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE products ADD COLUMN IF NOT EXISTS dimensions TEXT NOT NULL DEFAULT 'Özel Ölçüye Göre Üretim'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS cargo_company TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method TEXT NOT NULL DEFAULT 'bank_transfer'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'pending'").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS city TEXT").run(); } catch {}
+  try { await db.prepare("ALTER TABLE orders ADD COLUMN IF NOT EXISTS district TEXT").run(); } catch {}
+
+  // Fix Turkish characters in seeded contact messages
+  try { await db.prepare("UPDATE contact_messages SET name = 'Elif Aydın', message = 'Siparişim hazır olduğunda montaj için uygun tarihleri paylaşabilir misiniz?' WHERE id = 'cm-002'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Mehmet Demir', subject = 'Ölçü & Kumaş Desteği', message = 'Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.' WHERE id = 'cm-001'").run(); } catch {}
+  try { await db.prepare("UPDATE contact_messages SET name = 'Bora Çelik', message = 'Salon ve balkon için birlikte teklif almak istiyorum. Ölçüleri WhatsApp üzerinden iletebilirim.' WHERE id = 'cm-003'").run(); } catch {}
+
   await seedCatalog(db);
   await seedAnnouncements(db);
   await seedMockOrders(db);
@@ -603,7 +623,7 @@ export async function listProducts(includeInactive = false): Promise<CatalogProd
     const db = getDb();
     const { results: products } = await db
       .prepare(
-        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.options, p.created_at AS createdAt, p.updated_at AS updatedAt FROM products p ${where} ORDER BY p.featured DESC, p.updated_at DESC`
       )
       .all<CatalogProduct>();
 
@@ -659,7 +679,7 @@ export async function getProductBySlug(slug: string): Promise<CatalogProduct | n
     await ensureDatabase();
     const row = await getDb()
       .prepare(
-        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
+        `SELECT p.id, p.slug, p.sku, p.name, p.category, p.root_category AS rootCategory, p.description, p.price, p.sale_price AS salePrice, p.currency, p.stock, p.availability, p.brand, p.google_product_category AS googleProductCategory, p.active, p.featured, p.colors, p.dimensions, p.installments, p.installment_text AS installmentText, p.options, p.created_at AS createdAt, p.updated_at AS updatedAt, COALESCE((SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at LIMIT 1), '/images/catalog/diamond.webp') AS image, (SELECT json_group_array(source_url) FROM (SELECT source_url FROM product_images WHERE product_id = p.id ORDER BY sort_order, created_at)) AS imagesJson FROM products p WHERE p.slug = ? AND p.active = 1`
       )
       .bind(slug)
       .first<CatalogProduct & { imagesJson?: string }>();
@@ -703,6 +723,7 @@ export async function createProductRecord(data: {
   active?: boolean | number;
   featured?: boolean | number;
   colors?: string;
+  options?: string;
   dimensions?: string;
   installments?: number;
   installmentText?: string;
@@ -732,11 +753,12 @@ export async function createProductRecord(data: {
   const installmentText = data.installmentText || `Peşin Fiyatına ${installments} Taksit`;
   const dimensions = data.dimensions || "Özel Ölçüye Göre Üretim";
   const colors = data.colors || "[]";
+  const options = data.options || null;
   const description = data.description || "";
 
   await db
     .prepare(
-      `INSERT INTO products (id, slug, sku, name, category, root_category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, dimensions, installments, installment_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, ?, ?, 'Home & Garden > Decor > Window Treatments', ?, ?, ?, ?, ?, ?, ?, ?)`
+      `INSERT INTO products (id, slug, sku, name, category, root_category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, options, dimensions, installments, installment_text, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, ?, ?, 'Home & Garden > Decor > Window Treatments', ?, ?, ?, ?, ?, ?, ?, ?, ?)`
     )
     .bind(
       id,
@@ -754,6 +776,7 @@ export async function createProductRecord(data: {
       active,
       featured,
       colors,
+      options,
       dimensions,
       installments,
       installmentText,
@@ -1479,4 +1502,24 @@ export async function updateCustomerInDb(id: string, data: { fullName?: string; 
 export async function deleteCustomerInDb(id: string): Promise<void> {
   await ensureDatabase();
   await getDb().prepare("DELETE FROM users WHERE id = ? AND role = 'customer'").bind(id).run();
+}
+
+export async function updateCustomerInDb(originalEmail: string, data: { fullName: string; phone: string; email: string }) {
+  await ensureDatabase();
+  const db = getDb();
+  const now = new Date().toISOString();
+  
+  // 1. Update orders table (customer_name, phone, email)
+  await db.prepare(
+    `UPDATE orders 
+     SET customer_name = ?, phone = ?, email = ?, updated_at = ? 
+     WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))`
+  ).bind(data.fullName, data.phone, data.email, now, originalEmail).run();
+  
+  // 2. Update users table if exists (full_name, email)
+  await db.prepare(
+    `UPDATE users 
+     SET full_name = ?, email = ?, updated_at = ? 
+     WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))`
+  ).bind(data.fullName, data.email, now, originalEmail).run();
 }
