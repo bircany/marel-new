@@ -447,9 +447,16 @@ async function seedContactMessages(db: D1Database): Promise<void> {
   const result = await db.prepare("SELECT COUNT(*) AS count FROM contact_messages").first<{ count: number }>();
   if ((result?.count ?? 0) > 0) return;
   const now = new Date().toISOString();
-  await db.prepare(
-    "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 'new', ?, ?)"
-  ).bind("cm-001", "Mehmet Demir", "mehmet@example.com", "05339998877", "Ölçü & Kumaş Desteği", "Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.", now, now).run();
+  const messages = [
+    ["cm-001", "Mehmet Demir", "mehmet@example.com", "05339998877", "Ölçü & Kumaş Desteği", "Cam balkon plise perde sistemleri için ölçü ve kumaş kartelası hakkında bilgi rica ediyorum.", "new"],
+    ["cm-002", "Elif Aydın", "elif@example.com", "05324445566", "Montaj tarihi", "Siparişim hazır olduğunda montaj için uygun tarihleri paylaşabilir misiniz?", "read"],
+    ["cm-003", "Bora Çelik", "bora@example.com", "05367778899", "Teklif talebi", "Salon ve balkon için birlikte teklif almak istiyorum. Ölçüleri WhatsApp üzerinden iletebilirim.", "resolved"],
+  ] as const;
+  await db.batch(messages.map(([id, name, email, phone, subject, message, status]) =>
+    db.prepare(
+      "INSERT INTO contact_messages (id, name, email, phone, subject, message, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    ).bind(id, name, email, phone, subject, message, status, now, now)
+  ));
 }
 
 async function seedUsers(db: D1Database): Promise<void> {
@@ -549,9 +556,16 @@ async function seedCoupons(db: D1Database): Promise<void> {
   const result = await db.prepare("SELECT COUNT(*) AS count FROM coupons").first<{ count: number }>();
   if ((result?.count ?? 0) > 0) return;
   const now = new Date().toISOString();
-  await db.prepare(
-    "INSERT INTO coupons (id, code, discount_type, discount_value, minimum_subtotal, usage_limit, usage_count, active, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?)"
-  ).bind(crypto.randomUUID(), "HOSGELDIN10", "PERCENT", 10, 50000, 100, 0, now, now).run();
+  const coupons = [
+    ["HOSGELDIN10", "PERCENT", 10, 50000, 100],
+    ["YAZ2026", "PERCENT", 15, 100000, 50],
+    ["MAREL250", "FIXED", 25000, 200000, 25],
+  ] as const;
+  await db.batch(coupons.map(([code, type, value, minimumSubtotal, usageLimit]) =>
+    db.prepare(
+      "INSERT INTO coupons (id, code, discount_type, discount_value, minimum_subtotal, usage_limit, usage_count, active, expires_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, 1, NULL, ?, ?)"
+    ).bind(crypto.randomUUID(), code, type, value, minimumSubtotal, usageLimit, 0, now, now)
+  ));
 }
 
 interface ProductCacheEntry {
@@ -786,7 +800,10 @@ export async function updateProductRecord(
   const db = getDb();
   const now = new Date().toISOString();
 
-  const existing = await db.prepare("SELECT * FROM products WHERE id = ? OR slug = ? OR sku = ?").bind(id, id, id).first<any>();
+  const existing = await db
+    .prepare("SELECT * FROM products WHERE id = ? OR slug = ? OR sku = ?")
+    .bind(id, updates.slug ?? id, updates.sku ?? id)
+    .first<any>();
   if (!existing) throw new Error("Ürün bulunamadı");
   const actualId = existing.id;
 
@@ -808,7 +825,7 @@ export async function updateProductRecord(
   const installments = updates.installments !== undefined ? updates.installments : existing.installments;
   const installmentText = updates.installmentText !== undefined ? updates.installmentText : existing.installment_text;
 
-  await db
+  const result = await db
     .prepare(
       `UPDATE products SET name = ?, slug = ?, sku = ?, category = ?, root_category = ?, brand = ?, description = ?, price = ?, sale_price = ?, stock = ?, availability = ?, active = ?, featured = ?, colors = ?, dimensions = ?, installments = ?, installment_text = ?, updated_at = ? WHERE id = ?`
     )
@@ -834,6 +851,9 @@ export async function updateProductRecord(
       actualId
     )
     .run();
+  if (!result.success) {
+    throw new Error("Ürün veritabanında güncellenemedi.");
+  }
 
   if (updates.images || updates.image) {
     let newImages: string[] = [];
@@ -847,14 +867,16 @@ export async function updateProductRecord(
     }
 
     if (newImages.length > 0) {
-      await db.prepare("DELETE FROM product_images WHERE product_id = ?").bind(actualId).run();
+      const deleteResult = await db.prepare("DELETE FROM product_images WHERE product_id = ?").bind(actualId).run();
+      if (!deleteResult.success) throw new Error("Ürün görselleri güncellenemedi.");
       let sortOrder = 0;
       for (const imgUrl of newImages) {
         if (!imgUrl) continue;
-        await db
+        const imageResult = await db
           .prepare("INSERT INTO product_images (id, product_id, source_url, alt_text, sort_order, created_at) VALUES (?, ?, ?, ?, ?, ?)")
           .bind(crypto.randomUUID(), actualId, imgUrl, name, sortOrder++, now)
           .run();
+        if (!imageResult.success) throw new Error("Ürün görseli kaydedilemedi.");
       }
     }
   }
@@ -1330,4 +1352,3 @@ export async function listCustomersFromDb(): Promise<CustomerRecord[]> {
     createdAt: c.createdAt ?? c.createdat ?? new Date().toISOString(),
   }));
 }
-
