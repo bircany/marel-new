@@ -80,7 +80,7 @@ export default function Home() {
             <div className="max-w-2xl text-white">
               <h1 className="text-5xl md:text-7xl font-light mb-4 tracking-tight" style={{fontFamily: "serif"}}>Özel Ölçü Plise Perde</h1>
               <div className="mt-8">
-                <Link href="/urunler" className="inline-block bg-[#b08d6a] hover:bg-[#9a7b5c] text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors">
+                <Link href="/urunler" className="inline-block bg-[#d4af37] hover:bg-[#c29a28] text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors">
                   SİPARİŞ VERİN
                 </Link>
               </div>
@@ -113,7 +113,7 @@ export default function Home() {
                     <p className="text-sm text-neutral-500 mb-4">{formatMoney(parseFloat(product.price) * 100, "TRY")}</p>
                   </div>
                   <div className="w-full flex">
-                      <Link href={`/urunler/${product.slug}`} className="w-full bg-[#8c3b3b] hover:bg-[#7a3232] text-white text-center py-3 text-xs font-medium tracking-wider transition-colors">
+                      <Link href={`/urunler/${product.slug}`} className="w-full bg-[#d4af37] hover:bg-[#c29a28] text-white text-center py-3 text-xs font-medium tracking-wider transition-colors">
                         Sipariş Ver
                       </Link>
                   </div>
@@ -122,7 +122,7 @@ export default function Home() {
             </div>
             
             <div className="mt-12 text-center">
-              <Link href="/urunler" className="inline-block bg-[#8c3b3b] hover:bg-[#7a3232] text-white px-10 py-3 text-sm font-medium tracking-wider transition-colors">
+              <Link href="/urunler" className="inline-block bg-[#d4af37] hover:bg-[#c29a28] text-white px-10 py-3 text-sm font-medium tracking-wider transition-colors">
                 Tüm Ürünler
               </Link>
             </div>
@@ -211,7 +211,7 @@ export default function Home() {
                 <p className="text-neutral-600 mb-8 leading-relaxed max-w-md">
                   Yaşam alanlarınızı tamamlayan modern plise perde modellerimizi keşfedin. Her pencereye özel ölçü, dayanıklı mekanizma ve zengin renk seçenekleri ile hem estetik hem de fonksiyonel çözümler sunuyoruz.
                 </p>
-                <Link href="/urunler" className="inline-block bg-[#8c3b3b] hover:bg-[#7a3232] text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors">
+                <Link href="/urunler" className="inline-block bg-[#d4af37] hover:bg-[#c29a28] text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors">
                   Ürünlerimizi Keşfedin
                 </Link>
               </div>

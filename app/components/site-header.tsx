@@ -14,9 +14,6 @@ const menuGroups = [
     href: "/perdeler",
     items: [
       ["Plise Perdeler", "/plise-perdeler"],
-      ["Orjin Plise Perdeler", "/plise-perdeler?seri=orjin"],
-      ["Bambu Plise Perdeler", "/plise-perdeler?seri=bambu"],
-      ["Dimout Plise Perdeler", "/plise-perdeler?seri=dimout"],
     ],
   },
 ] as const;
