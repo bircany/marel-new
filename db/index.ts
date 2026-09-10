@@ -384,7 +384,7 @@ async function initializeDatabase(): Promise<void> {
 }
 
 async function seedCatalog(db: D1Database): Promise<void> {
-  const allSeeds = [...GENERATED_SEEDS, ...GENERATED_PLISE_SEEDS];
+  const allSeeds: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
   const result = await db.prepare("SELECT COUNT(*) AS count FROM products").first<{ count: number }>();
   if ((result?.count ?? 0) === allSeeds.length) return; // Skip only if all seeds exist
 
@@ -397,7 +397,7 @@ async function seedCatalog(db: D1Database): Promise<void> {
 
   for (const product of allSeeds) {
     const id = crypto.randomUUID();
-    const rootCat = (product as any).rootCategory || (product.category.includes("Plise") ? "Perdeler" : product.category);
+    const rootCat = product.rootCategory || (product.category?.includes("Plise") ? "Perdeler" : product.category);
     statements.push(
       db.prepare(
         "INSERT INTO products (id, slug, sku, name, category, description, price, sale_price, currency, stock, availability, brand, google_product_category, active, featured, colors, root_category, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'TRY', ?, 'in_stock', 'Marel', 'Home & Garden > Decor > Window Treatments', 1, 1, ?, ?, ?, ?)"
