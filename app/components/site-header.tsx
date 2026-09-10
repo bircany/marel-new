@@ -73,12 +73,12 @@ export function SiteHeader() {
     <>
       <div className="benefit-bar" aria-label="Alışveriş avantajları">
         <div className="benefit-marquee">
-          <span>HAVALEDE EK %10 İNDİRİM</span>
           <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
-          <span>PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
-          <span aria-hidden="true">HAVALEDE EK %10 İNDİRİM</span>
+          <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
+          <span>1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
           <span aria-hidden="true">1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
-          <span aria-hidden="true">PEŞİN FİYATINA 3 TAKSİT İMKANI</span>
+          <span aria-hidden="true">1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
+          <span aria-hidden="true">1000₺ ÜZERİ ÜCRETSİZ KARGO</span>
         </div>
       </div>
       <header className="shop-header">
@@ -151,13 +151,6 @@ export function SiteHeader() {
               </svg>
             </a>
 
-            <Link href="/account/login" aria-label="Hesabım" className="header-account-btn">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </Link>
-
             <Link
               className={`cart-action${cartPulse ? " cart-pulse" : ""}`}
               href="/sepet"
@@ -187,7 +180,7 @@ export function SiteHeader() {
 
       <div className="red-ticker">
         <div>
-          TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR
+          1000₺ ÜZERİ ÜCRETSİZ KARGO / 1000₺ ÜZERİ ÜCRETSİZ KARGO / 1000₺ ÜZERİ ÜCRETSİZ KARGO / 1000₺ ÜZERİ ÜCRETSİZ KARGO / 1000₺ ÜZERİ ÜCRETSİZ KARGO / 1000₺ ÜZERİ ÜCRETSİZ KARGO
         </div>
       </div>
     </>
