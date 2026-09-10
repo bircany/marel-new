@@ -10,31 +10,6 @@ import { formatMoney } from "@/app/lib/commerce";
 
 const menuGroups = [
   {
-    label: "Sineklikler",
-    href: "/sineklikler",
-    items: [
-      ["Menteşeli Sineklikler", "/sineklikler?alt=menteseli"],
-      ["Menteşeli Pencere Sinekliği", "/sineklikler?alt=menteseli-pencere"],
-      ["Menteşeli Pencere Kedi Sinekliği", "/sineklikler?alt=menteseli-pencere-kedi"],
-      ["Menteşeli Kapı Kedi Sinekliği", "/sineklikler?alt=menteseli-kapi-kedi"],
-      ["Sabit Sök-Tak Sineklikler", "/sineklikler?alt=sabit-sok-tak"],
-      ["Akordiyon Sineklikler", "/sineklikler?alt=akordiyon"],
-      ["Cam Balkon Sineklikleri", "/sineklikler?alt=cam-balkon"],
-      ["Kedi Sineklikleri", "/sineklikler?alt=kedi"],
-      ["Sürme Sineklikler", "/sineklikler?alt=surme"],
-      ["Sineklik Kasaları", "/sineklikler?alt=kasalar"],
-    ],
-  },
-  {
-    label: "Seperatör Kapı",
-    href: "/separator-kapi",
-    items: [
-      ["Orjin Separatör Kapılar", "/separator-kapi?alt=orjin"],
-      ["%100 Işık Yalıtımlı Kapılar", "/separator-kapi?alt=isik-yalitimli"],
-      ["Termal ve Işık Yalıtımlı Kapılar", "/separator-kapi?alt=termal"],
-    ],
-  },
-  {
     label: "Perdeler",
     href: "/perdeler",
     items: [
@@ -42,30 +17,6 @@ const menuGroups = [
       ["Orjin Plise Perdeler", "/plise-perdeler?seri=orjin"],
       ["Bambu Plise Perdeler", "/plise-perdeler?seri=bambu"],
       ["Dimout Plise Perdeler", "/plise-perdeler?seri=dimout"],
-    ],
-  },
-  {
-    label: "Otomatik Panjurlar",
-    href: "/otomatik-panjurlar",
-    items: [
-      ["Motorlu Panjur Sistemleri", "/otomatik-panjurlar?alt=motorlu"],
-      ["Kumandalı Panjur", "/otomatik-panjurlar?alt=kumandali"],
-      ["Yedek Parça", "/otomatik-panjurlar?alt=yedek-parca"],
-    ],
-  },
-  {
-    label: "Tutamaklar",
-    href: "/tutamaklar",
-    items: [],
-  },
-  {
-    label: "Aksesuarlar",
-    href: "/aksesuarlar",
-    items: [
-      ["Sineklik Aksesuarları", "/aksesuarlar?alt=sineklik"],
-      ["Sineklik Tülleri", "/aksesuarlar?alt=tul"],
-      ["Yırtılmaz Kedi Tülleri", "/aksesuarlar?alt=kedi-tulu"],
-      ["Pencere ve Kapı Aksesuarları", "/aksesuarlar?alt=pencere-kapi"],
     ],
   },
 ] as const;
@@ -228,12 +179,7 @@ export function SiteHeader() {
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>
             <nav>
-              <Link href="/sineklikler">Sineklikler</Link>
-              <Link href="/separator-kapi">Seperatör Kapı</Link>
               <Link href="/perdeler">Perdeler</Link>
-              <Link href="/otomatik-panjurlar">Otomatik Panjurlar</Link>
-              <Link href="/tutamaklar">Tutamaklar</Link>
-              <Link href="/aksesuarlar">Aksesuarlar</Link>
               <Link href="/siparis-takip">Sipariş Takip</Link>
               <Link href="/urunler">Tüm Ürünler</Link>
               <Link href="/iletisim">İletişim</Link>
