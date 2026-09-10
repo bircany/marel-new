@@ -4,7 +4,7 @@ import https from "https";
 import http from "http";
 import { URL } from "url";
 
-const TARGET_URL = "https://www.yarenpliseperde.com/ana-sayfa/";
+const TARGET_URL = "https://www.yarenpliseperde.com/plise-perde/";
 
 const downloadImage = (url, filepath) => {
   return new Promise((resolve, reject) => {

@@ -5,6 +5,7 @@ import { SiteHeader } from "./components/site-header";
 import { absoluteUrl } from "@/app/lib/site";
 import { scrapedProducts } from "./scraped-data";
 import { formatMoney } from "@/app/lib/commerce";
+import { ensureDatabase, getDb } from "@/db";
 
 export const revalidate = 60;
 
@@ -13,7 +14,17 @@ export const metadata = {
   description: "Marel Plise Perde - Plise perde sistemlerinde özel ölçüye göre kaliteli üretim.",
 };
 
-export default function Home() {
+export default async function Home() {
+  await ensureDatabase();
+  const db = getDb();
+  let blogPosts: any[] = [];
+  try {
+    const raw = await db.prepare("SELECT * FROM announcements WHERE published = 1 ORDER BY created_at DESC LIMIT 3").all();
+    blogPosts = raw.results || [];
+  } catch (err) {
+    console.error(err);
+  }
+
   return (
     <>
       <script
@@ -218,6 +229,66 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Urun Cesitlerimiz Section */}
+        <section className="py-20" style={{backgroundColor: "#fff"}}>
+          <div className="container" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+            <div style={{ textAlign: "center", marginBottom: 40 }}>
+              <h2 className="text-3xl md:text-4xl font-light text-neutral-900 mb-4" style={{fontFamily: "serif"}}>Ürün Çeşitlerimiz</h2>
+              <p className="text-neutral-500 max-w-2xl mx-auto">Her mekana ve pencere tipine özel olarak üretilen, premium kalitede plise perde çözümlerimizi keşfedin.</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 30 }}>
+              {[
+                { title: "Cam Balkon Plise Perde", img: "/images/real/diamond-beyaz-siyah-ip.jpeg" },
+                { title: "Karartma (Blackout)", img: "/images/hero/marel-honeycomb-hero-v3.png" },
+                { title: "Kış Bahçesi", img: "/images/catalog/blackout.webp" }
+              ].map((cat, i) => (
+                <Link href="/urun-cesitleri" key={i} style={{ display: "block", position: "relative", height: 280, borderRadius: 12, overflow: "hidden", textDecoration: "none" }}>
+                  <Image src={cat.img} alt={cat.title} fill style={{ objectFit: "cover", transition: "transform 0.3s" }} className="hover:scale-105" />
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0))" }} />
+                  <div style={{ position: "absolute", bottom: 20, left: 20 }}>
+                    <h3 style={{ color: "#fff", fontSize: "1.2rem", fontWeight: 700 }}>{cat.title}</h3>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div style={{ textAlign: "center", marginTop: 40 }}>
+              <Link href="/urun-cesitleri" className="inline-block bg-[#0f172a] hover:bg-[#1e293b] text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors rounded-full">
+                Tüm Çeşitleri Gör
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* Blog Section */}
+        {blogPosts.length > 0 && (
+          <section className="py-20" style={{backgroundColor: "#f8fafc"}}>
+            <div className="container" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 20px" }}>
+              <div style={{ textAlign: "center", marginBottom: 40 }}>
+                <span style={{ color: "#d4af37", fontWeight: 700, fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: 2 }}>Marel Blog</span>
+                <h2 className="text-3xl md:text-4xl font-light text-neutral-900 mt-2 mb-4" style={{fontFamily: "serif"}}>Güncel İçeriklerimiz</h2>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 30 }}>
+                {blogPosts.map((post) => (
+                  <Link href={`/blog/${post.slug}`} key={post.id} style={{ display: "block", background: "#fff", borderRadius: 12, overflow: "hidden", boxShadow: "0 4px 15px rgba(0,0,0,0.05)", textDecoration: "none", transition: "transform 0.2s" }} className="hover:-translate-y-1">
+                    <div style={{ position: "relative", height: 200, background: "#e2e8f0" }}>
+                      <Image src={post.image_url || "/images/real/diamond-beyaz-siyah-ip.jpeg"} alt={post.title} fill style={{ objectFit: "cover" }} />
+                    </div>
+                    <div style={{ padding: 20 }}>
+                      <h3 style={{ fontSize: "1.1rem", color: "#0f172a", fontWeight: 700, marginBottom: 8, lineHeight: 1.3 }}>{post.title}</h3>
+                      <p style={{ color: "#64748b", fontSize: "0.9rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{post.summary}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <div style={{ textAlign: "center", marginTop: 40 }}>
+                <Link href="/blog" className="inline-block border-2 border-[#0f172a] text-[#0f172a] hover:bg-[#0f172a] hover:text-white px-8 py-3 text-sm font-medium tracking-wider transition-colors rounded-full">
+                  Tüm Yazıları İncele
+                </Link>
+              </div>
+            </div>
+          </section>
+        )}
 
       </main>
       <SiteFooter />

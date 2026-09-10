@@ -1,14 +1,10 @@
-import Image from "next/image";
-import { ContactForm } from "@/app/components/contact-form";
-import { Reveal } from "@/app/components/motion-media";
-import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { SiteFooter } from "@/app/components/site-footer";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const metadata = {
-  title: "İletişim & Danışma | Marel Perde ve Sineklik Sistemleri",
-  description:
-    "Marel plise perde, jaluzi, zip perde ve sineklik sistemleri için doğrudan WhatsApp hattı, müşteri hizmetleri ve iletişim formu.",
+  title: "İletişim | Marel Plise Perde",
+  description: "Marel plise perde iletişim bilgileri. Adres, telefon ve iletişim formu ile bize ulaşın.",
   alternates: { canonical: absoluteUrl("/iletisim") },
 };
 
@@ -16,115 +12,105 @@ export default function ContactPage() {
   return (
     <>
       <SiteHeader />
-      <main className="content-page">
-        {/* Contact Hero */}
-        <section className="content-hero contact-hero">
-          <div className="content-hero-media">
-            <Image
-              unoptimized
-              src="/images/hero/marel-honeycomb-hero-v3.png"
-              alt="Marel Honeycomb perde uygulaması"
-              fill
-              priority
-              sizes="100vw"
-            />
-          </div>
-          <div className="shop-container">
-            <span>MAREL MİMARİ DESTEK</span>
-            <h1>Doğru sistemi birlikte seçelim.</h1>
-            <p>Ürün seçimi, ölçü desteği, sipariş veya satış sonrası talepleriniz için bize anında ulaşın.</p>
-          </div>
-        </section>
-
-        {/* Contact Section */}
-        <section className="contact-section shop-container">
-          <Reveal direction="left">
-            <div className="contact-info-col">
-              <span className="contact-badge">HIZLI DANIŞMA</span>
-              <h2>Size nasıl yardımcı olabiliriz?</h2>
-              <p>
-                Mekânınızın veya pencerenizin fotoğrafı ile yaklaşık ölçünüz hazırsa, WhatsApp üzerinden doğrudan
-                uzman danışmanımıza iletebilirsiniz. En uygun sistem ve kumaş alternatiflerini hemen sunalım.
+      <main className="static-page-main" style={{ background: "#fbf8ee" }}>
+        
+        <section className="shop-container" style={{ padding: "80px 20px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "60px" }}>
+            
+            {/* Contact Info */}
+            <div style={{ flex: "1 1 400px" }}>
+              <h1 style={{ fontSize: "2.5rem", color: "#1e293b", marginBottom: "20px", fontWeight: "700" }}>
+                İletişime geçin!
+              </h1>
+              <p style={{ color: "#64748b", fontSize: "1.05rem", lineHeight: "1.7", marginBottom: "30px" }}>
+                Ürünlerimiz, hizmetlerimiz veya sipariş süreçlerimizle ilgili merak ettiklerinizi yanıtlamaktan memnuniyet duyarız.
+                <br /><br />
+                İhtiyacınıza en uygun çözümü sunabilmemiz için bize telefon, e-posta veya iletişim formu üzerinden dilediğiniz zaman ulaşabilirsiniz.
               </p>
-
-              {/* Direct WhatsApp Call/Chat Card */}
-              <a
-                className="contact-whatsapp-card"
-                href="https://wa.me/905467356602?text=Merhaba%2C%20Marel%20perde%2Fsineklik%20sistemleri%20hakk%C4%B1nda%20bilgi%20ve%20%C3%B6l%C3%A7%C3%BC%20deste%C4%9Fi%20almak%20istiyorum."
-                target="_blank"
-                rel="noreferrer"
-              >
-                <div className="wa-card-left">
-                  <div className="wa-icon-bubble">
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="26" height="26">
-                      <path d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38c1.45.79 3.08 1.21 4.74 1.21 5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.816 9.816 0 0 0 12.04 2zm0 18.15c-1.48 0-2.93-.4-4.2-1.15l-.3-.18-3.12.82.83-3.04-.2-.31a8.13 8.13 0 0 1-1.25-4.38c0-4.5 3.66-8.16 8.16-8.16 2.18 0 4.23.85 5.77 2.39a8.11 8.11 0 0 1 2.39 5.77c0 4.5-3.66 8.16-8.16 8.16zm4.47-6.1c-.25-.12-1.47-.72-1.7-.81-.23-.08-.39-.12-.56.12-.17.25-.64.81-.79.97-.14.17-.29.19-.53.07-.25-.12-1.05-.39-2-1.23-.74-.66-1.24-1.47-1.39-1.71-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.14.17-.25.25-.41.08-.17.04-.31-.02-.43s-.56-1.34-.76-1.84c-.2-.48-.41-.42-.56-.43h-.48c-.17 0-.43.06-.66.31-.22.25-.86.84-.86 2.05s.88 2.38 1 2.54c.12.17 1.73 2.64 4.2 3.7.59.25 1.05.4 1.41.51.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.47-.29z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Canlı WhatsApp Danışmanı</strong>
-                    <small>0546 735 66 02 · Anında Yanıt</small>
-                  </div>
+              
+              <div style={{ display: "flex", flexDirection: "column", gap: "20px", color: "#334155", fontSize: "1.05rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                  <span style={{ fontSize: "1.5rem", color: "#d97706" }}>📍</span>
+                  <span>Sanayi Sitesi, Marel İmalat Atölyesi, Elbistan / Kahramanmaraş</span>
                 </div>
-                <span className="wa-arrow">↗</span>
-              </a>
-
-              {/* Direct Support Channels */}
-              <div className="contact-channels-grid">
-                <article className="channel-box">
-                  <span className="channel-icon">📍</span>
-                  <div>
-                    <strong>İmalat & Atölye Adresi</strong>
-                    <small>Sanayi Sitesi, Marel İmalat Atölyesi, Elbistan / Kahramanmaraş</small>
-                  </div>
-                </article>
-
-                <article className="channel-box">
-                  <span className="channel-icon">📞</span>
-                  <div>
-                    <strong>Müşteri Hizmetleri & WhatsApp</strong>
-                    <small>+90 546 735 66 02 · info@marelpliseperde.com</small>
-                  </div>
-                </article>
-
-                <article className="channel-box">
-                  <span className="channel-icon">📐</span>
-                  <div>
-                    <strong>Ölçü & Kumaş Desteği</strong>
-                    <small>Pencerenize özel milimetrik ölçü ve renk kartelası danışmanlığı</small>
-                  </div>
-                </article>
-
-                <article className="channel-box">
-                  <span className="channel-icon">🚚</span>
-                  <div>
-                    <strong>Yurtiçi Kargo Takibi</strong>
-                    <small>Türkiye geneli sigortalı ve korunaklı kargo teslimatı</small>
-                  </div>
-                </article>
-
-                <article className="channel-box">
-                  <span className="channel-icon">⏰</span>
-                  <div>
-                    <strong>Çalışma Saatleri</strong>
-                    <small>Pazartesi – Cumartesi: 09:00 – 19:00</small>
-                  </div>
-                </article>
-
-                <article className="channel-box">
-                  <span className="channel-icon">🛡️</span>
-                  <div>
-                    <strong>Garanti & Teknik Destek</strong>
-                    <small>2 yıl parça, ip ve mekanizma garantisi</small>
-                  </div>
-                </article>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                  <span style={{ fontSize: "1.5rem", color: "#d97706" }}>📞</span>
+                  <a href="tel:+905467356602" style={{ color: "inherit", textDecoration: "none" }}>+90 546 735 66 02</a>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+                  <span style={{ fontSize: "1.5rem", color: "#d97706" }}>✉️</span>
+                  <a href="mailto:info@marelpliseperde.com" style={{ color: "inherit", textDecoration: "none" }}>info@marelpliseperde.com</a>
+                </div>
               </div>
             </div>
-          </Reveal>
 
-          <Reveal direction="right">
-            <ContactForm />
-          </Reveal>
+            {/* Contact Form */}
+            <div style={{ flex: "1 1 500px", background: "#ffffff", padding: "40px", borderRadius: "12px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)" }}>
+              <form style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+                  <input 
+                    type="text" 
+                    placeholder="Adınız *" 
+                    required
+                    style={{ flex: "1 1 200px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", outline: "none" }}
+                  />
+                  <input 
+                    type="tel" 
+                    placeholder="Numaranız *" 
+                    required
+                    style={{ flex: "1 1 200px", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", outline: "none" }}
+                  />
+                </div>
+                <textarea 
+                  placeholder="Size nasıl yardımcı olabiliriz?" 
+                  rows={5}
+                  required
+                  style={{ width: "100%", padding: "15px", border: "1px solid #e2e8f0", borderRadius: "8px", outline: "none", resize: "vertical" }}
+                ></textarea>
+                
+                <label style={{ display: "flex", alignItems: "flex-start", gap: "10px", fontSize: "0.9rem", color: "#64748b", cursor: "pointer" }}>
+                  <input type="checkbox" required style={{ marginTop: "4px" }} />
+                  <span>Kişisel bilgilerimin toplanıp saklanmasını kabul ediyorum.</span>
+                </label>
+
+                <button 
+                  type="submit" 
+                  style={{ 
+                    padding: "15px 30px", 
+                    background: "#cda434", 
+                    color: "#fff", 
+                    border: "none", 
+                    borderRadius: "8px", 
+                    fontSize: "1.05rem", 
+                    fontWeight: "600",
+                    cursor: "pointer",
+                    alignSelf: "flex-start",
+                    transition: "background 0.3s ease"
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.background = "#b8922f"}
+                  onMouseOut={(e) => e.currentTarget.style.background = "#cda434"}
+                >
+                  İletişime Geçin
+                </button>
+              </form>
+            </div>
+          </div>
         </section>
+
+        {/* Map Section */}
+        <section style={{ width: "100%", height: "500px", background: "#e2e8f0" }}>
+          <iframe 
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d101252.70997198188!2d37.11477755!3d38.204593!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1531e2197e411cbb%3A0x67faaf27a1ef24a!2sElbistan%2C%20Kahramanmara%C5%9F!5e0!3m2!1str!2str!4v1715873030000!5m2!1str!2str" 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            allowFullScreen={false} 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+            title="Marel İmalat Atölyesi Harita"
+          ></iframe>
+        </section>
+
       </main>
       <SiteFooter />
     </>

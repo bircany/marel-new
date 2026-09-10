@@ -20,29 +20,31 @@ export function SiteFooter() {
 
         <div>
           <h3>Kategoriler</h3>
-          <Link href="/sineklikler">Sineklikler</Link>
-          <Link href="/perdeler">Perdeler</Link>
-          <Link href="/tutamaklar">Tutamaklar</Link>
-          <Link href="/profiller">Profiller</Link>
-          <Link href="/kosebentler-1">Köşebentler</Link>
-          <Link href="/aksesuarlar">Aksesuarlar</Link>
+          <Link href="/urunler">Plise Perdeler</Link>
+          <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
+          <Link href="/blog">Blog</Link>
         </div>
 
         <div>
           <h3>Hesabım</h3>
           <Link href="/account/login">Giriş Yap</Link>
           <Link href="/account/register">Kayıt ol</Link>
+          <Link href="/siparis-takip">Sipariş Takip</Link>
         </div>
 
         <div>
-          <h3>Hakkımızda</h3>
+          <h3>Kurumsal</h3>
+          <Link href="/hakkimizda">Hakkımızda</Link>
           <Link href="/iletisim">İletişim</Link>
           <Link href="/gizlilik-politikasi">Gizlilik Güvenlik Politikası</Link>
           <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
-          <Link href="/iade-ve-iptal-kosullari">Tüketici Hakları Cayma İptal İade Koşulları</Link>
+          <Link href="/iade-ve-iptal-kosullari">İptal ve İade Koşulları</Link>
           <Link href="/kvkk-aydinlatma-metni">Kişisel Veriler Politikası (KVKK)</Link>
-          <h3 className="footer-video-title" style={{ marginTop: 20, fontWeight: 800, fontSize: "0.85rem", color: "#0f172a" }}>
-            Kurulum ve Montaj Videoları için:
+        </div>
+
+        <div>
+          <h3 className="footer-video-title" style={{ fontWeight: 800, fontSize: "0.85rem", color: "#0f172a" }}>
+            Sosyal Medya
           </h3>
           <div className="footer-social-links" style={{ display: "flex", gap: 12, marginTop: 10 }}>
             <a

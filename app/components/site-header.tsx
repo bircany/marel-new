@@ -187,7 +187,7 @@ export function SiteHeader() {
 
       <div className="red-ticker">
         <div>
-          HAVALEDE İNDİRİMLERE EK %10 İNDİRİM • PEŞİN FİYATINA 3 TAKSİT İMKANI • 1000₺ ÜZERİ ÜCRETSİZ KARGO • CANLI WHATSAPP DANIŞMA
+          TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR / TÜM ÜRÜNLERİMİZ / 2 YIL GARANTİLİDİR
         </div>
       </div>
     </>

@@ -108,8 +108,36 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </div>
 
         {/* Main Product Configurator & Gallery */}
-        <section className="shop-container pdp-hero-section">
-          <ProductConfigurator product={product} />
+        <section className="shop-container pdp-hero-section" style={{ padding: "40px 20px" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 40, maxWidth: 1200, margin: "0 auto" }}>
+            {/* Image Side */}
+            <div style={{ flex: "1 1 400px" }}>
+              <div style={{ position: "relative", width: "100%", height: 500, borderRadius: 16, overflow: "hidden", background: "#f1f5f9" }}>
+                <img 
+                  src={product.image || "/images/real/diamond-beyaz-siyah-ip.jpeg"} 
+                  alt={product.name} 
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+                />
+              </div>
+            </div>
+
+            {/* Configurator Side */}
+            <div style={{ flex: "1 1 500px" }}>
+              <h1 style={{ fontSize: "2.5rem", fontWeight: 800, color: "#0f172a", marginBottom: 12, lineHeight: 1.2 }}>
+                {product.name}
+              </h1>
+              <p style={{ fontSize: "1.1rem", color: "#475569", marginBottom: 30, lineHeight: 1.6 }}>
+                {product.description}
+              </p>
+
+              <ProductConfigurator product={{
+                name: product.name,
+                price: effectivePrice,
+                colors: product.colors,
+                options: product.options
+              }} />
+            </div>
+          </div>
         </section>
 
         {/* Bank Installment Options Table */}

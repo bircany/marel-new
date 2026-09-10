@@ -334,53 +334,27 @@ export function AdminConsole({
     );
   };
 
-  // Announcement Actions
-  const createAnnouncement = (event: React.FormEvent<HTMLFormElement>) => {
+  // Blog Actions
+  const createAnnouncement = (event: React.FormEvent) => {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    return run(
-      () =>
-        request("/api/admin/announcements", {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            title: form.get("title"),
-            slug: form.get("slug"),
-            summary: form.get("summary"),
-            body: form.get("body"),
-            imageUrl: form.get("imageUrl"),
-            published: form.get("published") === "on",
-            featured: form.get("featured") === "on",
-          }),
-        }),
-      "Duyuru kaydedilemedi.",
-    );
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
+    if (!formData.get("imageUrl")) formData.set("imageUrl", "/images/real/diamond-beyaz-siyah-ip.jpeg");
+    formData.set("published", formData.get("published") === "on" ? "true" : "false");
+    formData.set("featured", formData.get("featured") === "on" ? "true" : "false");
+    return run(() => request("/api/admin/announcements", { method: "POST", body: formData }), "Blog yazısı kaydedilemedi.");
   };
 
-  const updateAnnouncement = (event: React.FormEvent<HTMLFormElement>, id: string) => {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    return run(
-      () =>
-        request(`/api/admin/announcements/${id}`, {
-          method: "PATCH",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            title: form.get("title"),
-            summary: form.get("summary"),
-            body: form.get("body"),
-            imageUrl: form.get("imageUrl"),
-            published: form.get("published") === "on",
-            featured: form.get("featured") === "on",
-          }),
-        }),
-      "Duyuru güncellenemedi.",
-    );
+  const updateAnnouncement = (event: React.FormEvent, id: string) => {
+    const formData = new FormData(event.currentTarget as HTMLFormElement);
+    if (!formData.get("imageUrl")) formData.set("imageUrl", "/images/real/diamond-beyaz-siyah-ip.jpeg");
+    formData.set("published", formData.get("published") === "on" ? "true" : "false");
+    formData.set("featured", formData.get("featured") === "on" ? "true" : "false");
+    return run(() => request(`/api/admin/announcements/${id}`, { method: "PUT", body: formData }), "Blog yazısı güncellenemedi.");
   };
 
   const deleteAnnouncement = (id: string) => {
-    if (!window.confirm("Bu duyuruyu kalıcı olarak silmek istediğinize emin misiniz?")) return;
-    return run(() => request(`/api/admin/announcements/${id}`, { method: "DELETE" }), "Duyuru silinemedi.");
+    if (!window.confirm("Bu blog yazısını kalıcı olarak silmek istediğinize emin misiniz?")) return;
+    return run(() => request(`/api/admin/announcements/${id}`, { method: "DELETE" }), "Blog yazısı silinemedi.");
   };
 
   // Contact Actions
@@ -738,65 +712,6 @@ export function AdminConsole({
           </button>
 
           <button
-            className={`admin-nav-btn ${tab === "orders" ? "active" : ""}`}
-            onClick={() => setTab("orders")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-                <polyline points="10 9 9 9 8 9" />
-              </svg>
-              Sipariş Takip
-            </span>
-            <span className={`admin-nav-badge ${activeOrdersCount > 0 ? "gold" : ""}`}>{orders.length}</span>
-          </button>
-
-          <button
-            className={`admin-nav-btn ${tab === "cargo" ? "active" : ""}`}
-            onClick={() => setTab("cargo")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <rect x="1" y="3" width="15" height="13" />
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                <circle cx="5.5" cy="18.5" r="2.5" />
-                <circle cx="18.5" cy="18.5" r="2.5" />
-              </svg>
-              Kargo Takip
-            </span>
-            {missingCargoCount > 0 ? (
-              <span className="admin-nav-badge alert" title={`${missingCargoCount} siparişin kargo takip numarası eksik`}>
-                {missingCargoCount}
-              </span>
-            ) : (
-              <span className="admin-nav-badge">{orders.filter((o) => o.trackingNumber).length}</span>
-            )}
-          </button>
-
-          <button
-            className={`admin-nav-btn ${tab === "reviews" ? "active" : ""}`}
-            onClick={() => setTab("reviews")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              Yorumlar
-            </span>
-            {pendingReviewsCount > 0 ? (
-              <span className="admin-nav-badge alert">{pendingReviewsCount}</span>
-            ) : (
-              <span className="admin-nav-badge">{reviews.length}</span>
-            )}
-          </button>
-
-          <button
             className={`admin-nav-btn ${tab === "announcements" ? "active" : ""}`}
             onClick={() => setTab("announcements")}
             type="button"
@@ -806,74 +721,12 @@ export function AdminConsole({
                 <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
                 <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
               </svg>
-              Duyurular
+              Blog Yönetimi
             </span>
             <span className="admin-nav-badge">{announcements.length}</span>
           </button>
 
-          <button
-            className={`admin-nav-btn ${tab === "contacts" ? "active" : ""}`}
-            onClick={() => setTab("contacts")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-              </svg>
-              Gelen Mesajlar
-            </span>
-            {newContactsCount > 0 ? (
-              <span className="admin-nav-badge alert">{newContactsCount}</span>
-            ) : (
-              <span className="admin-nav-badge">{contacts.length}</span>
-            )}
-          </button>
 
-          <button
-            className={`admin-nav-btn ${tab === "coupons" ? "active" : ""}`}
-            onClick={() => setTab("coupons")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
-                <line x1="7" y1="7" x2="7.01" y2="7" />
-              </svg>
-              Kupon Yönetimi
-            </span>
-            <span className="admin-nav-badge">{coupons.length}</span>
-          </button>
-
-          <button
-            className={`admin-nav-btn ${tab === "customers" ? "active" : ""}`}
-            onClick={() => setTab("customers")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-              Müşteriler
-            </span>
-            <span className="admin-nav-badge">{customers.length}</span>
-          </button>
-
-          <button
-            className={`admin-nav-btn ${tab === "settings" ? "active" : ""}`}
-            onClick={() => setTab("settings")}
-            type="button"
-          >
-            <span className="admin-nav-btn-left">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
-              </svg>
-              Site Ayarları
-            </span>
-          </button>
         </nav>
 
         <div className="admin-sidebar-footer">
@@ -933,21 +786,9 @@ export function AdminConsole({
             </header>
 
             <div className="admin-quick-actions">
-              <button type="button" className="admin-quick-action peach" onClick={() => setTab("coupons")}>
-                <strong>Yeni kupon oluştur</strong>
-                <span>İndirim kodu veya sabit tutar tanımla ↗</span>
-              </button>
-              <button type="button" className="admin-quick-action blue" onClick={() => setTab("announcements")}>
-                <strong>Duyuru yayınla</strong>
-                <span>Mağazada yeni bilgilendirme paylaş ↗</span>
-              </button>
               <button type="button" className="admin-quick-action green" onClick={() => setTab("products")}>
                 <strong>Ürün kataloğunu düzenle</strong>
                 <span>Stok ve vitrin durumunu güncelle ↗</span>
-              </button>
-              <button type="button" className="admin-quick-action lilac" onClick={() => setTab("contacts")}>
-                <strong>Mesajları kontrol et</strong>
-                <span>{newContactsCount} yeni müşteri talebi bulunuyor ↗</span>
               </button>
             </div>
 
@@ -1051,7 +892,7 @@ export function AdminConsole({
                 <div className="admin-analytics-item">
                   <small>Aktif Kampanyalar</small>
                   <strong>{activeCouponsCount}</strong>
-                  <span>{announcements.filter((announcement) => Boolean(announcement.published)).length} yayınlanan duyuru</span>
+                  <span>{announcements.filter((announcement) => Boolean(announcement.published)).length} yayınlanan blog yazısı</span>
                 </div>
               </div>
             </section>
@@ -2102,16 +1943,16 @@ export function AdminConsole({
             <header className="admin-page-header">
               <div className="admin-page-header-left">
                 <span>İÇERİK YÖNETİMİ</span>
-                <h1>Duyurular</h1>
+                <h1>Blog Yönetimi</h1>
                 <p>
-                  Kampanya duyurularını ve bilgilendirme içeriklerini oluşturun. Yayınlanan duyurular `/duyurular` sayfasında anında canlıya alınır.
+                  Blog yazılarını ve bilgilendirme içeriklerini oluşturun. Yayınlanan içerikler `/blog` sayfasında anında canlıya alınır.
                 </p>
               </div>
             </header>
 
             {/* Create Announcement Drawer */}
             <details className="admin-create-box">
-              <summary>+ Yeni Duyuru Oluştur</summary>
+              <summary>+ Yeni Blog Yazısı Oluştur</summary>
               <form onSubmit={createAnnouncement} className="admin-grid-form">
                 <label className="span-2">
                   Başlık *
@@ -2119,15 +1960,15 @@ export function AdminConsole({
                 </label>
                 <label className="span-2">
                   URL Adı (Slug)
-                  <input name="slug" placeholder="duyuru-basligi (otomatik üretilir)" />
+                  <input name="slug" placeholder="blog-basligi (otomatik üretilir)" />
                 </label>
                 <label className="span-4">
                   Kısa Özet *
-                  <textarea name="summary" rows={2} placeholder="Kartlarda ve duyuru listesinde görünecek kısa özet..." required />
+                  <textarea name="summary" rows={2} placeholder="Kartlarda ve blog listesinde görünecek kısa özet..." required />
                 </label>
                 <label className="span-4">
-                  Duyuru Metni *
-                  <textarea name="body" rows={6} placeholder="Duyurunun detaylı metni..." required />
+                  Blog Metni *
+                  <textarea name="body" rows={6} placeholder="Blog yazısının detaylı metni..." required />
                 </label>
                 <label className="span-4">
                   Görsel Yolu
@@ -2142,7 +1983,7 @@ export function AdminConsole({
                   Öne Çıkan İçerik
                 </label>
                 <button className="span-4" type="submit">
-                  Duyuruyu Kaydet ve Yayınla
+                  Blog Yazısını Kaydet ve Yayınla
                 </button>
               </form>
             </details>
@@ -2180,8 +2021,8 @@ export function AdminConsole({
                 </button>
               </div>
 
-              <Link href="/duyurular" target="_blank" className="admin-btn-secondary" style={{ height: 36, textDecoration: "none" }}>
-                Canlı Duyurular Sayfasını Aç ↗
+              <Link href="/blog" target="_blank" className="admin-btn-secondary" style={{ height: 36, textDecoration: "none" }}>
+                Canlı Blog Sayfasını Aç ↗
               </Link>
             </div>
 
@@ -2222,7 +2063,7 @@ export function AdminConsole({
                             <input name="featured" type="checkbox" defaultChecked={Boolean(item.featured)} />
                             Öne Çıkan
                           </label>
-                          <Link href={`/duyurular#${item.slug}`} target="_blank" style={{ color: "#38bdf8", fontSize: "0.72rem" }}>
+                          <Link href={`/blog/${item.slug}`} target="_blank" style={{ color: "#38bdf8", fontSize: "0.72rem" }}>
                             Canlı Gör ↗
                           </Link>
                         </div>
@@ -2245,8 +2086,8 @@ export function AdminConsole({
                 ))
               ) : (
                 <div className="admin-empty-state">
-                  <h3>Duyuru bulunamadı.</h3>
-                  <p>Yukarıdaki formu kullanarak yeni duyuru ekleyebilirsiniz.</p>
+                  <h3>Blog yazısı bulunamadı.</h3>
+                  <p>Yukarıdaki formu kullanarak yeni blog yazısı ekleyebilirsiniz.</p>
                 </div>
               )}
             </div>

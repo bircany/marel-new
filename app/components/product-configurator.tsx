@@ -1,380 +1,200 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
-import { useState, useMemo } from "react";
-import { addToServerCart, formatMoney } from "@/app/lib/commerce";
-import { trackCommerceEvent } from "@/app/lib/google-ads";
-import type { CatalogProduct } from "@/db";
+import { useState, useEffect } from "react";
+import { formatMoney } from "@/app/lib/commerce";
 
-export type ColorOption = {
-  id: string;
-  name: string;
-  hex: string;
-  image?: string;
-};
+interface ConfiguratorProps {
+  product: {
+    name: string;
+    price: number; // m2 price in cents (e.g. 60500 for 605.00₺)
+    colors?: string; // JSON array string
+    options?: string; // JSON string for profile colors
+  };
+}
 
-export const DEFAULT_FABRIC_COLORS: ColorOption[] = [
-  { id: "beyaz", name: "Beyaz", hex: "#FFFFFF", image: "/images/catalog/diamond.webp" },
-  { id: "krem", name: "Krem", hex: "#F5F0E6" },
-  { id: "antrasit", name: "Antrasit", hex: "#2B303A" },
-  { id: "gri", name: "Gri", hex: "#8A909A" },
-  { id: "kahve", name: "Kahverengi", hex: "#5D4037" },
-  { id: "kirmizi", name: "Kırmızı", hex: "#C62828" },
-  { id: "pembe", name: "Pudra Pembe", hex: "#E8B4B8" },
-  { id: "yesil", name: "Açık Yeşil", hex: "#9CCC65" },
-];
-
-export const PROFILE_COLORS = [
-  { id: "BEYAZ", name: "BEYAZ", color: "#FFFFFF", border: "#D1D5DB" },
-  { id: "ANTRASIT", name: "ANTRASİT", color: "#2B303A", border: "#2B303A" },
-  { id: "GRI", name: "GRİ", color: "#9CA3AF", border: "#9CA3AF" },
-  { id: "KAHVE", name: "KAHVE", color: "#5C3A21", border: "#5C3A21" },
-];
-
-export function ProductConfigurator({ product }: { product: CatalogProduct }) {
-  // Gallery images
-  const galleryImages = useMemo(() => {
-    const list: string[] = [];
-    if (product.image) list.push(product.image);
-    if (product.images && Array.isArray(product.images)) {
-      product.images.forEach((img) => {
-        if (!list.includes(img)) list.push(img);
-      });
-    }
-    if (list.length === 1) {
-      // Add standard detail angles
-      list.push("/images/real/diamond-beyaz-siyah-ip.jpeg");
-      list.push("/images/real/honeycomb-gri-detay.png");
-    }
-    return list;
-  }, [product.image, product.images]);
-
-  const optionsObj = useMemo(() => {
-    try {
-      return typeof product.options === "string" ? JSON.parse(product.options) : product.options || {};
-    } catch {
-      return {};
-    }
-  }, [product.options]);
-
-  const fabricColors = Array.isArray(optionsObj.fabricColors) && optionsObj.fabricColors.length ? optionsObj.fabricColors : DEFAULT_FABRIC_COLORS;
-  const profileColors = Array.isArray(optionsObj.profileColors) && optionsObj.profileColors.length ? optionsObj.profileColors : PROFILE_COLORS;
-  const accessories = Array.isArray(optionsObj.accessories) ? optionsObj.accessories : [];
-  const tabs = Array.isArray(optionsObj.tabs) ? optionsObj.tabs : [];
-
-  const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedFabric, setSelectedFabric] = useState(fabricColors[0] || DEFAULT_FABRIC_COLORS[0]);
-  const [selectedProfile, setSelectedProfile] = useState(profileColors[0] || PROFILE_COLORS[0]);
-  const [width, setWidth] = useState<number>(80);
-  const [height, setHeight] = useState<number>(150);
+export function ProductConfigurator({ product }: ConfiguratorProps) {
+  const [width, setWidth] = useState<number | "">("");
+  const [height, setHeight] = useState<number | "">("");
   const [quantity, setQuantity] = useState<number>(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [profileColor, setProfileColor] = useState<string>("Beyaz (Standart)");
+  const [fabricColor, setFabricColor] = useState<string>("");
+  const [totalPrice, setTotalPrice] = useState<number>(0);
 
-  // Upsell switch tracking (using accessory IDs as keys)
-  const [selectedAccessories, setSelectedAccessories] = useState<Record<string, boolean>>({});
+  // Parse colors & options if any
+  let parsedFabricColors: string[] = [];
+  try {
+    parsedFabricColors = JSON.parse(product.colors || "[]");
+  } catch (e) {}
 
-  // Accordion open states
-  const [openAccordion, setOpenAccordion] = useState<string | null>(tabs.length > 0 ? tabs[0].id : "info");
+  const profileOptions = [
+    "Beyaz (Standart)",
+    "Antrasit",
+    "Kahverengi",
+    "Ahşap Desenli",
+    "Siyah"
+  ];
 
-  const [pending, setPending] = useState(false);
-  const [addedSuccess, setAddedSuccess] = useState(false);
-
-  // Price calculations
-  const basePriceKurus = product.salePrice ?? product.price ?? 59900;
-  const areaM2 = Math.max(1.0, (width * height) / 10000);
-  let singleItemPriceKurus = Math.round(basePriceKurus * areaM2);
-
-  accessories.forEach((acc: any) => {
-    if (selectedAccessories[acc.id]) {
-      singleItemPriceKurus += acc.priceKurus || 0;
+  // Fiyat Hesaplama
+  useEffect(() => {
+    const w = typeof width === "number" ? width : 0;
+    const h = typeof height === "number" ? height : 0;
+    
+    if (w > 0 && h > 0) {
+      let m2 = (w * h) / 10000;
+      // Genellikle minimum 1 m2 baz alınır
+      if (m2 < 1) m2 = 1;
+      
+      const total = m2 * (product.price / 100) * quantity;
+      setTotalPrice(total);
+    } else {
+      setTotalPrice(0);
     }
-  });
+  }, [width, height, quantity, product.price]);
 
-  const totalPriceKurus = singleItemPriceKurus * quantity;
-  const oldPriceKurus = Math.round(singleItemPriceKurus * 2.16); // ~54% discount simulation
-
-  const nextImage = () => {
-    setActiveImageIndex((prev) => (prev + 1) % galleryImages.length);
-  };
-
-  const prevImage = () => {
-    setActiveImageIndex((prev) => (prev - 1 + galleryImages.length) % galleryImages.length);
-  };
-
-  const handleAddToCart = async () => {
-    if (pending) return;
-    setPending(true);
-    setAddedSuccess(false);
-
-    try {
-      await addToServerCart(product.id, quantity);
-      trackCommerceEvent("add_to_cart", totalPriceKurus / 100, [
-        {
-          item_id: product.sku,
-          item_name: `${product.name} (${selectedFabric.name} / ${selectedProfile.name} - ${width}x${height}cm)`,
-          item_brand: "Marel",
-          item_category: product.category,
-          price: singleItemPriceKurus / 100,
-          quantity,
-          google_business_vertical: "retail",
-        },
-      ]);
-      setAddedSuccess(true);
-      setTimeout(() => setAddedSuccess(false), 3500);
-    } catch {
-      alert("Ürün sepete eklenirken bir hata oluştu.");
-    } finally {
-      setPending(false);
+  const handleWhatsapp = () => {
+    if (!width || !height || typeof width !== "number" || typeof height !== "number") {
+      alert("Lütfen en ve boy ölçülerini giriniz.");
+      return;
     }
+    const message = `Merhaba, ${product.name} için sipariş vermek istiyorum.
+- En: ${width} cm
+- Boy: ${height} cm
+- Adet: ${quantity}
+- Profil Rengi: ${profileColor}
+- Kumaş Seçimi: ${fabricColor || "Belirtilmedi"}
+- Tahmini Fiyat: ${formatMoney(totalPrice * 100)}`;
+    
+    const encoded = encodeURIComponent(message);
+    window.open(`https://wa.me/905467356602?text=${encoded}`, "_blank");
   };
-
-  const activeImage = selectedFabric?.image || galleryImages[activeImageIndex] || product.image;
 
   return (
-    <div className="kamatas-pdp-layout">
-      {/* LEFT GALLERY WITH VERTICAL THUMBNAIL STRIP */}
-      <div className="kamatas-gallery-col">
-        {/* Vertical Thumbnails */}
-        <div className="kamatas-vertical-thumbs">
-          {galleryImages.map((img, idx) => (
-            <button
-              key={idx}
-              type="button"
-              className={`kamatas-v-thumb ${idx === activeImageIndex ? "active" : ""}`}
-              onClick={() => setActiveImageIndex(idx)}
-            >
-              <Image
-                unoptimized
-                src={img}
-                alt={`${product.name} thumbnail ${idx + 1}`}
-                width={70}
-                height={90}
-                style={{ objectFit: "cover" }}
-              />
-            </button>
-          ))}
+    <div className="product-configurator" style={{ background: "#f8fafc", padding: 24, borderRadius: 16, border: "1px solid #e2e8f0" }}>
+      <h3 style={{ fontSize: "1.2rem", fontWeight: 700, marginBottom: 20, color: "#0f172a" }}>Ölçü ve Seçenekler</h3>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
+        <div>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            En (Genişlik) cm
+          </label>
+          <input 
+            type="number" 
+            placeholder="Örn: 60"
+            value={width}
+            onChange={(e) => setWidth(e.target.value ? Number(e.target.value) : "")}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem" }}
+          />
         </div>
-
-        {/* Main Stage Image */}
-        <div className="kamatas-main-stage">
-          <button type="button" className="gallery-nav-btn prev" onClick={prevImage}>
-            ‹
-          </button>
-          <div className="stage-image-wrapper">
-            <Image
-              unoptimized
-              src={activeImage}
-              alt={product.name}
-              fill
-              priority
-              sizes="(max-width: 900px) 100vw, 550px"
-              style={{ objectFit: "contain" }}
-            />
-          </div>
-          <button type="button" className="gallery-nav-btn next" onClick={nextImage}>
-            ›
-          </button>
+        <div>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            Boy (Yükseklik) cm
+          </label>
+          <input 
+            type="number" 
+            placeholder="Örn: 120"
+            value={height}
+            onChange={(e) => setHeight(e.target.value ? Number(e.target.value) : "")}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem" }}
+          />
         </div>
       </div>
 
-      {/* RIGHT PRODUCT DETAILS & CONFIGURATOR PANEL */}
-      <div className="kamatas-details-col">
-        <div className="pdp-header-row">
-          <div className="pdp-title-box">
-            <span className="pdp-brand-tag">MAREL</span>
-            <h1 className="pdp-title">
-              {product.name} {selectedFabric.name}, Katlanır Cam/Ev/Ofis Perdesi, İstediğin Ölçüde
-            </h1>
-            <div className="pdp-rating-row">
-              <span className="pdp-stars">★★★★★</span>
-              <a href="#yorumlar" className="pdp-review-count">
-                87 Yorum
-              </a>
-            </div>
-          </div>
-          <button
-            type="button"
-            className={`pdp-wishlist-btn ${isWishlisted ? "active" : ""}`}
-            onClick={() => setIsWishlisted(!isWishlisted)}
-            title="Favorilere Ekle"
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 24 }}>
+        <div>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            Profil Rengi
+          </label>
+          <select 
+            value={profileColor}
+            onChange={(e) => setProfileColor(e.target.value)}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem", background: "#fff" }}
           >
-            {isWishlisted ? "♥" : "♡"}
-          </button>
+            {profileOptions.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+          </select>
         </div>
-
-        {/* Price Row */}
-        <div className="pdp-pricing-box">
-          <span className="pdp-discount-badge">%54</span>
-          <div className="pdp-prices">
-            <span className="pdp-old-price">
-              {formatMoney(oldPriceKurus, product.currency)}
-            </span>
-            <span className="pdp-new-price">
-              {formatMoney(singleItemPriceKurus, product.currency)}
-            </span>
-          </div>
+        <div>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            Adet
+          </label>
+          <input 
+            type="number" 
+            min="1"
+            value={quantity}
+            onChange={(e) => setQuantity(Number(e.target.value) || 1)}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem" }}
+          />
         </div>
-
-        {/* Perde Rengi (Fabric Color) */}
-        <div className="pdp-option-section">
-          <label className="pdp-option-label">Perde Rengi</label>
-          <div className="pdp-swatches-grid">
-            {fabricColors.map((fabric: any) => (
-              <button
-                key={fabric.id}
-                type="button"
-                className={`pdp-swatch-box ${selectedFabric.id === fabric.id ? "active" : ""}`}
-                onClick={() => setSelectedFabric(fabric)}
-                title={fabric.name}
-              >
-                <span
-                  className="pdp-swatch-color"
-                  style={{
-                    backgroundColor: fabric.hex || fabric.color || "#000",
-                    border: (fabric.hex || fabric.color) === "#FFFFFF" ? "1px solid #E5E7EB" : "none",
-                  }}
-                />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Profil Rengi (Profile Color) */}
-        <div className="pdp-option-section">
-          <label className="pdp-option-label">Profil Rengi *</label>
-          <div className="pdp-profiles-row">
-            {profileColors.map((prof: any) => (
-              <button
-                key={prof.id}
-                type="button"
-                className={`pdp-profile-card ${selectedProfile.id === prof.id ? "active" : ""}`}
-                onClick={() => setSelectedProfile(prof)}
-              >
-                <div
-                  className="pdp-profile-sample"
-                  style={{ backgroundColor: prof.color || prof.hex || "#000", border: `1px solid ${prof.border || "#E5E7EB"}` }}
-                />
-                <span className="pdp-profile-name">{prof.name}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Custom Dimensions (En & Boy) */}
-        <div className="pdp-dimensions-row">
-          <div className="pdp-input-field">
-            <label>En (cm)*</label>
-            <input
-              type="number"
-              min="20"
-              max="300"
-              value={width}
-              onChange={(e) => setWidth(Math.max(1, Number(e.target.value)))}
-              placeholder="Örn: 80"
-            />
-          </div>
-          <div className="pdp-input-field">
-            <label>Boy (cm)*</label>
-            <input
-              type="number"
-              min="20"
-              max="300"
-              value={height}
-              onChange={(e) => setHeight(Math.max(1, Number(e.target.value)))}
-              placeholder="Örn: 150"
-            />
-          </div>
-        </div>
-
-        {accessories.length > 0 && (
-          <div className="pdp-upsell-container">
-            <div className="pdp-upsell-header">Gider Süzgeci ve Ek Aksesuarlar</div>
-            
-            {accessories.map((acc: any) => (
-              <div key={acc.id} className="pdp-upsell-row">
-                <label className="pdp-switch">
-                  <input
-                    type="checkbox"
-                    checked={!!selectedAccessories[acc.id]}
-                    onChange={(e) => setSelectedAccessories(prev => ({...prev, [acc.id]: e.target.checked}))}
-                  />
-                  <span className="slider round"></span>
-                </label>
-                <div className="pdp-upsell-thumb">
-                  {acc.image && (
-                    <Image
-                      unoptimized
-                      src={acc.image}
-                      alt={acc.name}
-                      width={48}
-                      height={48}
-                      style={{ objectFit: "cover", borderRadius: 4 }}
-                    />
-                  )}
-                </div>
-                <div className="pdp-upsell-text">
-                  <strong>{acc.name}</strong>
-                  <div className="pdp-upsell-prices">
-                    {acc.oldPriceKurus > 0 && (
-                      <span className="upsell-old">₺ {(acc.oldPriceKurus / 100).toFixed(2)}</span>
-                    )}
-                    <span className="upsell-new">₺ {(acc.priceKurus / 100).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Quantity and Sepete Ekle Button */}
-        <div className="pdp-cart-actions">
-          <div className="pdp-qty-stepper">
-            <button
-              type="button"
-              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-            >
-              −
-            </button>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(Math.max(1, Number(e.target.value)))}
-            />
-            <button type="button" onClick={() => setQuantity((q) => q + 1)}>
-              +
-            </button>
-          </div>
-          <button
-            type="button"
-            className="kamatas-primary-btn"
-            onClick={handleAddToCart}
-            disabled={pending}
-          >
-            {pending ? "Ekleniyor..." : addedSuccess ? "Sepete Eklendi ✓" : "Sepete Ekle"}
-          </button>
-        </div>
-
-        {tabs.length > 0 && (
-          <div className="pdp-accordion-group">
-            {tabs.map((tab: any) => (
-              <div key={tab.id} className="pdp-accordion-panel">
-                <button
-                  type="button"
-                  className="pdp-accordion-trigger"
-                  onClick={() => setOpenAccordion(openAccordion === tab.id ? null : tab.id)}
-                >
-                  <span>{tab.title}</span>
-                  <span>{openAccordion === tab.id ? "˄" : "˅"}</span>
-                </button>
-                {openAccordion === tab.id && (
-                  <div className="pdp-accordion-content" dangerouslySetInnerHTML={{ __html: tab.content }} />
-                )}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
+
+      {parsedFabricColors.length > 0 && (
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            Kumaş Seçimi
+          </label>
+          <select 
+            value={fabricColor}
+            onChange={(e) => setFabricColor(e.target.value)}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem", background: "#fff" }}
+          >
+            <option value="">Seçiniz...</option>
+            {parsedFabricColors.map(c => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+      )}
+
+      {!parsedFabricColors.length && (
+        <div style={{ marginBottom: 24 }}>
+          <label style={{ display: "block", fontSize: "0.9rem", fontWeight: 600, color: "#475569", marginBottom: 6 }}>
+            Kumaş Kodu / Rengi (İsteğe Bağlı)
+          </label>
+          <input 
+            type="text" 
+            placeholder="Örn: 3001 Siyah"
+            value={fabricColor}
+            onChange={(e) => setFabricColor(e.target.value)}
+            style={{ width: "100%", padding: "10px 14px", borderRadius: 8, border: "1px solid #cbd5e1", fontSize: "1rem" }}
+          />
+        </div>
+      )}
+
+      <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: 20, marginBottom: 24 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+          <span style={{ fontSize: "1.1rem", color: "#475569", fontWeight: 500 }}>Toplam Tutar:</span>
+          <span style={{ fontSize: "2rem", color: "#0f172a", fontWeight: 800 }}>
+            {totalPrice > 0 ? formatMoney(totalPrice * 100) : "---"}
+          </span>
+        </div>
+        {totalPrice > 0 && <p style={{ fontSize: "0.8rem", color: "#64748b", textAlign: "right", marginTop: 4 }}>*Minimum 1 m² üzerinden hesaplanmıştır.</p>}
+      </div>
+
+      <button 
+        onClick={handleWhatsapp}
+        style={{
+          width: "100%",
+          padding: "16px",
+          background: "#25D366",
+          color: "#fff",
+          fontSize: "1.1rem",
+          fontWeight: 700,
+          border: "none",
+          borderRadius: 8,
+          cursor: "pointer",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 10,
+          transition: "transform 0.1s, background 0.2s"
+        }}
+        onMouseOver={(e) => e.currentTarget.style.background = "#1da851"}
+        onMouseOut={(e) => e.currentTarget.style.background = "#25D366"}
+        onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.98)"}
+        onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+        </svg>
+        WhatsApp'tan Sipariş Ver
+      </button>
     </div>
   );
 }

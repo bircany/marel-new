@@ -53,12 +53,48 @@ export default async function ProductsPage({
           </h1>
         </div>
 
-        <section className="catalog-browser-section shop-container">
-          <CatalogBrowser
-            products={products}
-            initialCategory={params?.kategori}
-            initialSearch={params?.q}
-          />
+        <section className="shop-container" style={{ padding: "40px 20px" }}>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: "30px",
+            maxWidth: "1200px",
+            margin: "0 auto"
+          }}>
+            {products.map(p => (
+              <Link href={`/urunler/${p.slug}`} key={p.id} style={{
+                display: "block",
+                border: "1px solid #e2e8f0",
+                borderRadius: "12px",
+                overflow: "hidden",
+                textDecoration: "none",
+                background: "#fff",
+                transition: "transform 0.2s, box-shadow 0.2s"
+              }}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "translateY(-4px)";
+                e.currentTarget.style.boxShadow = "0 10px 25px rgba(0,0,0,0.05)";
+              }}
+              onMouseOut={(e) => {
+                e.currentTarget.style.transform = "translateY(0)";
+                e.currentTarget.style.boxShadow = "none";
+              }}>
+                <div style={{ width: "100%", height: "250px", background: "#f8fafc" }}>
+                  <img 
+                    src={p.image || "/images/real/diamond-beyaz-siyah-ip.jpeg"} 
+                    alt={p.name} 
+                    style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  />
+                </div>
+                <div style={{ padding: "20px" }}>
+                  <h3 style={{ fontSize: "1.1rem", fontWeight: 700, color: "#0f172a", marginBottom: 8 }}>{p.name}</h3>
+                  <p style={{ fontSize: "1.2rem", fontWeight: 800, color: "#2563eb" }}>
+                    {(p.salePrice ?? p.price) / 100} ₺ / m²
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         </section>
       </main>
       <SiteFooter />
