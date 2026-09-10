@@ -3,7 +3,7 @@ import Image from "next/image";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { absoluteUrl } from "@/app/lib/site";
-import { scrapedProducts } from "./scraped-data";
+
 import { formatMoney } from "@/app/lib/commerce";
 import { ensureDatabase, getDb } from "@/db";
 
@@ -18,9 +18,12 @@ export default async function Home() {
   await ensureDatabase();
   const db = getDb();
   let blogPosts: any[] = [];
+  let products: any[] = [];
   try {
     const raw = await db.prepare("SELECT * FROM announcements WHERE published = 1 ORDER BY created_at DESC LIMIT 3").all();
     blogPosts = raw.results || [];
+    const productsRaw = await db.prepare("SELECT * FROM products WHERE active = 1 ORDER BY sort_order ASC, created_at DESC LIMIT 8").all();
+    products = productsRaw.results || [];
   } catch (err) {
     console.error(err);
   }
@@ -103,11 +106,11 @@ export default async function Home() {
         <section className="py-16 bg-white">
           <div className="shop-container">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {scrapedProducts.map((product) => (
+              {products.map((product) => (
                 <div key={product.slug} className="group flex flex-col border border-neutral-200">
                   <Link href={`/urunler/${product.slug}`} className="relative aspect-[4/3] w-full overflow-hidden bg-neutral-100">
                     <Image
-                      src={product.image}
+                      src={product.image || '/images/real/diamond-beyaz-siyah-ip.jpeg'}
                       alt={product.name}
                       fill
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
@@ -121,7 +124,7 @@ export default async function Home() {
                         {product.name}
                       </Link>
                     </h3>
-                    <p className="text-sm text-neutral-500 mb-4">{formatMoney(parseFloat(product.price) * 100, "TRY")}</p>
+                    <p className="text-sm text-neutral-500 mb-4">{formatMoney(Number(product.price || 0), "TRY")}</p>
                   </div>
                   <div className="w-full flex">
                       <Link href={`/urunler/${product.slug}`} className="w-full bg-[#d4af37] hover:bg-[#c29a28] text-white text-center py-3 text-xs font-medium tracking-wider transition-colors">
