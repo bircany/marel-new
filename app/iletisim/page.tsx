@@ -87,8 +87,7 @@ export default function ContactPage() {
                     alignSelf: "flex-start",
                     transition: "background 0.3s ease"
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.background = "#b8922f"}
-                  onMouseOut={(e) => e.currentTarget.style.background = "#cda434"}
+
                 >
                   İletişime Geçin
                 </button>
