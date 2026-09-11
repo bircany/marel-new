@@ -5,8 +5,6 @@ import { SiteHeader } from "./components/site-header";
 import { absoluteUrl } from "@/app/lib/site";
 import { ensureDatabase, getDb } from "@/db";
 
-export const revalidate = 60;
-
 export const metadata = {
   title: "Marel Plise Perde | Özel Ölçü Plise Perde Sistemleri",
   description:

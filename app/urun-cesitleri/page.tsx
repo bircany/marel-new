@@ -5,7 +5,6 @@ import { SiteFooter } from "../components/site-footer";
 import { listProducts } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
-export const revalidate = 60;
 export const metadata = { title: "Ürün Çeşitlerimiz | Marel Plise Perde", description: "Marel plise perde serileri ve tüm renk seçenekleri.", alternates: { canonical: absoluteUrl("/urun-cesitleri") } };
 
 export default async function UrunCesitleriPage() {

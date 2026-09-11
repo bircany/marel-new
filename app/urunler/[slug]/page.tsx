@@ -11,7 +11,6 @@ import { stGetProductBySlug } from "@/app/lib/softtrade";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const dynamic = "force-static";
-export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

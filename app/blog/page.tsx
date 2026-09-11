@@ -5,8 +5,6 @@ import { SiteFooter } from "../components/site-footer";
 import { absoluteUrl } from "@/app/lib/site";
 import { listAnnouncements } from "@/db";
 
-export const revalidate = 60; // 1 minute cache
-
 export const metadata = {
   title: "Marel Plise Perde | Blog, Ölçü Rehberleri ve İpuçları",
   description:

@@ -5,7 +5,6 @@ import { SiteHeader } from "../components/site-header";
 import { listProducts } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
-export const revalidate = 60;
 export const dynamic = "force-static";
 
 export const metadata = {

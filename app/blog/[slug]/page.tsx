@@ -8,7 +8,6 @@ import { absoluteUrl } from "@/app/lib/site";
 import { getAnnouncementBySlug, listAnnouncements } from "@/db";
 import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
 
-export const revalidate = 60;
 export const dynamic = "force-static";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
