@@ -4,6 +4,7 @@ import { SiteFooter } from "../components/site-footer";
 import { SiteHeader } from "../components/site-header";
 import { listProducts } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
+import { ProductFilterSync } from "@/app/components/product-filter-sync";
 
 export const dynamic = "force-static";
 
@@ -64,6 +65,7 @@ export default async function ProductsPage({
   return (
     <>
       <SiteHeader />
+      <ProductFilterSync />
       <main style={{ backgroundColor: "#fcfbf7", minHeight: "100vh", padding: "40px 20px 80px" }}>
         <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
           
@@ -109,6 +111,7 @@ export default async function ProductsPage({
 
                   return (
                     <Link
+                      data-product-card={`${product.name} ${product.category}`}
                       key={product.id || product.slug}
                       href={`/urunler/${product.slug}`}
                       style={{
