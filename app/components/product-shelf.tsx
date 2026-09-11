@@ -20,6 +20,9 @@ export type StoreProduct = {
   priceKurus?: number;
   currency?: string;
   imagePosition?: string;
+  discount?: number; // yüzde indirim
+  rating?: number; // 0-5 puan
+  tags?: string[]; // etiket listesi
 };
 
 const phone = "905467356602";
@@ -87,9 +90,11 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
             <h3>
               <Link href={product.href}>{product.name}</Link>
             </h3>
-            <div className="stars" aria-label="Öne çıkan ürün">
-              ★★★★★ <i>5.0</i>
-            </div>
+            {product.rating !== undefined && (
+              <div className="stars" aria-label={`Rating ${product.rating} out of 5`}>
+                {"★".repeat(Math.round(product.rating))}{"☆".repeat(5 - Math.round(product.rating))} <i>{product.rating.toFixed(1)}</i>
+              </div>
+            )}
             <p>{product.feature}</p>
             {product.colors.length ? (
               <div className="product-swatches" aria-label={`${product.colors.length} renk seçeneği`}>
@@ -99,12 +104,22 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
                 <span>{product.colors.length} renk</span>
               </div>
             ) : null}
+            {product.tags && product.tags.length > 0 && (
+              <div className="product-tags">
+                {product.tags.map((tag) => (
+                  <span key={tag} className="tag-badge">{tag}</span>
+                ))}
+              </div>
+            )}
             <div className="shop-product-price">
               <strong>
                 {product.priceKurus
-                  ? formatMoney(product.priceKurus, product.currency)
+                  ? formatMoney(product.priceKurus - (product.discount ? product.priceKurus * product.discount / 100 : 0), product.currency)
                   : product.price ?? "Ölçüye göre fiyat"}
               </strong>
+              {product.discount && product.discount > 0 && (
+                <span className="discount-badge">%{product.discount} indirim</span>
+              )}
               <em>Kişiye özel üretim</em>
             </div>
             <div className="shop-card-actions">

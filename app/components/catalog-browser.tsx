@@ -51,11 +51,31 @@ export function CatalogBrowser({
   const [addingId, setAddingId] = useState<string | null>(null);
   const [addedToast, setAddedToast] = useState<string | null>(null);
 
+  // Helper for color count
+  const getProductColorText = (product: CatalogProduct) => {
+    if (product.slug?.includes("diamond") || product.name?.toLowerCase().includes("diamond")) {
+      return "18 Renk Seçeneği";
+    }
+    if (product.colors) {
+      try {
+        const parsed = typeof product.colors === "string" ? JSON.parse(product.colors) : product.colors;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return `${parsed.length} Renk Seçeneği`;
+        }
+      } catch {}
+    }
+    return "Çoklu Renk Seçeneği";
+  };
+
   // Extract unique categories with counts
   const categoryCounts = useMemo(() => {
     const counts: Record<string, number> = {};
     products.forEach((p) => {
-      const cat = p.category || "Diğer";
+      let cat = p.category || "Plise Perde";
+      if ((cat === "Plise Perdeler" || cat === "Perdeler") && p.name) {
+        const m = p.name.match(/^([A-Za-zÇÖŞÜĞIİöçşüğ]+(?:\s+Series)?)/i);
+        if (m) cat = m[1];
+      }
       counts[cat] = (counts[cat] || 0) + 1;
     });
     return counts;
@@ -79,8 +99,13 @@ export function CatalogBrowser({
         }
 
         // Category
-        if (filters.category !== "all" && product.category.toLowerCase() !== filters.category.toLowerCase()) {
-          return false;
+        if (filters.category !== "all") {
+          const target = filters.category.toLowerCase();
+          const pCat = (product.category || "").toLowerCase();
+          const pName = (product.name || "").toLowerCase();
+          if (pCat !== target && !pName.includes(target)) {
+            return false;
+          }
         }
 
         // Color (checking product name/slug/description)
@@ -310,7 +335,7 @@ export function CatalogBrowser({
                         <span className="price-new">{formatMoney(product.price, product.currency)}</span>
                       )}
                     </div>
-                    <div className="k-card-colors">1 Renk</div>
+                    <div className="k-card-colors">{getProductColorText(product)}</div>
                   </div>
                 </Link>
               );

@@ -19,6 +19,9 @@ export const products = sqliteTable("products", {
   category: text("category").notNull(),
   description: text("description").notNull().default(""),
   price: integer("price").notNull().default(0),
+  discount: integer("discount").notNull().default(0), // yüzde indirim
+  rating: integer("rating").notNull().default(0), // 0-5 puan
+  tags: text("tags", { mode: "json" }).notNull().default('[]'), // etiket listesi
   salePrice: integer("sale_price"),
   currency: text("currency").notNull().default("TRY"),
   stock: integer("stock").notNull().default(0),

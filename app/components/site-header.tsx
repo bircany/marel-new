@@ -2,26 +2,16 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useRef, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { GlobalSearch } from "./global-search";
-import type { CatalogProduct } from "@/db";
-import { formatMoney } from "@/app/lib/commerce";
-
-const menuGroups = [
-  {
-    label: "Perdeler",
-    href: "/perdeler",
-    items: [
-      ["Plise Perdeler", "/plise-perdeler"],
-    ],
-  },
-] as const;
+import { PLISE_13_CATEGORIES } from "@/app/data/plise-categories";
 
 export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
   const [cartPulse, setCartPulse] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPerdelerOpen, setIsPerdelerOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDetailsElement>(null);
 
   useEffect(() => {
     let pulseTimer: ReturnType<typeof setTimeout> | null = null;
@@ -69,6 +59,18 @@ export function SiteHeader() {
     };
   }, []);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleDocumentClick = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        dropdownRef.current.removeAttribute("open");
+        setIsPerdelerOpen(false);
+      }
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => document.removeEventListener("click", handleDocumentClick);
+  }, []);
+
   return (
     <>
       <div className="benefit-bar" aria-label="Alışveriş avantajları">
@@ -112,27 +114,60 @@ export function SiteHeader() {
           </button>
 
           <nav className={`header-primary-nav ${isMobileMenuOpen ? "open" : ""}`} aria-label="Ürün kategorileri">
-            {menuGroups.map((group) =>
-              group.items.length > 0 ? (
-                <details className="nav-dropdown" key={group.label}>
-                  <summary>
-                    <Link href={group.href}>{group.label}</Link>
-                    <span aria-hidden="true">⌄</span>
-                  </summary>
-                  <div className="nav-dropdown-panel">
-                    {group.items.map(([label, href]) => (
-                      <Link href={href} key={href}>
-                        {label}
-                      </Link>
-                    ))}
-                  </div>
-                </details>
-              ) : (
-                <Link href={group.href} key={group.label}>
-                  {group.label}
+            {/* Multi-column Mega Menu for 13 Plise Perde Categories */}
+            <details 
+              ref={dropdownRef}
+              className="nav-dropdown nav-mega-dropdown"
+              onToggle={(e) => setIsPerdelerOpen(e.currentTarget.open)}
+            >
+              <summary>
+                <Link href="/plise-perdeler" onClick={(e) => e.stopPropagation()}>
+                  Perdeler
                 </Link>
-              ),
-            )}
+                <span aria-hidden="true">⌄</span>
+              </summary>
+              <div className="nav-dropdown-panel nav-mega-panel">
+                <div className="mega-menu-header">
+                  <div>
+                    <strong>Plise Perde Çeşitlerimiz</strong>
+                    <span className="mega-header-sub">13 Özel Seri · İstenilen Ölçüde Üretim</span>
+                  </div>
+                  <Link 
+                    href="/urun-cesitleri" 
+                    className="mega-view-all"
+                    onClick={() => dropdownRef.current?.removeAttribute("open")}
+                  >
+                    Tüm Kartela & Renk Modelleri →
+                  </Link>
+                </div>
+                <div className="mega-menu-grid">
+                  {PLISE_13_CATEGORIES.map((cat) => (
+                    <Link 
+                      href={cat.href} 
+                      key={cat.id} 
+                      className="mega-menu-item"
+                      onClick={() => dropdownRef.current?.removeAttribute("open")}
+                    >
+                      <div className="mega-item-top">
+                        <span className="mega-item-name">{cat.name}</span>
+                        {cat.badge && <span className="mega-item-badge">{cat.badge}</span>}
+                      </div>
+                      <span className="mega-item-meta">{cat.colorCountText}</span>
+                    </Link>
+                  ))}
+                </div>
+                <div className="mega-menu-footer">
+                  <Link 
+                    href="/plise-perdeler" 
+                    className="mega-footer-link"
+                    onClick={() => dropdownRef.current?.removeAttribute("open")}
+                  >
+                    🔍 Tüm 13 Plise Perde Modelini Listele ve Filtrele →
+                  </Link>
+                </div>
+              </div>
+            </details>
+
             <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
             <Link href="/blog">Blog</Link>
           </nav>
@@ -170,10 +205,23 @@ export function SiteHeader() {
           <details className="shop-mobile-menu">
             <summary aria-label="Menüyü aç">☰</summary>
             <nav>
-              <Link href="/perdeler">Perdeler</Link>
-              <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
+              <div style={{ padding: "8px 14px", fontWeight: 800, fontSize: "0.8rem", color: "#64748b", textTransform: "uppercase" }}>
+                Plise Perde Çeşitleri (13 Seri)
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px", padding: "0 10px 12px" }}>
+                {PLISE_13_CATEGORIES.map((c) => (
+                  <Link 
+                    key={c.id} 
+                    href={c.href}
+                    style={{ fontSize: "0.85rem", padding: "6px 8px", background: "#f8fafc", borderRadius: "6px", fontWeight: 600 }}
+                  >
+                    {c.name}
+                  </Link>
+                ))}
+              </div>
+              <Link href="/plise-perdeler" style={{ fontWeight: 700, color: "#b8904f" }}>Tüm Plise Perdeler</Link>
+              <Link href="/urun-cesitleri">Ürün Çeşitlerimiz & Kartela</Link>
               <Link href="/blog">Blog</Link>
-              <Link href="/urunler">Tüm Ürünler</Link>
               <Link href="/iletisim">İletişim</Link>
             </nav>
           </details>
