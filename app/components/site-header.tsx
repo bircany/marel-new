@@ -169,6 +169,7 @@ export function SiteHeader() {
             </details>
 
             <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
+            <Link href="/products">Tüm Ürünler</Link>
             <Link href="/blog">Blog</Link>
           </nav>
 
