@@ -1,13 +1,11 @@
 import type { MetadataRoute } from "next";
 import { categoryPages } from "@/app/data";
 import { absoluteUrl } from "@/app/lib/site";
-import { stListProducts } from "@/app/lib/softtrade";
 
 export const dynamic = "force-static";
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const products = await stListProducts(false, "Marel").catch(() => [] as Awaited<ReturnType<typeof stListProducts>>);
   const now = new Date();
   const staticPages = [
     "/",
@@ -30,13 +28,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.8,
   }));
 
-  const productEntries = products.map((product) => ({
-    url: absoluteUrl(`/urunler/${product.slug}`),
-    lastModified: now,
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
-
   return [
     ...staticPages.map((path) => ({
       url: absoluteUrl(path),
@@ -45,6 +36,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: path === "/" ? 1 : 0.7,
     })),
     ...categoryEntries,
-    ...productEntries,
   ];
 }
