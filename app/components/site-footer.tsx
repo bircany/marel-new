@@ -31,8 +31,8 @@ export function SiteFooter() {
               <Link href="/urun-cesitleri#gold">Gold Series</Link>
             </div>
             <div className="footer-cat-col">
-              <Link href="/urun-cesitleri#honeycomb">Honeycomb (Isı Yalıtım)</Link>
-              <Link href="/urun-cesitleri#silver">Silver (Güneş Kırıcı)</Link>
+              <Link href="/urun-cesitleri#honeycomb">Honeycomb</Link>
+              <Link href="/urun-cesitleri#silver">Silver</Link>
               <Link href="/urun-cesitleri#arda">Arda Series</Link>
               <Link href="/urun-cesitleri#venus">Venus Series</Link>
               <Link href="/urun-cesitleri#reina">Reina Series</Link>

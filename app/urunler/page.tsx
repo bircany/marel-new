@@ -35,19 +35,23 @@ const CATEGORY_LIST = [
   { name: "Venus", query: "Venus" },
 ];
 
+const normalizeFilter = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+
 export default async function ProductsPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ kategori?: string; q?: string; sort?: string }>;
+  searchParams?: Promise<{ kategori?: string; q?: string; filter?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const rawProducts = await listProducts(false);
 
-  let filtered = params?.q
+  const query = params?.filter || params?.q;
+  const normalizedQuery = query ? normalizeFilter(query) : "";
+  let filtered = query
     ? rawProducts.filter(
         (p) =>
-          p.name.toLowerCase().includes(params.q!.toLowerCase()) ||
-          p.category.toLowerCase().includes(params.q!.toLowerCase())
+          normalizeFilter(p.name).includes(normalizedQuery) ||
+          normalizeFilter(p.category).includes(normalizedQuery)
       )
     : rawProducts;
 
@@ -236,13 +240,13 @@ export default async function ProductsPage({
                 >
                   {CATEGORY_LIST.map((cat) => {
                     const isSelected =
-                      (!params?.q && cat.query === "") ||
-                      (params?.q && params.q.toLowerCase() === cat.query.toLowerCase());
+                      (!query && cat.query === "") ||
+                      (query && query.toLowerCase() === cat.query.toLowerCase());
 
                     return (
                       <li key={cat.name}>
                         <Link
-                          href={cat.query ? `/urunler?q=${cat.query}` : "/urunler"}
+                          href={cat.query ? `/urunler?filter=${encodeURIComponent(normalizeFilter(cat.query))}` : "/urunler"}
                           style={{
                             display: "flex",
                             alignItems: "center",

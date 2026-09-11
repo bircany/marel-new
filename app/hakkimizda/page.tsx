@@ -145,7 +145,7 @@ export default function HakkimizdaPage() {
         </section>
 
         {/* 4 Pillars / Quality Standards */}
-        <section style={{ background: "#ffffff", borderTop: "1px solid #e2e8f0", borderBottom: "1px solid #e2e8f0", padding: "80px 20px" }}>
+        <section style={{ display: "none" }} aria-hidden="true">
           <div className="shop-container" style={{ maxWidth: 1140, margin: "0 auto" }}>
             
             <div style={{ textAlign: "center", marginBottom: 50 }}>

@@ -10,6 +10,13 @@ import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
 
 export const dynamic = "force-static";
 
+// Pre-render every published article during deployment so opening a blog
+// card does not wait for a database request on the first visit.
+export async function generateStaticParams() {
+  const posts = await listAnnouncements(true);
+  return posts.map((post) => ({ slug: post.slug }));
+}
+
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const post = await getAnnouncementBySlug(slug);
