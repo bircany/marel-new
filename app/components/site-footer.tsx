@@ -22,21 +22,21 @@ export function SiteFooter() {
           <h3>Plise Perde Çeşitlerimiz</h3>
           <div className="footer-cat-columns">
             <div className="footer-cat-col">
-              <Link href="/urunler/diamond-series-plise-perde">Diamond Series (18 Renk)</Link>
-              <Link href="/urunler/touch-series-plise-perde">Touch Series (4 Renk)</Link>
-              <Link href="/urunler/new-series-plise-perde">New Series (5 Renk)</Link>
-              <Link href="/urunler/tulle-series-plise-perde">Tülle Series (Tül Plise)</Link>
-              <Link href="/urunler/efe-series-plise-perde">Efe Series (3 Renk)</Link>
-              <Link href="/urunler/ece-series-plise-perde">Ece Series (3 Renk)</Link>
-              <Link href="/urunler/gold-series-plise-perde">Gold Series (5 Renk)</Link>
+              <Link href="/urun-cesitleri#diamond">Diamond Series (18 Renk)</Link>
+              <Link href="/urun-cesitleri#touch">Touch Series (4 Renk)</Link>
+              <Link href="/urun-cesitleri#new">New Series (5 Renk)</Link>
+              <Link href="/urun-cesitleri#tulle">Tülle Series (Tül Plise)</Link>
+              <Link href="/urun-cesitleri#efe">Efe Series (3 Renk)</Link>
+              <Link href="/urun-cesitleri#ece">Ece Series (3 Renk)</Link>
+              <Link href="/urun-cesitleri#gold">Gold Series (5 Renk)</Link>
             </div>
             <div className="footer-cat-col">
-              <Link href="/urunler/honeycomb-series-plise-perde">Honeycomb (Isı Yalıtım)</Link>
-              <Link href="/urunler/silver-series-plise-perde">Silver (Güneş Kırıcı)</Link>
-              <Link href="/urunler/arda-series-plise-perde">Arda Series</Link>
-              <Link href="/urunler/venus-series-plise-perde">Venus Series</Link>
-              <Link href="/urunler/reina-series-plise-perde">Reina Series</Link>
-              <Link href="/urunler/pars-series-plise-perde">Pars Series</Link>
+              <Link href="/urun-cesitleri#honeycomb">Honeycomb (Isı Yalıtım)</Link>
+              <Link href="/urun-cesitleri#silver">Silver (Güneş Kırıcı)</Link>
+              <Link href="/urun-cesitleri#arda">Arda Series</Link>
+              <Link href="/urun-cesitleri#venus">Venus Series</Link>
+              <Link href="/urun-cesitleri#reina">Reina Series</Link>
+              <Link href="/urun-cesitleri#pars">Pars Series</Link>
               <Link href="/urun-cesitleri" style={{ color: "#b8904f", fontWeight: 700 }}>Tüm Çeşitler & Kartela →</Link>
             </div>
           </div>
