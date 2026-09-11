@@ -56,10 +56,10 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
   const updateQuantity = async (item: ServerCartItem, quantity: number) => {
     if (quantity <= 0) return removeItem(item);
     setMessage("");
-    const response = await fetch(`/api/cart/${item.id}`, {
+    const response = await fetch("/api/cart", {
       method: "PUT",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ quantity }),
+      body: JSON.stringify({ itemId: item.id, quantity }),
     });
     const data = (await response.json().catch(() => null)) as { error?: string } | null;
     if (!response.ok) return setMessage(data?.error ?? "Miktar güncellenemedi.");
@@ -69,7 +69,7 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
 
   const removeItem = async (item: ServerCartItem) => {
     setMessage("");
-    const response = await fetch(`/api/cart/${item.id}`, { method: "DELETE" });
+    const response = await fetch(`/api/cart?itemId=${encodeURIComponent(item.id)}`, { method: "DELETE" });
     if (!response.ok) return;
     setCart(await fetchServerCart());
     window.dispatchEvent(new CustomEvent("marel:cart-updated"));
