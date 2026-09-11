@@ -38,13 +38,9 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const [cartData, payRes] = await Promise.all([
-        fetchServerCart(),
-        fetch("/api/payment-settings", { cache: "no-store" }).then((r) => r.json()).catch(() => null),
-      ]);
+      const cartData = await fetchServerCart();
       if (cancelled) return;
       setCart(cartData);
-      if (payRes && typeof payRes === "object") setPayment(payRes as PaymentSettings);
       window.dispatchEvent(new CustomEvent("marel:cart-updated", { detail: cartData.summary?.total_quantity ?? 0 }));
       if (user) {
         const addressResponse = await fetch("/api/addresses", { cache: "no-store" });
