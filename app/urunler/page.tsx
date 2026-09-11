@@ -6,6 +6,7 @@ import { listProducts } from "@/db";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const revalidate = 60;
+export const dynamic = "force-static";
 
 export const metadata = {
   title: "Marel Ürünleri | Plise Perde Sistemleri",

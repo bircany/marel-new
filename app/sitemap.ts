@@ -3,7 +3,8 @@ import { categoryPages } from "@/app/data";
 import { absoluteUrl } from "@/app/lib/site";
 import { stListProducts } from "@/app/lib/softtrade";
 
-export const dynamic = "force-dynamic";
+export const dynamic = "force-static";
+export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const products = await stListProducts(false, "Marel").catch(() => [] as Awaited<ReturnType<typeof stListProducts>>);
