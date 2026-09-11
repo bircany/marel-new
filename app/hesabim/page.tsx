@@ -4,12 +4,10 @@ import { getCurrentUser, laravel } from "@/app/lib/laravel-auth";
 import { AuthPanel } from "@/app/components/auth-panel";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
-import { CustomerReviews } from "@/app/components/customer-reviews";
 import { SignOutButton } from "@/app/components/sign-out-button";
 import { formatMoney } from "@/app/lib/commerce";
 import { stListProducts } from "@/app/lib/softtrade";
 import type { OrderPayload } from "@/app/api/orders/route";
-import type { ReviewPayload } from "@/app/api/reviews/route";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Hesabım | Marel", robots: { index: false, follow: false } };
@@ -79,10 +77,9 @@ export default async function AccountPage() {
     return <><SiteHeader /><GuestAccount /><SiteFooter /></>;
   }
 
-  const [orders, products, reviews] = await Promise.all([
+  const [orders, products] = await Promise.all([
     laravel<OrderPayload[]>("/orders", { token: true }).then((r) => r.ok ? r.data : []).catch(() => []),
     stListProducts(false, "Marel"),
-    laravel<ReviewPayload[]>("/reviews/mine", { token: true }).then((r) => r.ok ? r.data : []).catch(() => []),
   ]);
   const activeOrders = orders.filter((order) => !["delivered", "cancelled"].includes(order.status)).length;
   const deliveredOrders = orders.filter((order) => order.status === "delivered").length;
@@ -99,7 +96,7 @@ export default async function AccountPage() {
         <aside className="account-profile-card">
           <div className="account-avatar" aria-hidden="true">{initials}</div>
           <h2>{user.full_name}</h2><p>{user.email}</p>
-          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><a href="#yorumlar">Yorumlarım <span>{reviews.length}</span></a><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
+          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
           <small>Hesap bilgileriniz güvenli oturumunuz üzerinden alınır.</small>
         </aside>
 
@@ -114,7 +111,6 @@ export default async function AccountPage() {
           <div className="account-order-list">
             {orders.length ? orders.map((order) => <OrderCard key={order.id} order={order} />) : <div className="account-empty-orders"><h3>Henüz bir siparişiniz yok.</h3><p>Ölçünüze özel Marel ürünlerini keşfedin.</p><Link className="account-primary-action" href="/urunler"><span>Ürünleri keşfet</span><b aria-hidden="true">→</b></Link></div>}
           </div>
-          <CustomerReviews products={products.map(({ id, name }) => ({ id, name }))} reviews={reviews} />
         </section>
       </div>
     </main><SiteFooter /></>

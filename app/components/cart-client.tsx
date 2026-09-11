@@ -6,7 +6,6 @@ import { useEffect, useState } from "react";
 import { fetchServerCart, formatMoney, type ServerCart, type ServerCartItem } from "@/app/lib/commerce";
 import { trackAdsConversion, trackCommerceEvent } from "@/app/lib/google-ads";
 import type { LaravelUser } from "@/app/lib/laravel-auth";
-import type { AddressPayload } from "@/app/api/addresses/route";
 import type { OrderPayload } from "@/app/api/orders/route";
 import { getPaymentSettingsSync, whatsappPaymentUrl, type PaymentSettings } from "@/app/lib/payment";
 
@@ -22,17 +21,18 @@ type GuestShipping = {
   district: string;
   full_address: string;
 };
+type AddressPayload = { id: number; title?: string; name?: string; phone?: string; city?: string; district?: string; full_address?: string; is_default?: boolean };
 
 export function CartClient({ user }: { user: LaravelUser | null }) {
   const [cart, setCart] = useState<ServerCart | null>(null);
   const [message, setMessage] = useState("");
   const [pending, setPending] = useState(false);
   const [order, setOrder] = useState<OrderPayload | null>(null);
-  const [addresses, setAddresses] = useState<AddressPayload[]>([]);
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState("bank_transfer");
   const [showNewAddress, setShowNewAddress] = useState(false);
   const [newAddressPending, setNewAddressPending] = useState(false);
+  const [addresses, setAddresses] = useState<AddressPayload[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
   const [payment, setPayment] = useState<PaymentSettings>(getPaymentSettingsSync());
 
   useEffect(() => {
@@ -42,16 +42,6 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
       if (cancelled) return;
       setCart(cartData);
       window.dispatchEvent(new CustomEvent("marel:cart-updated", { detail: cartData.summary?.total_quantity ?? 0 }));
-      if (user) {
-        const addressResponse = await fetch("/api/addresses", { cache: "no-store" });
-        if (addressResponse.ok) {
-          const list = (await addressResponse.json()) as AddressPayload[];
-          if (!cancelled) {
-            setAddresses(list);
-            setSelectedAddressId(list.find((address) => address.is_default)?.id ?? list[0]?.id ?? null);
-          }
-        }
-      }
     };
     load();
     return () => {

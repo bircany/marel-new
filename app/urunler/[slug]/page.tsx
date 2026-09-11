@@ -2,13 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/app/components/product-configurator";
 
-import { ProductReviewsSection } from "@/app/components/product-reviews-section";
 import { ProductViewTracker } from "@/app/components/product-view-tracker";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
 import { CategoryLanding } from "@/app/components/category-landing";
 import { getCategoryPage } from "@/app/data";
-import { stGetProductBySlug, stGetProductReviews } from "@/app/lib/softtrade";
+import { stGetProductBySlug } from "@/app/lib/softtrade";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const dynamic = "force-dynamic";
@@ -54,10 +53,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
   const product = await stGetProductBySlug(slug);
   if (!product) notFound();
-
-  const [reviews] = await Promise.all([
-    stGetProductReviews(product.id).catch(() => []),
-  ]);
 
   const effectivePrice = product.salePrice ?? product.price ?? 59900;
 
@@ -143,15 +138,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* Bank Installment Options Table */}
 
 
-        {/* Database-synced Reviews Section */}
-        <ProductReviewsSection
-          productId={product.id}
-          productName={product.name}
-          initialReviews={reviews}
-        />
       </main>
       <SiteFooter />
     </>
   );
 }
-
