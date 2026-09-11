@@ -8,14 +8,58 @@ import { ensureDatabase, getDb } from "@/db";
 
 export const revalidate = 60;
 
-export async function generateMetadata({ params }: { params: { slug: string } }) {
+const FALLBACK_POSTS: Record<string, any> = {
+  "olcuye-ozel-uretim-rehberi": {
+    id: "ann-1",
+    slug: "olcuye-ozel-uretim-rehberi",
+    title: "Ölçüye özel üretim nasıl ilerliyor?",
+    summary: "Ölçü teyidinden üretim ve teslimata kadar Marel sipariş sürecini adım adım keşfedin.",
+    body: "Siparişiniz sonrasında Marel danışmanı ölçülerinizi ve seçtiğiniz kumaş ile profil rengini teyit eder. Onaylanan bilgiler üretim planına alınır; güncel durumunu Hesabım alanından takip edebilirsiniz.",
+    image_url: "/images/real/diamond-beyaz-siyah-ip.jpeg",
+    published: 1,
+    featured: 1,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+  "honeycomb-isi-yalitimi": {
+    id: "ann-2",
+    slug: "honeycomb-isi-yalitimi",
+    title: "Honeycomb ile dört mevsim konfor",
+    summary: "Hücresel kumaş yapısının ışık ve ısı kontrolüne katkısını yakından inceleyin.",
+    body: "Honeycomb kumaşın hücresel yapısı, cam yüzeyi ile yaşam alanı arasında ek bir hava katmanı oluşturur. Doğru renk ve ölçü seçimi için fotoğrafınızı WhatsApp danışmanımıza iletebilirsiniz.",
+    image_url: "/images/hero/marel-honeycomb-hero-v3.png",
+    published: 1,
+    featured: 1,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+  "whatsapp-olcu-destegi": {
+    id: "ann-3",
+    slug: "whatsapp-olcu-destegi",
+    title: "Fotoğrafınızı gönderin, sistemi birlikte seçelim",
+    summary: "Perde, sineklik veya kapı sistemi seçiminde Marel danışmanından hızlı destek alın.",
+    body: "Mekânın genel görünümünü ve yaklaşık ölçüleri paylaşmanız yeterli. Kullanım alanınıza göre uygun sistem, kumaş ve profil seçeneklerini birlikte belirleyelim.",
+    image_url: "/images/catalog/diamond.webp",
+    published: 1,
+    featured: 0,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+};
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   await ensureDatabase();
   const db = getDb();
   let post: any = null;
   try {
-    post = await db.prepare("SELECT * FROM announcements WHERE slug = ? LIMIT 1").bind(params.slug).first();
+    post = await db.prepare("SELECT * FROM announcements WHERE slug = ? LIMIT 1").bind(slug).first();
   } catch (err) {
     console.error(err);
+  }
+
+  if (!post) {
+    post = FALLBACK_POSTS[slug];
   }
 
   if (!post) {
@@ -34,14 +78,19 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   await ensureDatabase();
   const db = getDb();
   let post: any = null;
   try {
-    post = await db.prepare("SELECT * FROM announcements WHERE slug = ? LIMIT 1").bind(params.slug).first();
+    post = await db.prepare("SELECT * FROM announcements WHERE slug = ? LIMIT 1").bind(slug).first();
   } catch (err) {
     console.error(err);
+  }
+
+  if (!post) {
+    post = FALLBACK_POSTS[slug];
   }
 
   if (!post) {
@@ -135,20 +184,9 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
             </div>
 
             <div style={{ marginTop: 60, paddingTop: 30, borderTop: "1px solid #e2e8f0", textAlign: "center" }}>
-              <Link href="/blog" style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                color: "#0f172a",
-                fontWeight: 700,
-                textDecoration: "none",
-                background: "#f1f5f9",
-                padding: "12px 24px",
-                borderRadius: 30,
-                transition: "background 0.2s"
-              }}
-              onMouseOver={(e) => e.currentTarget.style.background = "#e2e8f0"}
-              onMouseOut={(e) => e.currentTarget.style.background = "#f1f5f9"}
+              <Link
+                href="/blog"
+                className="inline-flex items-center gap-2 text-slate-900 font-bold no-underline bg-slate-100 hover:bg-slate-200 px-6 py-3 rounded-full transition-colors"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M19 12H5M12 19l-7-7 7-7" />

@@ -11,8 +11,8 @@ async function main() {
   const db = getDb();
   
   console.log("Deleting existing products and images...");
-  db.prepare("DELETE FROM products").run();
-  db.prepare("DELETE FROM product_images").run();
+  await db.prepare("DELETE FROM products").run();
+  await db.prepare("DELETE FROM product_images").run();
   
   if (!fs.existsSync(DEST_DIR)) {
     fs.mkdirSync(DEST_DIR, { recursive: true });
@@ -20,15 +20,12 @@ async function main() {
 
   const folders = fs.readdirSync(SOURCE_DIR).filter(f => fs.statSync(path.join(SOURCE_DIR, f)).isDirectory());
   
-  const ALLOWED_SERIES = ["arda", "asel", "bambu", "blackout", "dark", "dia", "ece", "efe", "gold", "honeycomb", "new", "pars", "reina", "silver", "touch", "tülle", "venus"];
+  const ALLOWED_SERIES = ["arda", "asel", "bambu", "blackout", "dark", "dia", "ece", "efe", "gold", "honeycomb", "new", "pars", "reina", "silver", "touch", "tulle", "venus"];
   
   let sortOrder = 0;
   for (const rawFolder of folders) {
-    const folder = rawFolder.toLowerCase().replace(/ü/g, 'u').replace(/ü/g, 'u'); // handle tülle
-    let isAllowed = false;
-    for (const allowed of ALLOWED_SERIES) {
-      if (folder.includes(allowed.replace(/ü/g, 'u'))) isAllowed = true;
-    }
+    const normalized = rawFolder.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    let isAllowed = ALLOWED_SERIES.includes(normalized);
     
     if (!isAllowed) {
       console.log(`Skipping folder: ${rawFolder}`);
@@ -37,11 +34,11 @@ async function main() {
     
     // Format name
     let baseName = rawFolder.charAt(0).toUpperCase() + rawFolder.slice(1);
-    if (folder === "dia") baseName = "Diamond";
-    if (folder.includes("tülle") || folder === "tulle" || rawFolder === "tülle") baseName = "Tülle";
+    if (normalized === "dia") baseName = "Diamond";
+    if (normalized === "tulle") baseName = "Tülle";
     
     const productName = `${baseName} Series Plise Perde`;
-    const slug = `${baseName.toLowerCase()}-series-plise-perde`;
+    const slug = `${baseName.toLowerCase().replace(/ü/g, 'u')}-series-plise-perde`;
     
     console.log(`Creating product: ${productName}`);
     
@@ -54,35 +51,12 @@ async function main() {
     }
     
     const files = fs.readdirSync(path.join(SOURCE_DIR, rawFolder)).filter(f => f.match(/\.(png|jpe?g)$/i));
-    let mainImageUrl = "";
     
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      const sourcePath = path.join(SOURCE_DIR, rawFolder, file);
-      const destPath = path.join(destProductDir, file);
-      fs.copyFileSync(sourcePath, destPath);
-      
-      const imageUrl = `/images/products/${rawFolder}/${file}`;
-      if (i === 0) mainImageUrl = imageUrl;
-      
-      db.prepare(`
-        INSERT INTO product_images (id, product_id, source_url, alt_text, sort_order, created_at) 
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).bind(
-        crypto.randomUUID(),
-        productId,
-        imageUrl,
-        `${productName} - ${i+1}`,
-        i,
-        now
-      ).run();
-    }
-    
-    db.prepare(`
+    await db.prepare(`
       INSERT INTO products (
-        id, slug, sku, name, category, root_category, description, price, currency, stock, availability, brand, google_product_category, active, featured, colors, options, dimensions, installments, installment_text, created_at, updated_at, image
+        id, slug, sku, name, category, root_category, description, price, currency, stock, availability, brand, google_product_category, active, featured, colors, options, dimensions, installments, installment_text, created_at, updated_at
       ) VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', 100, 'in_stock', 'Marel Plise', 'Home & Garden', 1, ?, '[]', NULL, 'Özel Ölçüye Göre Üretim', 3, 'Peşin Fiyatına 3 Taksit', ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, 'TRY', 100, 'in_stock', 'Marel Plise', 'Home & Garden > Decor > Window Treatments', 1, ?, '[]', NULL, 'Özel Ölçüye Göre Üretim', 3, 'Peşin Fiyatına 3 Taksit', ?, ?
       )
     `).bind(
       productId,
@@ -95,9 +69,33 @@ async function main() {
       60500, // 605 TL
       sortOrder < 4 ? 1 : 0, // feature first 4
       now,
-      now,
-      mainImageUrl
+      now
     ).run();
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const sourcePath = path.join(SOURCE_DIR, rawFolder, file);
+      const destPath = path.join(destProductDir, file);
+      try {
+        fs.copyFileSync(sourcePath, destPath);
+      } catch (err) {
+        console.warn("Could not copy file:", err);
+      }
+      
+      const imageUrl = `/images/products/${rawFolder}/${file}`;
+      
+      await db.prepare(`
+        INSERT INTO product_images (id, product_id, source_url, alt_text, sort_order, created_at) 
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).bind(
+        crypto.randomUUID(),
+        productId,
+        imageUrl,
+        `${productName} - ${i+1}`,
+        i,
+        now
+      ).run();
+    }
     
     sortOrder++;
   }

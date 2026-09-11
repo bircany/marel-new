@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/app/components/product-configurator";
-import { InstallmentTable } from "@/app/components/installment-table";
+
 import { ProductReviewsSection } from "@/app/components/product-reviews-section";
 import { ProductViewTracker } from "@/app/components/product-view-tracker";
 import { SiteFooter } from "@/app/components/site-footer";
@@ -141,7 +141,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         </section>
 
         {/* Bank Installment Options Table */}
-        <InstallmentTable priceInKurus={effectivePrice} />
+
 
         {/* Database-synced Reviews Section */}
         <ProductReviewsSection

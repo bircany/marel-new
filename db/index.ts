@@ -408,10 +408,10 @@ async function seedCatalog(db: D1Database): Promise<void> {
         product.name,
         product.category,
         product.description,
-        product.price,
+        product.price || 150000,
         product.salePrice ?? null,
-        product.stock,
-        product.colors,
+        product.stock ?? 100,
+        product.colors || "[]",
         rootCat,
         now,
         now

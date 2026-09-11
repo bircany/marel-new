@@ -21,6 +21,42 @@ export const metadata = {
   },
 };
 
+const FALLBACK_BLOG_POSTS = [
+  {
+    id: "ann-1",
+    slug: "olcuye-ozel-uretim-rehberi",
+    title: "Ölçüye özel üretim nasıl ilerliyor?",
+    summary: "Ölçü teyidinden üretim ve teslimata kadar Marel sipariş sürecini adım adım keşfedin.",
+    body: "Siparişiniz sonrasında Marel danışmanı ölçülerinizi ve seçtiğiniz kumaş ile profil rengini teyit eder. Onaylanan bilgiler üretim planına alınır; güncel durumunu Hesabım alanından takip edebilirsiniz.",
+    image_url: "/images/real/diamond-beyaz-siyah-ip.jpeg",
+    featured: 1,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+  {
+    id: "ann-2",
+    slug: "honeycomb-isi-yalitimi",
+    title: "Honeycomb ile dört mevsim konfor",
+    summary: "Hücresel kumaş yapısının ışık ve ısı kontrolüne katkısını yakından inceleyin.",
+    body: "Honeycomb kumaşın hücresel yapısı, cam yüzeyi ile yaşam alanı arasında ek bir hava katmanı oluşturur. Doğru renk ve ölçü seçimi için fotoğrafınızı WhatsApp danışmanımıza iletebilirsiniz.",
+    image_url: "/images/hero/marel-honeycomb-hero-v3.png",
+    featured: 1,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+  {
+    id: "ann-3",
+    slug: "whatsapp-olcu-destegi",
+    title: "Fotoğrafınızı gönderin, sistemi birlikte seçelim",
+    summary: "Perde, sineklik veya kapı sistemi seçiminde Marel danışmanından hızlı destek alın.",
+    body: "Mekânın genel görünümünü ve yaklaşık ölçüleri paylaşmanız yeterli. Kullanım alanınıza göre uygun sistem, kumaş ve profil seçeneklerini birlikte belirleyelim.",
+    image_url: "/images/catalog/diamond.webp",
+    featured: 0,
+    published_at: "2026-03-01T00:00:00.000Z",
+    created_at: "2026-03-01T00:00:00.000Z",
+  },
+];
+
 export default async function BlogPage() {
   await ensureDatabase();
   
@@ -32,6 +68,10 @@ export default async function BlogPage() {
     blogPosts = raw.results || [];
   } catch (err) {
     console.error("Blog fetch error:", err);
+  }
+
+  if (blogPosts.length === 0) {
+    blogPosts = FALLBACK_BLOG_POSTS;
   }
 
   return (

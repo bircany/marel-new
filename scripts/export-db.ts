@@ -33,7 +33,7 @@ async function main() {
       dimensions: p.dimensions,
       installments: p.installments,
       installmentText: p.installment_text,
-      image: p.image,
+      image: pImages[0] || "/images/real/diamond-beyaz-siyah-ip.jpeg",
       images: pImages
     };
   });
