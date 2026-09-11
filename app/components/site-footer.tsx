@@ -22,13 +22,13 @@ export function SiteFooter() {
           <h3>Plise Perde Çeşitlerimiz</h3>
           <div className="footer-cat-columns">
             <div className="footer-cat-col">
-              <Link href="/urun-cesitleri#diamond">Diamond Series (18 Renk)</Link>
-              <Link href="/urun-cesitleri#touch">Touch Series (4 Renk)</Link>
-              <Link href="/urun-cesitleri#new">New Series (5 Renk)</Link>
-              <Link href="/urun-cesitleri#tulle">Tülle Series (Tül Plise)</Link>
-              <Link href="/urun-cesitleri#efe">Efe Series (3 Renk)</Link>
-              <Link href="/urun-cesitleri#ece">Ece Series (3 Renk)</Link>
-              <Link href="/urun-cesitleri#gold">Gold Series (5 Renk)</Link>
+              <Link href="/urun-cesitleri#diamond">Diamond Series</Link>
+              <Link href="/urun-cesitleri#touch">Touch Series</Link>
+              <Link href="/urun-cesitleri#new">New Series</Link>
+              <Link href="/urun-cesitleri#tulle">Tulle Series</Link>
+              <Link href="/urun-cesitleri#efe">Efe Series</Link>
+              <Link href="/urun-cesitleri#ece">Ece Series</Link>
+              <Link href="/urun-cesitleri#gold">Gold Series</Link>
             </div>
             <div className="footer-cat-col">
               <Link href="/urun-cesitleri#honeycomb">Honeycomb (Isı Yalıtım)</Link>
@@ -52,8 +52,6 @@ export function SiteFooter() {
 
         <div>
           <h3>Kurumsal</h3>
-          <Link href="/hakkimizda">Hakkımızda</Link>
-          <Link href="/iletisim">İletişim</Link>
           <Link href="/gizlilik-politikasi">Gizlilik Güvenlik Politikası</Link>
           <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
           <Link href="/iade-ve-iptal-kosullari">İptal ve İade Koşulları</Link>

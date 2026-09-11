@@ -85,7 +85,7 @@ export default async function ProductsPage({
           </div>
 
           {/* Main Layout: Products Grid (Left) + Sidebar (Right) */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "40px" }} className="lg:flex-row">
+          <div className="products-layout" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 260px", gap: "40px", alignItems: "start" }}>
             
             {/* Product Grid (Left) */}
             <div style={{ flex: 1 }}>

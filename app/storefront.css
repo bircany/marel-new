@@ -906,6 +906,8 @@
 }
 
 @media(max-width:1050px) {
+  .products-layout { grid-template-columns: 1fr !important; }
+  .products-layout aside { width: 100% !important; position: static !important; }
     .shop-container {
         width: min(100% - 40px, 1440px)
     }

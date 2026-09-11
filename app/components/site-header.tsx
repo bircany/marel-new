@@ -169,7 +169,9 @@ export function SiteHeader() {
             </details>
 
             <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
-            <Link href="/products">Tüm Ürünler</Link>
+            <Link href="/urunler">Tüm Ürünler</Link>
+            <Link href="/hakkimizda">Hakkımızda</Link>
+            <Link href="/iletisim">İletişim</Link>
             <Link href="/blog">Blog</Link>
           </nav>
 
@@ -222,6 +224,8 @@ export function SiteHeader() {
               </div>
               <Link href="/plise-perdeler" style={{ fontWeight: 700, color: "#b8904f" }}>Tüm Plise Perdeler</Link>
               <Link href="/urun-cesitleri">Ürün Çeşitlerimiz & Kartela</Link>
+              <Link href="/hakkimizda">Hakkımızda</Link>
+              <Link href="/iletisim">İletişim</Link>
               <Link href="/blog">Blog</Link>
               <Link href="/iletisim">İletişim</Link>
             </nav>
