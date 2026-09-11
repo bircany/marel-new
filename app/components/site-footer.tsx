@@ -29,7 +29,7 @@ export function SiteFooter() {
           <h3>Hızlı Erişim</h3>
           <Link href="/blog">Blog & Rehberler</Link>
           <Link href="/blog/whatsapp-olcu-destegi">Ölçü Nasıl Alınır?</Link>
-          <Link href="/siparis-takip">Sipariş Takip</Link>
+          <Link href="/urun-cesitleri">Ürün Çeşitlerimiz</Link>
           <a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">WhatsApp Danışma</a>
         </div>
 

@@ -225,8 +225,7 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
         <span>✓</span>
         <h1>Siparişiniz alındı</h1>
         <p>
-          Sipariş numaranız <strong>{order.order_number}</strong>. Takip için e-postanız yeterli —{" "}
-          <Link href="/siparis-takip">Sipariş Takip</Link>.
+          Sipariş numaranız <strong>{order.order_number}</strong>. Üretim ve kargo güncellemeleri SMS ve WhatsApp ile tarafınıza iletilecektir.
         </p>
         <p className="commerce-price">{totalLabel}</p>
         {paymentMethod === "bank_transfer" ? (
@@ -246,9 +245,9 @@ export function CartClient({ user }: { user: LaravelUser | null }) {
         ) : (
           <p>Kapıda ödeme seçildi. Teslimatta nakit/kart ile ödeyebilirsiniz.</p>
         )}
-        <Link className="button" href="/siparis-takip">
-          Siparişi takip et
-        </Link>
+        <a className="button" href="https://wa.me/905467356602" target="_blank" rel="noreferrer">
+          WhatsApp Bilgi Hattı
+        </a>
       </section>
     );
   }

@@ -1089,29 +1089,8 @@ body {
   display: block;
 }
 
-/* 3 Taksit Badge */
 .kamatas-badge-taksit {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: #00d1b2; /* Cyan color matching Kamatas */
-  color: white;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.55rem;
-  line-height: 1.1;
-  text-align: center;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.kamatas-badge-taksit b {
-  font-size: 0.7rem;
+  display: none !important;
 }
 
 /* List View overrides */

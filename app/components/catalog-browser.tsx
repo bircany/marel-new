@@ -282,9 +282,6 @@ export function CatalogBrowser({
               return (
                 <Link href={`/urunler/${product.slug}`} className="kamatas-product-card" key={product.id}>
                   <div className="k-card-image">
-                    <div className="kamatas-badge-taksit">
-                      PEŞİN<br/>FİYATINA<br/><b>3 TAKSİT</b>
-                    </div>
                     <Image
                       unoptimized
                       src={product.image || "/images/catalog/diamond.webp"}

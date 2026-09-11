@@ -169,7 +169,7 @@ export default function NotFound() {
             </Link>
 
             <Link
-              href="/siparis-takip"
+              href="/iletisim"
               style={{
                 background: "rgba(2, 132, 199, 0.08)",
                 color: "#0284c7",
@@ -186,12 +186,9 @@ export default function NotFound() {
               }}
             >
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2">
-                <rect x="1" y="3" width="15" height="13" />
-                <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                <circle cx="5.5" cy="18.5" r="2.5" />
-                <circle cx="18.5" cy="18.5" r="2.5" />
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
-              Sipariş & Kargo Takibi
+              İletişim & Danışma
             </Link>
           </div>
 

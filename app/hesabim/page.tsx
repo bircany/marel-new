@@ -68,7 +68,7 @@ function OrderCard({ order }: { order: OrderPayload }) {
         <span><small>Toplam</small><b>{formatMoney(Math.round((order.total + Number.EPSILON) * 100))}</b></span>
       </div>
       {order.status !== "cancelled" && <div className="account-order-progress" aria-label={`Sipariş ilerlemesi yüzde ${progress}`}><i style={{ width: `${progress}%` }} /></div>}
-      <div className="account-order-actions"><span>{order.status === "delivered" ? "Siparişiniz teslim edildi." : "Siparişiniz takip ediliyor."}</span><Link href="/siparis-takip">Detayları gör →</Link></div>
+      <div className="account-order-actions"><span>{order.status === "delivered" ? "Siparişiniz teslim edildi." : "Siparişiniz takip ediliyor."}</span><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">WhatsApp Destek →</a></div>
     </article>
   );
 }
@@ -99,7 +99,7 @@ export default async function AccountPage() {
         <aside className="account-profile-card">
           <div className="account-avatar" aria-hidden="true">{initials}</div>
           <h2>{user.full_name}</h2><p>{user.email}</p>
-          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><a href="#yorumlar">Yorumlarım <span>{reviews.length}</span></a><Link href="/siparis-takip">Sipariş takip <span>↗</span></Link><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
+          <nav aria-label="Hesabım menüsü"><a className="active" href="#siparisler">Siparişlerim <span>{orders.length}</span></a><a href="#yorumlar">Yorumlarım <span>{reviews.length}</span></a><a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">Destek <span>↗</span></a></nav>
           <small>Hesap bilgileriniz güvenli oturumunuz üzerinden alınır.</small>
         </aside>
 

@@ -2918,23 +2918,7 @@
   overflow: hidden;
 }
 .kamatas-badge-taksit {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  z-index: 2;
-  background: #df2016;
-  color: #fff;
-  font-size: 0.58rem;
-  font-weight: 700;
-  line-height: 1.15;
-  padding: 4px 7px;
-  border-radius: 4px;
-  text-align: center;
-  box-shadow: 0 2px 6px rgba(223, 32, 22, 0.35);
-}
-.kamatas-badge-taksit b {
-  font-weight: 900;
-  display: block;
+  display: none !important;
 }
 .kamatas-product-card .k-card-body {
   padding: 12px 14px 14px 14px;
@@ -3327,14 +3311,6 @@
     border-radius: 0 !important;
   }
 
-  .kamatas-badge-taksit {
-    top: 6px !important;
-    left: 6px !important;
-    padding: 3px 5px !important;
-    font-size: 0.52rem !important;
-    line-height: 1.1 !important;
-    border-radius: 3px !important;
-  }
 
   .kamatas-product-card .k-card-body {
     padding: 6px 8px 10px 8px !important;
