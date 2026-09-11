@@ -594,7 +594,7 @@ export function AdminProductEditorModal({
               <div className="admin-form-section">
                 <div className="admin-form-grid-2">
                   <div className="admin-field-group">
-                    <label>Normal Satış Fiyatı (₺) *</label>
+                    <label>m² Birim Fiyatı (₺) *</label>
                     <input
                       type="number"
                       step="0.01"
@@ -604,7 +604,7 @@ export function AdminProductEditorModal({
                       placeholder="1250.00"
                       required
                     />
-                    <span className="admin-field-hint">Ürünün orijinal liste satış fiyatıdır.</span>
+                    <span className="admin-field-hint">Ölçü hesaplamasında kullanılan 1 m² fiyatıdır. Ürün detayındaki toplam tutar en × boy hesabıyla oluşur.</span>
                   </div>
 
                   <div className="admin-field-group">
