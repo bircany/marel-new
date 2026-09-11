@@ -43,6 +43,9 @@ export async function POST(request: Request, context: RouteContext) {
 export async function PUT(request: Request, context: RouteContext) {
   const path = await getPath(context);
   if (path.length === 1 && path[0] === "cart") return cart.PUT(request);
+  if (path.length === 3 && path[0] === "admin" && path[1] === "announcements") {
+    return announcements.PUT(request, { params: Promise.resolve({ id: path[2] }) });
+  }
   return notFound(path);
 }
 
@@ -57,6 +60,9 @@ export async function PATCH(request: Request, context: RouteContext) {
 export async function DELETE(request: Request, context: RouteContext) {
   const path = await getPath(context);
   if (path.length === 1 && path[0] === "cart") return cart.DELETE(request);
+  if (path.length === 3 && path[0] === "admin" && path[1] === "announcements") {
+    return announcements.DELETE(request, { params: Promise.resolve({ id: path[2] }) });
+  }
   if (path.length === 3 && path[0] === "admin" && path[1] === "products") {
     return adminProduct.DELETE(request, { params: Promise.resolve({ id: path[2] }) });
   }
