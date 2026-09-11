@@ -26,10 +26,11 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h3>Hesabım</h3>
-          <Link href="/account/login">Giriş Yap</Link>
-          <Link href="/account/register">Kayıt ol</Link>
+          <h3>Hızlı Erişim</h3>
+          <Link href="/blog">Blog & Rehberler</Link>
+          <Link href="/blog/whatsapp-olcu-destegi">Ölçü Nasıl Alınır?</Link>
           <Link href="/siparis-takip">Sipariş Takip</Link>
+          <a href="https://wa.me/905467356602" target="_blank" rel="noreferrer">WhatsApp Danışma</a>
         </div>
 
         <div>

@@ -345,6 +345,7 @@ export function AdminConsole({
   };
 
   const updateAnnouncement = (event: React.FormEvent, id: string) => {
+    event.preventDefault();
     const formData = new FormData(event.currentTarget as HTMLFormElement);
     if (!formData.get("imageUrl")) formData.set("imageUrl", "/images/real/diamond-beyaz-siyah-ip.jpeg");
     formData.set("published", formData.get("published") === "on" ? "true" : "false");
@@ -1955,24 +1956,37 @@ export function AdminConsole({
               <summary>+ Yeni Blog Yazısı Oluştur</summary>
               <form onSubmit={createAnnouncement} className="admin-grid-form">
                 <label className="span-2">
-                  Başlık *
-                  <input name="title" placeholder="Örn: Ölçüye Özel Plise Perde Kampanyası" required />
+                  Yazı Başlığı *
+                  <input name="title" placeholder="Örn: WhatsApp ile Plise Perde Ölçü Desteği" required />
                 </label>
                 <label className="span-2">
                   URL Adı (Slug)
-                  <input name="slug" placeholder="blog-basligi (otomatik üretilir)" />
+                  <input name="slug" placeholder="whatsapp-olcu-destegi (boş bırakılırsa başlıktan üretilir)" />
                 </label>
                 <label className="span-4">
-                  Kısa Özet *
-                  <textarea name="summary" rows={2} placeholder="Kartlarda ve blog listesinde görünecek kısa özet..." required />
+                  Kısa Özet (Google Açıklaması & Kart Özeti) *
+                  <textarea name="summary" rows={2} placeholder="Kartlarda ve arama motorlarında görünecek kısa özet..." required />
                 </label>
+                <div className="span-4" style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <label style={{ margin: 0, fontWeight: 700, fontSize: "0.85rem" }}>
+                      Blog Detaylı Metni (Markdown / Tablo Destekli) *
+                    </label>
+                    <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                      Desteklenenler: ## Başlık | ### Alt Başlık | | Tablo | | - Madde | [whatsapp-cta:Başlık|Mesaj]
+                    </span>
+                  </div>
+                  <textarea
+                    name="body"
+                    rows={12}
+                    style={{ fontFamily: "monospace", fontSize: "0.88rem", lineHeight: 1.6 }}
+                    placeholder="## Giriş&#10;Perde ölçüsü alırken...&#10;&#10;| Montaj Tipi | Çıta Derinliği |&#10;| :--- | :--- |&#10;| Cam İçi Vidalı | 18 mm |&#10;&#10;[whatsapp-cta:WhatsApp ile Fotoğraf Gönderin|Penceremin fotoğrafını göndermek istiyorum.]"
+                    required
+                  />
+                </div>
                 <label className="span-4">
-                  Blog Metni *
-                  <textarea name="body" rows={6} placeholder="Blog yazısının detaylı metni..." required />
-                </label>
-                <label className="span-4">
-                  Görsel Yolu
-                  <input name="imageUrl" defaultValue="/images/real/diamond-beyaz-siyah-ip.jpeg" />
+                  Kapak Görseli Yolu (Örn: /images/catalog/diamond.webp veya /images/real/diamond-beyaz.jpeg)
+                  <input name="imageUrl" defaultValue="/images/catalog/diamond.webp" />
                 </label>
                 <label style={{ flexDirection: "row", alignItems: "center", gap: 8, gridColumn: "span 2", cursor: "pointer" }}>
                   <input name="published" type="checkbox" defaultChecked style={{ width: 18, height: 18 }} />
@@ -2032,7 +2046,7 @@ export function AdminConsole({
                 filteredAnnouncements.map((item) => (
                   <article key={item.id} className="admin-data-card admin-announcement-card">
                     <div className="admin-announcement-thumb">
-                      <Image unoptimized src={item.imageUrl} alt="" fill sizes="200px" />
+                      <Image unoptimized src={item.imageUrl || "/images/catalog/diamond.webp"} alt="" fill sizes="200px" />
                     </div>
 
                     <form onSubmit={(event) => updateAnnouncement(event, item.id)} className="admin-announcement-edit-form">
@@ -2041,16 +2055,26 @@ export function AdminConsole({
                         <input name="title" defaultValue={item.title} required />
                       </label>
                       <label className="span-2">
+                        URL Adı (Slug)
+                        <input name="slug" defaultValue={item.slug} />
+                      </label>
+                      <label className="span-2">
                         Özet
                         <textarea name="summary" rows={2} defaultValue={item.summary} required />
                       </label>
                       <label className="span-2">
-                        İçerik Metni
-                        <textarea name="body" rows={4} defaultValue={item.body} required />
-                      </label>
-                      <label className="span-2">
                         Kapak Görseli
                         <input name="imageUrl" defaultValue={item.imageUrl} />
+                      </label>
+                      <label className="span-2">
+                        İçerik Metni (Markdown / Tablo Destekli)
+                        <textarea
+                          name="body"
+                          rows={10}
+                          style={{ fontFamily: "monospace", fontSize: "0.85rem", lineHeight: 1.5 }}
+                          defaultValue={item.body}
+                          required
+                        />
                       </label>
 
                       <div className="admin-announcement-actions-bar">
@@ -2063,7 +2087,7 @@ export function AdminConsole({
                             <input name="featured" type="checkbox" defaultChecked={Boolean(item.featured)} />
                             Öne Çıkan
                           </label>
-                          <Link href={`/blog/${item.slug}`} target="_blank" style={{ color: "#38bdf8", fontSize: "0.72rem" }}>
+                          <Link href={`/blog/${item.slug}`} target="_blank" style={{ color: "#38bdf8", fontSize: "0.78rem", fontWeight: 700 }}>
                             Canlı Gör ↗
                           </Link>
                         </div>

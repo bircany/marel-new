@@ -133,6 +133,8 @@ export function SiteHeader() {
                 </Link>
               ),
             )}
+            <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
+            <Link href="/blog">Blog</Link>
             <Link href="/siparis-takip">Sipariş Takip</Link>
           </nav>
 
@@ -170,6 +172,8 @@ export function SiteHeader() {
             <summary aria-label="Menüyü aç">☰</summary>
             <nav>
               <Link href="/perdeler">Perdeler</Link>
+              <Link href="/urun-cesitleri">Ürün Çeşitleri</Link>
+              <Link href="/blog">Blog</Link>
               <Link href="/siparis-takip">Sipariş Takip</Link>
               <Link href="/urunler">Tüm Ürünler</Link>
               <Link href="/iletisim">İletişim</Link>

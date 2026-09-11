@@ -1,6 +1,7 @@
 import postgres from "postgres";
 import { GENERATED_SEEDS } from "./generated-catalog";
 import { GENERATED_PLISE_SEEDS } from "./generated-plise";
+import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
 
 const ALL_FALLBACK_PRODUCTS: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
 
@@ -986,9 +987,75 @@ export async function duplicateProductRecord(id: string): Promise<CatalogProduct
 
 export async function listAnnouncements(publishedOnly = true): Promise<AnnouncementRecord[]> {
   await ensureDatabase();
+  const db = getDb();
+  try {
+    const count = await db.prepare("SELECT COUNT(*) AS total FROM announcements").first<{ total: number }>();
+    if (!count || count.total === 0) {
+      for (const p of DEFAULT_BLOG_POSTS) {
+        await db
+          .prepare(
+            "INSERT OR IGNORE INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+          )
+          .bind(
+            p.id,
+            p.slug,
+            p.title,
+            p.summary,
+            p.body,
+            p.image_url,
+            p.published,
+            p.featured,
+            p.published_at,
+            p.created_at,
+            p.created_at
+          )
+          .run();
+      }
+    }
+  } catch (err) {
+    console.error("Announcement seed check error:", err);
+  }
+
   const where = publishedOnly ? "WHERE published = 1" : "";
-  const { results } = await getDb().prepare(`SELECT id, slug, title, summary, body, image_url AS imageUrl, published, featured, published_at AS publishedAt, created_at AS createdAt, updated_at AS updatedAt FROM announcements ${where} ORDER BY featured DESC, COALESCE(published_at, created_at) DESC`).all<AnnouncementRecord>();
+  const { results } = await db
+    .prepare(
+      `SELECT id, slug, title, summary, body, image_url AS imageUrl, published, featured, published_at AS publishedAt, created_at AS createdAt, updated_at AS updatedAt FROM announcements ${where} ORDER BY featured DESC, COALESCE(published_at, created_at) DESC`
+    )
+    .all<AnnouncementRecord>();
   return results;
+}
+
+export async function getAnnouncementBySlug(slug: string): Promise<AnnouncementRecord | null> {
+  await ensureDatabase();
+  const db = getDb();
+  try {
+    const item = await db
+      .prepare(
+        "SELECT id, slug, title, summary, body, image_url AS imageUrl, published, featured, published_at AS publishedAt, created_at AS createdAt, updated_at AS updatedAt FROM announcements WHERE slug = ? LIMIT 1"
+      )
+      .bind(slug)
+      .first<AnnouncementRecord>();
+    if (item) return item;
+  } catch (err) {
+    console.error("Error fetching announcement by slug:", err);
+  }
+  const fallback = DEFAULT_BLOG_POSTS.find((p) => p.slug === slug);
+  if (fallback) {
+    return {
+      id: fallback.id,
+      slug: fallback.slug,
+      title: fallback.title,
+      summary: fallback.summary,
+      body: fallback.body,
+      imageUrl: fallback.image_url,
+      published: fallback.published,
+      featured: fallback.featured,
+      publishedAt: fallback.published_at,
+      createdAt: fallback.created_at,
+      updatedAt: fallback.created_at,
+    };
+  }
+  return null;
 }
 
 export async function listApprovedReviews(limit = 12): Promise<Array<{

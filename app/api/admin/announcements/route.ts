@@ -1,22 +1,103 @@
 import { requireAdminApi } from "@/app/lib/admin-auth";
-import { ensureDatabase, getDb } from "@/db";
+import { ensureDatabase, getDb, listAnnouncements } from "@/db";
 
-function slugify(value: string) { return value.toLocaleLowerCase("tr-TR").normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/ı/g, "i").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, ""); }
+function slugify(value: string) {
+  return value
+    .toLocaleLowerCase("tr-TR")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ı/g, "i")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export async function GET() {
+  const admin = await requireAdminApi();
+  if (admin instanceof Response) return admin;
+  await ensureDatabase();
+  const announcements = await listAnnouncements(false);
+  return Response.json({ ok: true, announcements });
+}
 
 export async function POST(request: Request) {
   const admin = await requireAdminApi();
   if (admin instanceof Response) return admin;
-  const input = await request.json() as { title?: string; slug?: string; summary?: string; body?: string; imageUrl?: string; published?: boolean; featured?: boolean };
-  const title = String(input.title ?? "").trim().slice(0, 180);
-  const slug = slugify(String(input.slug ?? title));
-  const summary = String(input.summary ?? "").trim().slice(0, 320);
-  const body = String(input.body ?? "").trim().slice(0, 6000);
-  if (title.length < 3 || !slug || summary.length < 10 || body.length < 20) return Response.json({ error: "Başlık, özet ve duyuru metni gereklidir." }, { status: 400 });
+
+  let title = "";
+  let slugInput = "";
+  let summary = "";
+  let body = "";
+  let imageUrl = "/images/real/diamond-beyaz-siyah-ip.jpeg";
+  let published = false;
+  let featured = false;
+
+  const contentType = request.headers.get("content-type") || "";
+
+  if (contentType.includes("application/json")) {
+    const input = (await request.json()) as {
+      title?: string;
+      slug?: string;
+      summary?: string;
+      body?: string;
+      imageUrl?: string;
+      published?: boolean | string;
+      featured?: boolean | string;
+    };
+    title = String(input.title ?? "").trim().slice(0, 250);
+    slugInput = String(input.slug ?? "").trim();
+    summary = String(input.summary ?? "").trim().slice(0, 1500);
+    body = String(input.body ?? "").trim().slice(0, 100000);
+    if (input.imageUrl) imageUrl = String(input.imageUrl).trim();
+    published = input.published === true || input.published === "true" || input.published === "1";
+    featured = input.featured === true || input.featured === "true" || input.featured === "1";
+  } else {
+    const formData = await request.formData();
+    title = String(formData.get("title") ?? "").trim().slice(0, 250);
+    slugInput = String(formData.get("slug") ?? "").trim();
+    summary = String(formData.get("summary") ?? "").trim().slice(0, 1500);
+    body = String(formData.get("body") ?? "").trim().slice(0, 100000);
+    const img = formData.get("imageUrl");
+    if (img && typeof img === "string" && img.trim()) imageUrl = img.trim();
+    published = formData.get("published") === "true" || formData.get("published") === "on" || formData.get("published") === "1";
+    featured = formData.get("featured") === "true" || formData.get("featured") === "on" || formData.get("featured") === "1";
+  }
+
+  const slug = slugify(slugInput || title);
+
+  if (title.length < 3 || !slug || summary.length < 5 || body.length < 10) {
+    return Response.json(
+      { error: "Başlık (en az 3 harf), özet ve detaylı içerik metni gereklidir." },
+      { status: 400 }
+    );
+  }
+
   await ensureDatabase();
   const now = new Date().toISOString();
-  const id = crypto.randomUUID();
+  const id = `ann-${crypto.randomUUID()}`;
+
   try {
-    await getDb().prepare("INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").bind(id, slug, title, summary, body, String(input.imageUrl ?? "/images/hero/marel-honeycomb-hero-v3.png"), input.published ? 1 : 0, input.featured ? 1 : 0, input.published ? now : null, now, now).run();
-  } catch { return Response.json({ error: "Bu URL adı zaten kullanılıyor." }, { status: 400 }); }
+    await getDb()
+      .prepare(
+        "INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      )
+      .bind(
+        id,
+        slug,
+        title,
+        summary,
+        body,
+        imageUrl,
+        published ? 1 : 0,
+        featured ? 1 : 0,
+        published ? now : null,
+        now,
+        now
+      )
+      .run();
+  } catch (err) {
+    console.error("Announcements insert error:", err);
+    return Response.json({ error: "Bu URL adı (slug) zaten başka bir yazıda kullanılıyor." }, { status: 400 });
+  }
+
   return Response.json({ ok: true, id, slug }, { status: 201 });
 }
