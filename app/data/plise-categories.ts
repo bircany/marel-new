@@ -14,7 +14,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "diamond",
     name: "Diamond Series",
     slug: "diamond-series-plise-perde",
-    href: "/urunler/diamond-series-plise-perde",
+    href: "/urun-cesitleri#diamond",
     colorCountText: "18 Renk Seçeneği",
     colorCount: 18,
     badge: "En Çok Satan",
@@ -24,7 +24,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "touch",
     name: "Touch Series",
     slug: "touch-series-plise-perde",
-    href: "/urunler/touch-series-plise-perde",
+    href: "/urun-cesitleri#touch",
     colorCountText: "4 Renk Seçeneği",
     colorCount: 4,
     description: "Zarif ve kadifemsi dokulu kumaş yapısı"
@@ -33,7 +33,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "new",
     name: "New Series",
     slug: "new-series-plise-perde",
-    href: "/urunler/new-series-plise-perde",
+    href: "/urun-cesitleri#new",
     colorCountText: "5 Renk Seçeneği",
     colorCount: 5,
     description: "Modern yaşam alanları için özel tasarım"
@@ -42,7 +42,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "tulle",
     name: "Tülle Series",
     slug: "tulle-series-plise-perde",
-    href: "/urunler/tulle-series-plise-perde",
+    href: "/urun-cesitleri#tulle",
     colorCountText: "Tül Plise Perde",
     colorCount: 3,
     description: "Ferah ve gün ışığını süzen tül doku"
@@ -51,7 +51,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "efe",
     name: "Efe Series",
     slug: "efe-series-plise-perde",
-    href: "/urunler/efe-series-plise-perde",
+    href: "/urun-cesitleri#efe",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Dayanıklı mekanizma ve modern tonlar"
@@ -60,7 +60,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "ece",
     name: "Ece Series",
     slug: "ece-series-plise-perde",
-    href: "/urunler/ece-series-plise-perde",
+    href: "/urun-cesitleri#ece",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Pencerelere tam uyum sağlayan dokuma"
@@ -69,7 +69,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "gold",
     name: "Gold Series",
     slug: "gold-series-plise-perde",
-    href: "/urunler/gold-series-plise-perde",
+    href: "/urun-cesitleri#gold",
     colorCountText: "5 Renk Seçeneği",
     colorCount: 5,
     description: "Zengin desenli doku ve prestijli görünüm"
@@ -78,7 +78,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "honeycomb",
     name: "Honeycomb Series",
     slug: "honeycomb-series-plise-perde",
-    href: "/urunler/honeycomb-series-plise-perde",
+    href: "/urun-cesitleri#honeycomb",
     colorCountText: "Isı Yalıtımlı (5 Renk)",
     colorCount: 5,
     badge: "Isı Yalıtımlı",
@@ -88,7 +88,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "silver",
     name: "Silver Series",
     slug: "silver-series-plise-perde",
-    href: "/urunler/silver-series-plise-perde",
+    href: "/urun-cesitleri#silver",
     colorCountText: "Güneş Kırıcı (5 Renk)",
     colorCount: 5,
     description: "UV koruyucu kaplama ve yüksek yansıtma"
@@ -97,7 +97,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "arda",
     name: "Arda Series",
     slug: "arda-series-plise-perde",
-    href: "/urunler/arda-series-plise-perde",
+    href: "/urun-cesitleri#arda",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Şık ve fonksiyonel plise perde serisi"
@@ -106,7 +106,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "venus",
     name: "Venus Series",
     slug: "venus-series-plise-perde",
-    href: "/urunler/venus-series-plise-perde",
+    href: "/urun-cesitleri#venus",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Özel ölçü estetik pencere çözümleri"
@@ -115,7 +115,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "reina",
     name: "Reina Series",
     slug: "reina-series-plise-perde",
-    href: "/urunler/reina-series-plise-perde",
+    href: "/urun-cesitleri#reina",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Yalın çizgiler ve kaliteli kumaş yapısı"
@@ -124,7 +124,7 @@ export const PLISE_13_CATEGORIES: PliseCategory[] = [
     id: "pars",
     name: "Pars Series",
     slug: "pars-series-plise-perde",
-    href: "/urunler/pars-series-plise-perde",
+    href: "/urun-cesitleri#pars",
     colorCountText: "3 Renk Seçeneği",
     colorCount: 3,
     description: "Güçlendirilmiş ipler ve uzun ömürlü kullanım"

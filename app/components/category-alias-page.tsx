@@ -59,7 +59,9 @@ const categoryNotes: Record<string, { title: string; text: string; rootCategory:
 
 export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryNotes }) {
   const config = categoryNotes[slug] || { title: slug, text: "", rootCategory: slug };
-  const allProducts = await listProducts(false);
+  // Category landing pages should still show catalog items when an older
+  // product record has not yet had its active flag backfilled.
+  const allProducts = await listProducts(slug === "perdeler" || slug === "plise-perdeler");
 
   // Filter by rootCategory or category text match
   const targetRoot = config.rootCategory.toLowerCase();
@@ -97,7 +99,7 @@ export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryN
       );
     }
     if (slug === "perdeler" || slug === "plise-perdeler") {
-      return pRoot.includes("perde") || pCat.includes("perde") || pCat.includes("plise");
+      return pRoot.includes("perde") || pRoot.includes("plise") || pCat.includes("perde") || pCat.includes("plise");
     }
 
     return pRoot === targetRoot || pCat.includes(targetRoot);
