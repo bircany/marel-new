@@ -104,6 +104,12 @@ export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryN
 
     return pRoot === targetRoot || pCat.includes(targetRoot);
   });
+  // Some legacy catalog rows have no root/category metadata. The plise
+  // catalog is still the intended content for these aliases, so do not show
+  // an empty state when the source contains products but metadata is sparse.
+  const visibleProducts = products.length > 0 || (slug !== "perdeler" && slug !== "plise-perdeler")
+    ? products
+    : allProducts;
 
   return (
     <>
@@ -120,8 +126,8 @@ export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryN
         </div>
 
         <section className="catalog-browser-section shop-container">
-          {products.length > 0 ? (
-            <CatalogBrowser products={products} />
+          {visibleProducts.length > 0 ? (
+            <CatalogBrowser products={visibleProducts} />
           ) : (
             <div className="alias-empty-category">
               <h2>{config.title} ürünleri hazırlanıyor.</h2>
