@@ -146,7 +146,7 @@ export function AdminSidebar({ adminUser, pendingOrdersCount = 0 }: AdminSidebar
 
       {/* Nav Menu */}
       <nav className="admin-sidebar-nav">
-        {navItems.map((item) => {
+        {navItems.filter((item) => item.label === "Ürün Yönetimi").map((item) => {
           const isActive = item.exact
             ? pathname === item.href
             : pathname.startsWith(item.href);
@@ -179,6 +179,9 @@ export function AdminSidebar({ adminUser, pendingOrdersCount = 0 }: AdminSidebar
             </Link>
           );
         })}
+        <Link href="/admin?tab=announcements" className={`admin-nav-btn ${pathname === "/admin" ? "active" : ""}`}>
+          <span className="admin-nav-btn-left">Blog Yönetimi</span>
+        </Link>
       </nav>
 
       {/* User & Footer */}
