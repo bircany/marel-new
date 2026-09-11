@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /api/
+Disallow: /sepet
+Sitemap: https://www.marelpliseperde.com.tr/sitemap.xml
