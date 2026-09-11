@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { LegalSidebar } from "@/app/components/legal-sidebar";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const metadata = {
@@ -22,15 +23,7 @@ export default function DistanceSalesPage() {
         </section>
 
         <div className="legal-layout shop-container">
-          <aside className="legal-sidebar-nav">
-            <Link href="/gizlilik-politikasi">Gizlilik Güvenlik Politikası</Link>
-            <Link href="/mesafeli-satis-sozlesmesi" className="active">
-              Mesafeli Satış Sözleşmesi
-            </Link>
-            <Link href="/iade-ve-iptal-kosullari">İade ve İptal Koşulları</Link>
-            <Link href="/kvkk-aydinlatma-metni">Kişisel Veriler Politikası (KVKK)</Link>
-            <Link href="/iletisim">İletişim & Danışma</Link>
-          </aside>
+          <LegalSidebar currentPath="/mesafeli-satis-sozlesmesi" />
 
           <article className="legal-content-body">
             <section>

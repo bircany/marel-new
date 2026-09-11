@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
+import { LegalSidebar } from "@/app/components/legal-sidebar";
 import { absoluteUrl } from "@/app/lib/site";
 
 export const metadata = {
-  title: "Çerez (Cookie) Politikası | Marel",
+  title: "Çerez (Cookie) Politikası | Marel Plise Perde",
   description: "Marel web sitesinde kullanılan çerez türleri, kullanım amaçları ve çerez yönetimi hakkında bilgilendirme.",
   alternates: { canonical: absoluteUrl("/cerez-politikasi") },
 };
@@ -21,16 +22,7 @@ export default function CookiePolicyPage() {
         </section>
 
         <div className="legal-layout shop-container">
-          <aside className="legal-sidebar-nav">
-            <Link href="/gizlilik-politikasi">Gizlilik Politikası</Link>
-            <Link href="/iade-ve-iptal-kosullari">İade ve İptal Koşulları</Link>
-            <Link href="/kvkk-aydinlatma-metni">KVKK Aydınlatma Metni</Link>
-            <Link href="/cerez-politikasi" className="active">
-              Çerez Politikası
-            </Link>
-            <Link href="/mesafeli-satis-sozlesmesi">Mesafeli Satış Sözleşmesi</Link>
-            <Link href="/iletisim">İletişim & Danışma</Link>
-          </aside>
+          <LegalSidebar currentPath="/cerez-politikasi" />
 
           <article className="legal-content-body">
             <section>
