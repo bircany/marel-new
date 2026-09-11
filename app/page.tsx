@@ -77,7 +77,9 @@ export default async function Home() {
   }
 
   const cardProducts = (category: string, fallback: typeof POPULAR_DIAMOND) => {
-    const matches = dbProducts.filter((product) => product.category.toLowerCase() === category.toLowerCase()).slice(0, fallback.length);
+    const matches = dbProducts
+      .filter((product) => product.active !== 0 && product.category.toLowerCase().includes(category.toLowerCase()))
+      .slice(0, fallback.length);
     if (!matches.length) return fallback;
     return matches.map((product) => ({
       code: product.sku || product.name,
