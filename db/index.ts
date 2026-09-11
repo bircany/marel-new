@@ -993,9 +993,16 @@ export async function updateProductRecord(
 export async function deleteProductRecord(id: string): Promise<void> {
   await ensureDatabase();
   const db = getDb();
-  await db.prepare("DELETE FROM product_images WHERE product_id = ?").bind(id).run();
-  await db.prepare("DELETE FROM reviews WHERE product_id = ?").bind(id).run();
-  await db.prepare("DELETE FROM products WHERE id = ? OR slug = ? OR sku = ?").bind(id, id, id).run();
+  const existing = await db
+    .prepare("SELECT id FROM products WHERE id = ? OR slug = ? OR sku = ? LIMIT 1")
+    .bind(id, id, id)
+    .first<{ id: string }>();
+  if (!existing) throw new Error("Ürün bulunamadı");
+  const actualId = existing.id;
+  await db.prepare("DELETE FROM product_images WHERE product_id = ?").bind(actualId).run();
+  await db.prepare("DELETE FROM reviews WHERE product_id = ?").bind(actualId).run();
+  const result = await db.prepare("DELETE FROM products WHERE id = ?").bind(actualId).run();
+  if (!result.success) throw new Error("Ürün silinemedi.");
   invalidateProductCache();
 }
 

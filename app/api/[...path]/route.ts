@@ -1,9 +1,11 @@
 import * as announcements from "@/app/api/admin/announcements/handler";
 import * as adminProducts from "@/app/api/admin/products/handler";
 import * as adminProduct from "@/app/api/admin/products/[id]/handler";
+import { duplicateProductRecord } from "@/db";
 import * as authLogin from "@/app/api/auth/login/handler";
 import * as cart from "@/app/api/cart/handler";
 import * as orders from "@/app/api/orders/handler";
+import { requireAdminApi } from "@/app/lib/admin-auth";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 type ProductContext = { params: Promise<{ id: string }> };
@@ -36,6 +38,12 @@ export async function POST(request: Request, context: RouteContext) {
   if (path.length === 2 && path[0] === "auth" && path[1] === "login") return authLogin.POST(request);
   if (path.length === 2 && path[0] === "admin" && path[1] === "announcements") return announcements.POST(request);
   if (path.length === 2 && path[0] === "admin" && path[1] === "products") return adminProducts.POST(request);
+  if (path.length === 4 && path[0] === "admin" && path[1] === "products" && path[3] === "duplicate") {
+    const admin = await requireAdminApi();
+    if (admin instanceof Response) return admin;
+    const created = await duplicateProductRecord(path[2]);
+    return Response.json({ ok: true, product: created }, { status: 201 });
+  }
 
   return notFound(path);
 }

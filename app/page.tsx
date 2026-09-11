@@ -3,7 +3,7 @@ import Image from "next/image";
 import { SiteFooter } from "./components/site-footer";
 import { SiteHeader } from "./components/site-header";
 import { absoluteUrl } from "@/app/lib/site";
-import { ensureDatabase, getDb } from "@/db";
+import { ensureDatabase, getDb, listProducts } from "@/db";
 
 export const metadata = {
   title: "Marel Plise Perde | Özel Ölçü Plise Perde Sistemleri",
@@ -63,6 +63,7 @@ const FALLBACK_BLOGS = [
 export default async function Home() {
   await ensureDatabase();
   const db = getDb();
+  const dbProducts = await listProducts();
   let blogPosts: any[] = [];
   try {
     const raw = await db.prepare("SELECT * FROM announcements WHERE published = 1 ORDER BY created_at DESC LIMIT 3").all();
@@ -74,6 +75,21 @@ export default async function Home() {
   if (!blogPosts || blogPosts.length === 0) {
     blogPosts = FALLBACK_BLOGS;
   }
+
+  const cardProducts = (category: string, fallback: typeof POPULAR_DIAMOND) => {
+    const matches = dbProducts.filter((product) => product.category.toLowerCase() === category.toLowerCase()).slice(0, fallback.length);
+    if (!matches.length) return fallback;
+    return matches.map((product) => ({
+      code: product.sku || product.name,
+      name: product.name,
+      price: new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format((product.salePrice ?? product.price) / 100),
+      image: product.image,
+      slug: product.slug,
+    }));
+  };
+  const popularDiamond = cardProducts("Diamond", POPULAR_DIAMOND);
+  const popularBlackout = cardProducts("Blackout", POPULAR_BLACKOUT);
+  const popularHoneycomb = cardProducts("Honeycomb", POPULAR_HONEYCOMB);
 
   return (
     <>
@@ -176,10 +192,10 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {POPULAR_DIAMOND.map((item) => (
+              {popularDiamond.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
+                  href={`/urunler/${item.slug}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -254,10 +270,10 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {POPULAR_BLACKOUT.map((item) => (
+              {popularBlackout.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
+                  href={`/urunler/${item.slug}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -332,10 +348,10 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {POPULAR_HONEYCOMB.map((item) => (
+              {popularHoneycomb.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
+                  href={`/urunler/${item.slug}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
