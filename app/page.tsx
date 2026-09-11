@@ -179,7 +179,7 @@ export default async function Home() {
               {POPULAR_DIAMOND.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler/${item.slug}`}
+                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -257,7 +257,7 @@ export default async function Home() {
               {POPULAR_BLACKOUT.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler/${item.slug}`}
+                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
@@ -335,7 +335,7 @@ export default async function Home() {
               {POPULAR_HONEYCOMB.map((item) => (
                 <Link
                   key={item.code}
-                  href={`/urunler/${item.slug}`}
+                  href={`/urunler?filter=${encodeURIComponent(item.code.split(" ")[0].toLowerCase())}`}
                   style={{
                     display: "flex",
                     flexDirection: "column",
