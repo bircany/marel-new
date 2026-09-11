@@ -1059,6 +1059,10 @@ export async function duplicateProductRecord(id: string): Promise<CatalogProduct
 export async function listAnnouncements(publishedOnly = true): Promise<AnnouncementRecord[]> {
   await ensureDatabase();
   const db = getDb();
+  // Existing databases may already be marked as initialized and therefore skip
+  // the one-time bootstrap. Re-run the idempotent catalog seed here so newly
+  // published SEO posts appear without requiring a manual DB reset.
+  await seedAnnouncements(db);
   try {
     const count = await db.prepare("SELECT COUNT(*) AS total FROM announcements").first<{ total: number }>();
     if (!count || count.total === 0) {
