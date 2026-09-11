@@ -1,4 +1,6 @@
 import postgres from "postgres";
+import fs from "node:fs";
+import path from "node:path";
 import { GENERATED_SEEDS } from "./generated-catalog";
 import { GENERATED_PLISE_SEEDS } from "./generated-plise";
 import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
@@ -385,7 +387,8 @@ async function initializeDatabase(): Promise<void> {
 }
 
 async function seedCatalog(db: D1Database): Promise<void> {
-  const allSeeds: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
+  const localSeeds = buildLocalCatalogSeeds();
+  const allSeeds: CatalogProduct[] = localSeeds.length ? localSeeds : [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
   const result = await db.prepare("SELECT COUNT(*) AS count FROM products").first<{ count: number }>();
   if ((result?.count ?? 0) === allSeeds.length) return; // Skip only if all seeds exist
 
@@ -438,15 +441,83 @@ async function seedCatalog(db: D1Database): Promise<void> {
 }
 
 async function seedAnnouncements(db: D1Database): Promise<void> {
-  const result = await db.prepare("SELECT COUNT(*) AS count FROM announcements").first<{ count: number }>();
-  if ((result?.count ?? 0) > 0) return;
   const now = new Date().toISOString();
   const rows = [
     ["olcuye-ozel-uretim-rehberi", "Ölçüye özel üretim nasıl ilerliyor?", "Ölçü teyidinden üretim ve teslimata kadar Marel sipariş sürecini adım adım keşfedin.", "Siparişiniz sonrasında Marel danışmanı ölçülerinizi ve seçtiğiniz kumaş ile profil rengini teyit eder. Onaylanan bilgiler üretim planına alınır; güncel durumunu Hesabım alanından takip edebilirsiniz.", "/images/real/diamond-beyaz-siyah-ip.jpeg", 1],
     ["honeycomb-isi-yalitimi", "Honeycomb ile dört mevsim konfor", "Hücresel kumaş yapısının ışık ve ısı kontrolüne katkısını yakından inceleyin.", "Honeycomb kumaşın hücresel yapısı, cam yüzeyi ile yaşam alanı arasında ek bir hava katmanı oluşturur. Doğru renk ve ölçü seçimi için fotoğrafınızı WhatsApp danışmanımıza iletebilirsiniz.", "/images/hero/marel-honeycomb-hero-v3.png", 1],
     ["whatsapp-olcu-destegi", "Fotoğrafınızı gönderin, sistemi birlikte seçelim", "Perde, sineklik veya kapı sistemi seçiminde Marel danışmanından hızlı destek alın.", "Mekânın genel görünümünü ve yaklaşık ölçüleri paylaşmanız yeterli. Kullanım alanınıza göre uygun sistem, kumaş ve profil seçeneklerini birlikte belirleyelim.", "/images/catalog/diamond.webp", 0],
   ] as const;
-  await db.batch(rows.map(([slug, title, summary, body, image, featured]) => db.prepare("INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?)").bind(crypto.randomUUID(), slug, title, summary, body, image, featured, now, now, now)));
+  await db.batch(rows.map(([slug, title, summary, body, image, featured]) => db.prepare("INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?) ON CONFLICT (slug) DO NOTHING").bind(crypto.randomUUID(), slug, title, summary, body, image, featured, now, now, now)));
+
+  // Keep the content library complete on existing installations too. The previous
+  // implementation only seeded when the table was empty, so production databases
+  // could never receive newly added SEO articles.
+  const seoTopics = [
+    ["plise-perde-olcusu-nasil-alinir", "Plise Perde Ölçüsü Nasıl Alınır? Cam İçi Ölçü Rehberi", "Cam içi plise perde ölçüsünü milimetrik doğrulukla alma adımlarını, sık yapılan hataları ve sipariş öncesi kontrol listesini öğrenin."],
+    ["cam-balkon-plise-perde-secimi", "Cam Balkon Plise Perde Seçimi: Sistem, Kumaş ve Montaj Karşılaştırması", "Katlanır cam balkonlar için doğru plise perde sistemini seçerken profil, kanat hareketi, kumaş ve montaj detayları."],
+    ["blackout-plise-perde", "Blackout Plise Perde Nedir? Yatak Odası İçin Tam Karartma Rehberi", "Güneş ışığını azaltan blackout kumaşların farklarını, kullanım alanlarını ve doğru renk seçimini keşfedin."],
+    ["plise-perde-temizligi", "Plise Perde Temizliği ve Bakımı: Kumaşa Zarar Vermeden 7 Adım", "Plise perde kumaşını ve mekanizmasını uzun yıllar ilk günkü görünümünde tutacak pratik bakım önerileri."],
+    ["yapistirmali-plise-perde", "Yapıştırmalı Plise Perde mi Vidalı Sistem mi? Avantaj ve Dezavantajlar", "Delmeden montaj isteyenler için yapıştırmalı sistem ile klasik vidalı sistemin teknik karşılaştırması."],
+    ["plise-perde-fiyatlari-2026", "Plise Perde Fiyatları 2026: Fiyatı Belirleyen 8 Teknik Kriter", "Ölçü, kumaş, mekanizma ve montaj tipinin toplam plise perde fiyatına etkisini şeffaf biçimde açıklıyoruz."],
+    ["honeycomb-ve-plise-karsilastirma", "Honeycomb ve Standart Plise Perde Karşılaştırması", "Isı yalıtımı, ışık kontrolü, ses konforu ve estetik açısından iki perde teknolojisinin farkları."],
+    ["salon-icin-plise-perde", "Salon İçin Plise Perde Seçimi: Işık, Renk ve Dekorasyon İpuçları", "Salonunuzun yönüne, mobilya paletine ve gün ışığına göre kumaş ve renk seçme rehberi."],
+    ["mutfak-plise-perde", "Mutfak Pencereleri İçin Plise Perde: Buhar, Leke ve Ölçü Rehberi", "Mutfakta kolay temizlenen, neme dayanıklı ve açılımı engellemeyen perde seçimi."],
+    ["balkon-kapisi-plise-perde", "Balkon Kapısına Plise Perde Ölçüsü ve Montajı", "Kapı kolu payı, geçiş alanı ve çift yönlü hareket için doğru ölçü ve montaj detayları."],
+    ["ofis-plise-perde", "Ofis ve İş Yerleri İçin Plise Perde Seçimi", "Ekran yansımalarını azaltan, mahremiyet sağlayan ve kurumsal dekorasyona uyumlu çözümler."],
+    ["cocuk-odasi-plise-perde", "Çocuk Odasında Güvenli Plise Perde Kullanımı", "Kumaş, ip güvenliği, karartma ve temizlik kriterleriyle çocuk odası için güvenli seçim."],
+    ["plise-perde-montaji", "Plise Perde Montajı Nasıl Yapılır? Uygulamalı Teknik Anlatım", "Vidalı, yapıştırmalı ve klipsli sistemlerin montaj sırasını ve gerekli ekipmanları adım adım anlatıyoruz."],
+    ["plise-perde-renk-secimi", "Plise Perde Renk Seçimi: Beyaz, Antrasit ve Ahşap Tonları", "Mekânın ışığı ve duvar rengine göre doğru perde profilini ve kumaş rengini seçme ipuçları."],
+    ["cam-balkon-isi-kontrolu", "Cam Balkonda Yaz Sıcağını Azaltmanın En Etkili Yolu", "Cam balkonlarda güneş kontrolü, UV koruması ve serinlik için plise perde kumaşlarını karşılaştırıyoruz."],
+    ["plise-perde-siparis-sureci", "Marel Plise Perde Sipariş Süreci: Ölçüden Kargoya", "Fotoğraflı danışmanlık, üretim onayı, kalite kontrol ve güvenli kargo aşamalarını inceleyin."],
+    ["elbistan-plise-perde", "Elbistan Plise Perde: Atölyeden Türkiye'nin Her Yerine", "Elbistan'daki üretim ve teknik destek avantajlarımızla Türkiye geneline özel ölçü plise perde."],
+  ] as const;
+  const extras = seoTopics.map(([slug, title, summary], index) => {
+    const body = `## ${title}\n\n${summary} Marel Plise Perde olarak her pencereyi kendi ölçüsüne ve kullanım senaryosuna göre değerlendiriyoruz. Doğru karar için önce pencerenin montaj yüzeyini, gün ışığı yönünü ve kullanım alışkanlığını belirlemek gerekir.\n\n### Doğru seçim için kontrol listesi\n\n- Cam çıtasını en, orta ve alt noktadan ölçün; en küçük değeri baz alın.\n- Pencere kolu, menteşe ve kanat açılımı için yeterli hareket payı bırakın.\n- Tül, filtreleyici, blackout veya Honeycomb kumaşı odanın ihtiyacına göre seçin.\n- Siparişten önce fotoğrafınızı WhatsApp teknik ekibimize göndererek ölçüyü teyit edin.\n\n### Marel farkı\n\nÖlçü onayı sonrası kumaş kesimi, profil işleme ve mekanizma testi aynı üretim akışında kontrol edilir. Böylece plise perde cam yüzeyine tam oturur, düzgün hareket eder ve uzun süre formunu korur. Türkiye'nin her iline güvenli kargo ve satış sonrası destek sunuyoruz.\n\n[whatsapp-cta:Fotoğrafınızı Gönderin, Birlikte Karar Verelim|Merhaba, ${title} için plise perde desteği almak istiyorum.]`;
+    return [slug, title, summary, body, index % 3 === 0 ? "/images/hero/marel-honeycomb-hero-v3.png" : "/images/catalog/diamond.webp", index === 0 ? 1 : 0] as const;
+  });
+  await db.batch(extras.map(([slug, title, summary, body, image, featured]) => db.prepare("INSERT INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?, ?, ?) ON CONFLICT (slug) DO NOTHING").bind(crypto.randomUUID(), slug, title, summary, body, image, featured, now, now, now)));
+}
+
+function buildLocalCatalogSeeds(): CatalogProduct[] {
+  const root = path.join(process.cwd(), "public", "catalog");
+  if (!fs.existsSync(root)) return [];
+  const folders = fs.readdirSync(root, { withFileTypes: true }).filter((entry) => entry.isDirectory());
+  const now = new Date().toISOString();
+  const result: CatalogProduct[] = [];
+  for (const folder of folders) {
+    const category = folder.name.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    const files = fs.readdirSync(path.join(root, folder.name), { withFileTypes: true })
+      .filter((entry) => entry.isFile() && /\.(png|jpe?g|webp)$/i.test(entry.name));
+    files.forEach((file, index) => {
+      const stem = file.name.replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      const slug = `${category}-${index + 1}-${stem || "renk"}`;
+      const image = `/catalog/${encodeURIComponent(folder.name)}/${encodeURIComponent(file.name)}`;
+      result.push({
+        id: `catalog-${category}-${index + 1}`,
+        slug,
+        sku: `MRL-${category.toUpperCase()}-${String(index + 1).padStart(2, "0")}`,
+        name: `${folder.name.toUpperCase()} ${index + 1}`,
+        category: folder.name.toUpperCase(),
+        rootCategory: "Plise Perdeler",
+        description: `${folder.name.toUpperCase()} serisi ölçüye özel plise perde. Renk kodu ${index + 1}.`,
+        price: 150000,
+        salePrice: null,
+        currency: "TRY",
+        stock: 100,
+        availability: "in_stock",
+        brand: "Marel",
+        googleProductCategory: "Home & Garden > Decor > Window Treatments",
+        active: 1,
+        featured: index === 0 ? 1 : 0,
+        colors: JSON.stringify([String(index + 1)]),
+        image,
+        images: [image],
+        createdAt: now,
+        updatedAt: now,
+      });
+    });
+  }
+  return result;
 }
 
 async function seedMockOrders(db: D1Database): Promise<void> {
@@ -1035,7 +1106,16 @@ export async function getAnnouncementBySlug(slug: string): Promise<AnnouncementR
       )
       .bind(slug)
       .first<AnnouncementRecord>();
-    if (item) return item;
+    if (item) {
+      // Upgrade legacy three-line seed records with the maintained SEO article
+      // when they predate the richer content library. Admin-authored long-form
+      // posts remain untouched.
+      const fallback = DEFAULT_BLOG_POSTS.find((p) => p.slug === slug);
+      if (fallback && (!item.body || item.body.length < 500) && fallback.body.length > item.body.length) {
+        return { ...item, title: fallback.title, summary: fallback.summary, body: fallback.body, imageUrl: fallback.image_url, publishedAt: fallback.published_at };
+      }
+      return item;
+    }
   } catch (err) {
     console.error("Error fetching announcement by slug:", err);
   }

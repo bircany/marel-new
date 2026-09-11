@@ -47,10 +47,10 @@ export default async function BlogPage() {
       <SiteHeader />
 
       <main className="blog-page-main" style={{ minHeight: "80vh", padding: "50px 20px 80px", background: "#f8fafc" }}>
-        <div className="container" style={{ maxWidth: 1160, margin: "0 auto" }}>
+        <div className="container" style={{ maxWidth: 1180, margin: "0 auto" }}>
           
           {/* Header Banner */}
-          <div className="blog-page-header" style={{ textAlign: "center", marginBottom: 50 }}>
+          <div className="blog-page-header" style={{ textAlign: "left", marginBottom: 42, padding: "18px 6px 0" }}>
             <span
               style={{
                 display: "inline-block",
@@ -67,10 +67,10 @@ export default async function BlogPage() {
             >
               Bilgi Merkezi & Rehberler
             </span>
-            <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3rem)", color: "#0f172a", marginBottom: 14, fontWeight: 900 }}>
-              Marel Blog & Ölçü Rehberi
+            <h1 style={{ fontSize: "clamp(2.2rem, 5vw, 3.6rem)", color: "#0b1736", marginBottom: 14, fontWeight: 900, letterSpacing: "-0.04em", maxWidth: 760 }}>
+              Pencereniz için doğru perdeyi seçmenin kısa yolu.
             </h1>
-            <p style={{ color: "#475569", fontSize: "1.15rem", maxWidth: 650, margin: "0 auto", lineHeight: 1.6 }}>
+            <p style={{ color: "#52627a", fontSize: "1.08rem", maxWidth: 680, margin: 0, lineHeight: 1.7 }}>
               Plise perdeler hakkında milimetrik ölçü alma adımları, kumaş teknolojileri, cam balkon montaj püf noktaları ve bakım tavsiyeleri.
             </p>
           </div>
@@ -130,7 +130,7 @@ export default async function BlogPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
-              gap: 32,
+              gap: 22,
             }}
           >
             {blogPosts.map((post) => {
@@ -150,7 +150,7 @@ export default async function BlogPage() {
                   className="blog-card"
                   style={{
                     background: "#ffffff",
-                    borderRadius: 16,
+                    borderRadius: 10,
                     overflow: "hidden",
                     boxShadow: "0 10px 25px rgba(0,0,0,0.03)",
                     border: "1px solid #e2e8f0",
@@ -160,7 +160,7 @@ export default async function BlogPage() {
                     flexDirection: "column",
                   }}
                 >
-                  <div style={{ position: "relative", width: "100%", height: 230, background: "#f1f5f9" }}>
+                  <div style={{ position: "relative", width: "100%", height: 245, background: "#f1f5f9" }}>
                     <Image
                       unoptimized
                       src={post.imageUrl || "/images/catalog/diamond.webp"}
@@ -191,7 +191,7 @@ export default async function BlogPage() {
                     ) : null}
                   </div>
 
-                  <div style={{ padding: 24, flex: 1, display: "flex", flexDirection: "column" }}>
+                  <div style={{ padding: "22px 22px 24px", flex: 1, display: "flex", flexDirection: "column" }}>
                     <div
                       style={{
                         fontSize: "0.82rem",
