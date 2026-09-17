@@ -7,6 +7,7 @@ import * as cart from "@/server/api/cart/handler";
 import * as orders from "@/server/api/orders/handler";
 import { requireAdminApi } from "@/app/lib/admin-auth";
 import { laravel, getSessionId, setTokenCookie } from "@/app/lib/laravel-auth";
+import { getProductBySlug, listProducts, listAnnouncements, getAnnouncementBySlug } from "@/db";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 type ProductContext = { params: Promise<{ id: string }> };
@@ -40,6 +41,18 @@ function notFound(path: string[]) {
 
 export async function GET(request: Request, context: RouteContext) {
   const path = await getPath(context);
+
+  // Public catalog/content methods. UI pages consume these instead of importing DB code.
+  if (path.length === 1 && path[0] === "products") return Response.json({ products: await listProducts(false) });
+  if (path.length === 2 && path[0] === "products") {
+    const product = await getProductBySlug(path[1]);
+    return product ? Response.json({ product }) : Response.json({ error: "Ürün bulunamadı" }, { status: 404 });
+  }
+  if (path.length === 1 && path[0] === "announcements") return Response.json({ announcements: await listAnnouncements(true) });
+  if (path.length === 2 && path[0] === "announcements") {
+    const announcement = await getAnnouncementBySlug(path[1]);
+    return announcement ? Response.json({ announcement }) : Response.json({ error: "İçerik bulunamadı" }, { status: 404 });
+  }
 
   if (path.length === 1 && path[0] === "cart") return cart.GET();
   if (path.length === 1 && path[0] === "orders") return orders.GET();
