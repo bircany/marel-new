@@ -122,6 +122,7 @@ Repository: **https://github.com/bircany/marel-new**
 ## Bakım notları
 
 - `public/images/products` yalnızca canlı katalogda kullanılan seri görsellerini içerir; eski Kamatas arşivi ve boş `public/storage` kaldırılmıştır.
+- Ürün, fiyat ve stok kayıtları `db/` üzerinden veritabanından gelir. `app/data.ts` ve `app/data/plise-categories.ts` yalnızca sayfa/navigasyon sunum metadatasıdır; katalog ürünü tutmaz.
 - Yardımcı doğrulama dosyaları `tests/` altındadır.
 - `node_modules/` ve `tsconfig.tsbuildinfo` yerel/üretilmiş dosyalardır ve Git'e gönderilmez.
 
