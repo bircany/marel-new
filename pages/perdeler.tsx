@@ -1,8 +1,7 @@
-import { CategoryAliasPage } from "@/components/category-alias-page";
+import type { GetServerSideProps } from "next";
 
-export const metadata = { title: "Perdeler | Marel" };
+/** Legacy alias: the canonical catalog is /plise-perdeler. */
+export default function PerdelerAlias() { return null; }
 
-export default function Page() {
-  return <CategoryAliasPage slug="perdeler" />;
-}
+export const getServerSideProps: GetServerSideProps = async () => ({ redirect: { destination: "/plise-perdeler", permanent: true } });
 

@@ -1,17 +1,17 @@
-import type { GetStaticProps, InferGetStaticPropsType } from "next";
+import { useEffect, useState } from "react";
 import BlogPage from "@/components/page-views/blog";
 
-export const getStaticProps: GetStaticProps<{ blogPosts: unknown[] }> = async () => {
-  try {
-    const { listAnnouncements } = await import("@/db");
-    const blogPosts = await listAnnouncements(true);
-    return { props: { blogPosts: JSON.parse(JSON.stringify(blogPosts)) }, revalidate: 60 };
-  } catch {
-    return { props: { blogPosts: [] }, revalidate: 30 };
-  }
-};
+/** Blog listesi yalnızca merkezi API'den okunur; sayfa DB modülü import etmez. */
+export default function BlogRoute() {
+  const [blogPosts, setBlogPosts] = useState<unknown[]>([]);
 
-export default function BlogRoute({ blogPosts }: InferGetStaticPropsType<typeof getStaticProps>) {
+  useEffect(() => {
+    fetch("/api/announcements")
+      .then((response) => (response.ok ? response.json() : { announcements: [] }))
+      .then((payload) => setBlogPosts(payload.announcements ?? []))
+      .catch(() => setBlogPosts([]));
+  }, []);
+
   return <BlogPage blogPosts={blogPosts as any[]} />;
 }
 
