@@ -30,11 +30,9 @@ yarn-error.log*
 .pnpm-debug.log*
 /scratch/
 
-# env files (can opt-in for committing if needed)
+# Environment files (local credentials must never be committed)
 .env*
 !.env.example
-!SoftTrade/.env.example
-!backend/.env.example
 
 # Laravel backend
 /SoftTrade/vendor/
@@ -57,18 +55,15 @@ yarn-error.log*
 /backend/database/*.sqlite
 
 # vercel
-.vercel
+.vercel/
 
 # typescript & build
-next-env.d.ts
 *.tsbuildinfo
 tsconfig.tsbuildinfo
 /dist/
 /.wrangler/
 /outputs/
 /work/
-node_modules/
 marel-plise - Copy/
 *.rar
 marel-katalog-fotolar/
-.vercel

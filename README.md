@@ -3,7 +3,7 @@
 Marel'in plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri için geliştirilmiş, yüksek performanslı ve tam özellikli modern e-ticaret platformu.
 
 **Teknoloji Yığını:**
-- **Frontend & BFF (Backend-for-Frontend):** Next.js 16 (App Router & Turbopack)
+- **Frontend & BFF (Backend-for-Frontend):** Next.js 16 (public sayfalar Pages Router, admin/API App Router)
 - **Veritabanı:** Supabase PostgreSQL (Havuzlayıcı / Pooler destekli)
 - **Kimlik Doğrulama & Oturum:** Next.js JWT / Secure Cookies
 - **Tasarım & UI:** Modern Vanilla CSS, CSS Değişkenleri & Design Tokens
@@ -60,6 +60,9 @@ DATABASE_URL="postgresql://postgres.[PROJECT_REF]:[PASSWORD]@[POOLER_HOST]:6543/
 ```
 
 > **İpucu:** Supabase Dashboard → **Project Settings** → **Database** → **Connection string (URI / Session / Transaction Mode)** bölümünden alabilirsiniz.
+
+`.env.local` yalnızca yerel sırlar içindir ve Git tarafından yok sayılır. Vercel
+üretim ortamında aynı değişkenleri proje ayarlarından tanımlayın.
 
 ### 4. Veritabanı Şemasını Başlatma
 

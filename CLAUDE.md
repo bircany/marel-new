@@ -10,10 +10,9 @@
 
 ## Mimari kurallar
 
-Bu proje Next.js App Router kullanır. `app/**/page.tsx`, `app/layout.tsx` ve
-`app/not-found.tsx` Next tarafından route giriş noktası olarak aranır; bunları
-top-level `pages/` klasörüne taşımayın. Sayfa gövdeleri gerektiğinde
-`app/pages/` altında ayrıştırılabilir.
+Public içerik sayfaları Pages Router (`pages/`) üzerinden üretilir; `_app.tsx`
+ve `404.tsx` bu dizindedir. Admin, API ve DB'ye sıkı bağlı ürün rotaları App
+Router (`app/`) üzerinde çalışır. Aynı URL için iki router route'u oluşturmayın.
 
 Next/Vercel yapılandırmaları (`package.json`, `tsconfig.json`, `next.config.ts`,
 `postcss.config.mjs`, `eslint.config.mjs`, `next-env.d.ts`, `vercel.json`) kökte
@@ -24,6 +23,5 @@ dağıtılır; yeni endpoint eklerken Vercel function sayısını artırmamaya d
 edin. Gizli değerleri yalnızca `.env.local` içinde tutun.
 
 `public/images/products` canlı katalog serileri için ayrılmıştır; silme öncesi
-`db/generated-catalog.ts` ve uygulama referansları kontrol edilmelidir. Test
-yardımcıları `tests/` altında, yerel bağımlılıklar ve `*.tsbuildinfo` ise Git
-dışında tutulur.
+`db/generated-catalog.ts` ve uygulama referansları kontrol edilmelidir. Yerel
+bağımlılıklar ve `*.tsbuildinfo` Git dışında tutulur.
