@@ -22,3 +22,8 @@ kalmalıdır. Drizzle yapılandırması `config/drizzle.config.ts` içindedir.
 API, `app/api/[...path]/route.ts` catch-all route üzerinden işlev modüllerine
 dağıtılır; yeni endpoint eklerken Vercel function sayısını artırmamaya dikkat
 edin. Gizli değerleri yalnızca `.env.local` içinde tutun.
+
+`public/images/products` canlı katalog serileri için ayrılmıştır; silme öncesi
+`db/generated-catalog.ts` ve uygulama referansları kontrol edilmelidir. Test
+yardımcıları `tests/` altında, yerel bağımlılıklar ve `*.tsbuildinfo` ise Git
+dışında tutulur.

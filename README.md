@@ -119,6 +119,12 @@ Proje Vercel ile %100 uyumludur.
 
 Repository: **https://github.com/bircany/marel-new**
 
+## Bakım notları
+
+- `public/images/products` yalnızca canlı katalogda kullanılan seri görsellerini içerir; eski Kamatas arşivi ve boş `public/storage` kaldırılmıştır.
+- Yardımcı doğrulama dosyaları `tests/` altındadır.
+- `node_modules/` ve `tsconfig.tsbuildinfo` yerel/üretilmiş dosyalardır ve Git'e gönderilmez.
+
 ## Dizin düzeni
 
 Next.js App Router kullandığımız için route girişleri `app/**/page.tsx` altında
