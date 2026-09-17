@@ -102,7 +102,7 @@ export default async function ProductsPage({
                   gap: "28px",
                 }}
               >
-                {filtered.map((product) => {
+                {filtered.map((product, index) => {
                   const displayPrice = (product.salePrice ?? product.price) / 100;
                   const tagText = product.name
                     .toUpperCase()
@@ -114,6 +114,7 @@ export default async function ProductsPage({
                       data-product-card={`${product.name} ${product.category}`}
                       key={product.id || product.slug}
                       href={`/urunler/${product.slug}`}
+                      className="group hover:-translate-y-1 hover:shadow-md"
                       style={{
                         display: "flex",
                         flexDirection: "column",
@@ -123,8 +124,9 @@ export default async function ProductsPage({
                         overflow: "hidden",
                         border: "1px solid #edebe4",
                         transition: "transform 0.2s, box-shadow 0.2s",
+                        contentVisibility: "auto",
+                        containIntrinsicSize: "320px",
                       }}
-                      className="group hover:-translate-y-1 hover:shadow-md"
                     >
                       {/* Image with Tag Banner */}
                       <div
@@ -143,6 +145,8 @@ export default async function ProductsPage({
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           style={{ objectFit: "cover" }}
                           className="transition-transform duration-300 group-hover:scale-105"
+                          loading={index < 8 ? "eager" : "lazy"}
+                          quality={72}
                         />
                         {/* Dark series tag on bottom-left */}
                         <div

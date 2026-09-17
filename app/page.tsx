@@ -194,7 +194,7 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {popularDiamond.map((item) => (
+              {popularDiamond.map((item, index) => (
                 <Link
                   key={item.code}
                   href={`/urunler/${item.slug}`}
@@ -219,6 +219,8 @@ export default async function Home() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       style={{ objectFit: "cover" }}
                       className="transition-transform duration-300 group-hover:scale-105"
+                      loading={index < 4 ? "eager" : "lazy"}
+                      quality={72}
                     />
                     <div
                       style={{
@@ -272,7 +274,7 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {popularBlackout.map((item) => (
+              {popularBlackout.map((item, index) => (
                 <Link
                   key={item.code}
                   href={`/urunler/${item.slug}`}
@@ -297,6 +299,8 @@ export default async function Home() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       style={{ objectFit: "cover" }}
                       className="transition-transform duration-300 group-hover:scale-105"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      quality={72}
                     />
                     <div
                       style={{
@@ -350,7 +354,7 @@ export default async function Home() {
                 gap: "20px",
               }}
             >
-              {popularHoneycomb.map((item) => (
+              {popularHoneycomb.map((item, index) => (
                 <Link
                   key={item.code}
                   href={`/urunler/${item.slug}`}
@@ -375,6 +379,8 @@ export default async function Home() {
                       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                       style={{ objectFit: "cover" }}
                       className="transition-transform duration-300 group-hover:scale-105"
+                      loading={index === 0 ? "eager" : "lazy"}
+                      quality={72}
                     />
                     <div
                       style={{

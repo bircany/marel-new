@@ -308,12 +308,12 @@ export function CatalogBrowser({
                 <Link href={`/urunler/${product.slug}`} className="kamatas-product-card" key={product.id}>
                   <div className="k-card-image">
                     <Image
-                      unoptimized
                       src={product.image || "/images/catalog/diamond.webp"}
                       alt={product.name}
                       fill
                       priority={index < 8}
-                      loading="eager"
+                      loading={index < 8 ? "eager" : "lazy"}
+                      quality={72}
                       sizes="(max-width: 600px) 50vw, (max-width: 1200px) 33vw, 25vw"
                       style={{ objectFit: 'contain' }}
                     />

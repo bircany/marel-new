@@ -5,7 +5,9 @@ const nextConfig: NextConfig = {
     root: process.cwd(),
   },
   images: {
-    unoptimized: true,
+    formats: ["image/avif", "image/webp"],
+    deviceSizes: [360, 640, 828, 1080, 1200, 1440],
+    imageSizes: [96, 160, 240, 320, 480, 640],
   },
   async redirects() {
     return [
