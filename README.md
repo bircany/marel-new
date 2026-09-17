@@ -81,7 +81,8 @@ Tarayıcınızda **http://localhost:3000** adresini açabilirsiniz.
 | `npm run dev` | Geliştirme sunucusunu başlatır (`http://localhost:3000`) |
 | `npm run build` | Üretim derlemesini çalıştırır (TypeScript & Turbopack doğrulaması) |
 | `npm run start` | Derlenmiş üretim sürümünü sunar |
-| `npm run db:setup` | Supabase PostgreSQL şemasını kurar ve tabloları oluşturur |
+| `npm run db:setup` | `db/setup-supabase.mjs` ile Supabase şemasını kurar |
+| `npm run db:generate` | `config/drizzle.config.ts` ile migration üretir |
 | `npm run lint` | ESLint ile kod standartlarını denetler |
 | `node test-e2e.mjs` | 21 adımlı E2E güvenlik, API, sipariş ve vitrin test paketini çalıştırır |
 
@@ -118,3 +119,14 @@ Proje Vercel ile %100 uyumludur.
 ## 🔗 GitHub Deposu
 
 Repository: **https://github.com/bircany/marel-new**
+
+## Dizin düzeni
+
+Next.js App Router kullandığımız için route girişleri `app/**/page.tsx` altında
+kalır. Yeniden kullanılabilir sayfa implementasyonları ve bileşenler `app/pages`
+ve `app/components` altında tutulur. Next/Vercel tarafından kökten aranan
+`package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`,
+`eslint.config.mjs`, `next-env.d.ts` ve `vercel.json` kökte bırakılmıştır.
+
+Drizzle ayarı `config/drizzle.config.ts`, migrationlar ve Supabase kurulum
+dosyaları `db/` altındadır. `.env.local` yerelde kalır ve Git'e gönderilmez.
