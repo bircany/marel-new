@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { trackCommerceEvent } from "@/app/lib/google-ads";
+import { trackCommerceEvent } from "@/lib/google-ads";
 
 export function ProductViewTracker({ sku, name, category, price }: { sku: string; name: string; category: string; price: number }) {
   useEffect(() => {
@@ -9,3 +9,4 @@ export function ProductViewTracker({ sku, name, category, price }: { sku: string
   }, [sku, name, category, price]);
   return null;
 }
+

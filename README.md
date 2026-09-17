@@ -16,7 +16,7 @@ Marel'in plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri
 Proje, harici bir PHP, Laravel veya Docker sunucusu kurulumu gerektirmeksizin **tamamen bağımsız (self-contained)** bir BFF mimarisine sahiptir.
 Next.js içerisindeki `/api/*` uç noktaları doğrudan Supabase PostgreSQL veritabanı ile konuşur.
 
-API yönlendirmesi tek merkezden `app/api.ts` içinde yapılır. `pages/api/[...path].ts`
+API yönlendirmesi tek merkezden `api.ts` içinde yapılır. `pages/api/[...path].ts`
 adaptörü Next.js `req/res` nesnelerini Web Request/Response'a bağlar; sepet, sipariş, auth ve admin CRUD
 işlemleri bu dispatch katmanından yönetilir.
 
@@ -129,7 +129,7 @@ Repository: **https://github.com/bircany/marel-new**
 ## Bakım notları
 
 - `public/images/products` yalnızca canlı katalogda kullanılan seri görsellerini içerir; eski Kamatas arşivi ve boş `public/storage` kaldırılmıştır.
-- Ürün, fiyat ve stok kayıtları `db/` üzerinden veritabanından gelir. `app/data.ts` ve `app/data/plise-categories.ts` yalnızca sayfa/navigasyon sunum metadatasıdır; katalog ürünü tutmaz.
+- Ürün, fiyat ve stok kayıtları `db/` üzerinden veritabanından gelir. `data/index.ts` ve `data/plise-categories.ts` yalnızca sayfa/navigasyon sunum metadatasıdır; katalog ürünü tutmaz.
 - Bağımlılıklar ve derleme çıktıları sürüm kontrolüne dahil edilmez; kurulumda `npm install` çalıştırılır.
 - `node_modules/` ve `tsconfig.tsbuildinfo` yerel/üretilmiş dosyalardır ve Git'e gönderilmez.
 

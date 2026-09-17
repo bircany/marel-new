@@ -1,14 +1,14 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ProductConfigurator } from "@/app/components/product-configurator";
+import { ProductConfigurator } from "@/components/product-configurator";
 
-import { ProductViewTracker } from "@/app/components/product-view-tracker";
-import { SiteFooter } from "@/app/components/site-footer";
-import { SiteHeader } from "@/app/components/site-header";
-import { CategoryLanding } from "@/app/components/category-landing";
-import { getCategoryPage } from "@/app/data";
-import { stGetProductBySlug } from "@/app/lib/softtrade";
-import { absoluteUrl } from "@/app/lib/site";
+import { ProductViewTracker } from "@/components/product-view-tracker";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { CategoryLanding } from "@/components/category-landing";
+import { getCategoryPage } from "@/data";
+import { stGetProductBySlug } from "@/lib/softtrade";
+import { absoluteUrl } from "@/lib/site";
 
 export const dynamic = "force-static";
 

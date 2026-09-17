@@ -1,11 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
-import type { CategoryPageConfig } from "@/app/data";
+import type { CategoryPageConfig } from "@/data";
 import { SiteFooter } from "./site-footer";
 import { SiteHeader } from "./site-header";
 import { CatalogBrowser } from "./catalog-browser";
-import { absoluteUrl } from "@/app/lib/site";
-import { stListProducts } from "@/app/lib/softtrade";
+import { absoluteUrl } from "@/lib/site";
+import { stListProducts } from "@/lib/softtrade";
 
 export async function CategoryLanding({ config }: { config: CategoryPageConfig }) {
   const allProducts = await stListProducts(false, "Marel");
@@ -63,3 +63,4 @@ export async function CategoryLanding({ config }: { config: CategoryPageConfig }
     </>
   );
 }
+

@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { GENERATED_SEEDS } from "./generated-catalog";
 import { GENERATED_PLISE_SEEDS } from "./generated-plise";
-import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
+import { DEFAULT_BLOG_POSTS } from "@/data/default-blogs";
 
 const ALL_FALLBACK_PRODUCTS: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
 
@@ -1683,3 +1683,4 @@ export async function updateCustomerByEmailInDb(originalEmail: string, data: { f
      WHERE LOWER(TRIM(email)) = LOWER(TRIM(?))`
   ).bind(data.fullName, data.email, now, originalEmail).run();
 }
+

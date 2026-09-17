@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import type { LaravelUser } from "@/app/lib/laravel-auth";
+import type { LaravelUser } from "@/lib/laravel-auth";
 
 interface AdminSidebarProps {
   adminUser?: LaravelUser | null;
@@ -221,3 +221,4 @@ export function AdminSidebar({ adminUser, pendingOrdersCount = 0 }: AdminSidebar
     </aside>
   );
 }
+

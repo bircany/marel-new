@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SiteFooter } from "./components/site-footer";
-import { SiteHeader } from "./components/site-header";
-import { absoluteUrl } from "@/app/lib/site";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { absoluteUrl } from "@/lib/site";
 import { ensureDatabase, getDb, listProducts } from "@/db";
 
 export const metadata = {
@@ -529,3 +529,4 @@ export default async function Home() {
     </>
   );
 }
+

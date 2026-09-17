@@ -2,11 +2,11 @@ import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { SiteHeader } from "@/app/components/site-header";
-import { SiteFooter } from "@/app/components/site-footer";
-import { absoluteUrl } from "@/app/lib/site";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { absoluteUrl } from "@/lib/site";
 import { getAnnouncementBySlug, listAnnouncements } from "@/db";
-import { DEFAULT_BLOG_POSTS } from "@/app/data/default-blogs";
+import { DEFAULT_BLOG_POSTS } from "@/data/default-blogs";
 
 export const dynamic = "force-static";
 
@@ -928,3 +928,4 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
     </>
   );
 }
+

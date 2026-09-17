@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { CatalogProduct } from "@/db";
-import { formatMoney } from "@/app/lib/commerce";
+import { formatMoney } from "@/lib/commerce";
 
 const POPULAR_CATEGORIES = [
   { name: "Plise Perdeler", href: "/plise-perdeler", badge: "Çok Satan" },
@@ -350,3 +350,4 @@ export function GlobalSearch() {
     </>
   );
 }
+

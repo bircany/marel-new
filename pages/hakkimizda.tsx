@@ -1,9 +1,9 @@
-import { SiteHeader } from "@/app/components/site-header";
-import { SiteFooter } from "@/app/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { absoluteUrl } from "@/app/lib/site";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata: Metadata = {
   title: "Hakkımızda | Marel Plise Perde",
@@ -287,3 +287,4 @@ export default function HakkimizdaPage() {
     </>
   );
 }
+

@@ -1,6 +1,6 @@
-import { getAdminUser } from "@/app/lib/laravel-auth";
-import { AdminConsole } from "@/app/components/admin-console";
-import { AdminLogin } from "@/app/components/admin-login";
+import { getAdminUser } from "@/lib/laravel-auth";
+import { AdminConsole } from "@/components/admin-console";
+import { AdminLogin } from "@/components/admin-login";
 import {
   listAnnouncements,
   listProducts,
@@ -9,7 +9,7 @@ import {
   getSettingsFromDb,
   listCustomersFromDb,
 } from "@/db";
-import { stListReviews, stListContactMessages } from "@/app/lib/softtrade";
+import { stListReviews, stListContactMessages } from "@/lib/softtrade";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Marel Yönetim Portalı", robots: { index: false, follow: false } };
@@ -45,3 +45,4 @@ export default async function AdminPage() {
     />
   );
 }
+

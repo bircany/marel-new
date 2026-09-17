@@ -1,4 +1,4 @@
-import { getCurrentUser } from "@/app/lib/laravel-auth";
+import { getCurrentUser } from "@/lib/laravel-auth";
 import { createOrderInDb, listOrdersWithDetails } from "@/db";
 
 export type OrderItemPayload = {
@@ -240,4 +240,5 @@ export async function GET() {
     return Response.json([], { status: 200 });
   }
 }
+
 

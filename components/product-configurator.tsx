@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { formatMoney } from "@/app/lib/commerce";
+import { formatMoney } from "@/lib/commerce";
 
 interface ConfiguratorProps {
   product: {
@@ -198,3 +198,4 @@ export function ProductConfigurator({ product }: ConfiguratorProps) {
     </div>
   );
 }
+

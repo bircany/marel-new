@@ -1,10 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SiteFooter } from "../components/site-footer";
-import { SiteHeader } from "../components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { listProducts } from "@/db";
-import { absoluteUrl } from "@/app/lib/site";
-import { ProductFilterSync } from "@/app/components/product-filter-sync";
+import { absoluteUrl } from "@/lib/site";
+import { ProductFilterSync } from "@/components/product-filter-sync";
 
 export const dynamic = "force-static";
 
@@ -325,3 +325,4 @@ export default async function ProductsPage({
     </>
   );
 }
+

@@ -1,7 +1,7 @@
-import { SiteHeader } from "@/app/components/site-header";
-import { SiteFooter } from "@/app/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 import Link from "next/link";
-import { absoluteUrl } from "@/app/lib/site";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata = {
   title: "Sıkça Sorulan Sorular (SSS) | Marel Plise Perde",
@@ -180,3 +180,4 @@ export default function SssPage() {
     </>
   );
 }
+

@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { SiteFooter } from "@/app/components/site-footer";
-import { SiteHeader } from "@/app/components/site-header";
-import { absoluteUrl } from "@/app/lib/site";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { absoluteUrl } from "@/lib/site";
 
 export const metadata = {
   title: "Duyurular & Bilgilendirme | Marel Perde ve Sineklik Sistemleri",
@@ -121,3 +121,4 @@ export default function AnnouncementsPage({ announcements }: { announcements: an
     </>
   );
 }
+

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { CatalogBrowser } from "@/app/components/catalog-browser";
-import { SiteFooter } from "@/app/components/site-footer";
-import { SiteHeader } from "@/app/components/site-header";
+import { CatalogBrowser } from "@/components/catalog-browser";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { listProducts } from "@/db";
 
 const categoryNotes: Record<string, { title: string; text: string; rootCategory: string }> = {
@@ -141,3 +141,4 @@ export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryN
     </>
   );
 }
+

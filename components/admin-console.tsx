@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { formatMoney } from "@/app/lib/commerce";
-import { CARGO_PROVIDERS, cargoLabel, cargoTrackingUrl, type CargoCompany } from "@/app/lib/cargo";
+import { formatMoney } from "@/lib/commerce";
+import { CARGO_PROVIDERS, cargoLabel, cargoTrackingUrl, type CargoCompany } from "@/lib/cargo";
 import type {
   AnnouncementRecord,
   CatalogProduct,
@@ -16,9 +16,9 @@ import type {
   ReviewRecord,
   SiteSettingsRecord,
 } from "@/db";
-import type { LaravelUser } from "@/app/lib/laravel-auth";
-import { AdminProductEditorModal } from "@/app/components/admin-product-editor-modal";
-import { AdminCustomerEditorModal } from "@/app/components/admin-customer-editor-modal";
+import type { LaravelUser } from "@/lib/laravel-auth";
+import { AdminProductEditorModal } from "@/components/admin-product-editor-modal";
+import { AdminCustomerEditorModal } from "@/components/admin-customer-editor-modal";
 
 const orderStatuses = [
   "pending",
@@ -2921,3 +2921,4 @@ export function AdminConsole({
     </div>
   );
 }
+

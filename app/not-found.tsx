@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { SiteHeader } from "@/app/components/site-header";
-import { SiteFooter } from "@/app/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
 
 export const metadata = {
   title: "Sayfa Bulunamadı (404) | Marel Plise Perde & Sistemleri",
@@ -274,3 +274,4 @@ export default function NotFound() {
     </>
   );
 }
+

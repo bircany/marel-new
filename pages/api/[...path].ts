@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { GET, POST, PUT, PATCH, DELETE } from "@/app/api";
+import { GET, POST, PUT, PATCH, DELETE } from "@/api";
 
 export const config = { api: { bodyParser: false } };
 

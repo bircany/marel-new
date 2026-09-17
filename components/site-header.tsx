@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { GlobalSearch } from "./global-search";
-import { PLISE_13_CATEGORIES } from "@/app/data/plise-categories";
+import { PLISE_13_CATEGORIES } from "@/data/plise-categories";
 
 export function SiteHeader() {
   const [cartCount, setCartCount] = useState(0);
@@ -241,3 +241,4 @@ export function SiteHeader() {
     </>
   );
 }
+

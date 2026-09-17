@@ -1,4 +1,4 @@
-import { requireAdminApi } from "@/app/lib/admin-auth";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { deleteProductRecord, updateProductRecord } from "@/db";
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {

@@ -5,8 +5,8 @@ import { duplicateProductRecord } from "@/db";
 import * as authLogin from "@/server/api/auth/login/handler";
 import * as cart from "@/server/api/cart/handler";
 import * as orders from "@/server/api/orders/handler";
-import { requireAdminApi } from "@/app/lib/admin-auth";
-import { laravel, getSessionId, setTokenCookie } from "@/app/lib/laravel-auth";
+import { requireAdminApi } from "@/lib/admin-auth";
+import { laravel, getSessionId, setTokenCookie } from "@/lib/laravel-auth";
 import { getProductBySlug, listProducts, listAnnouncements, getAnnouncementBySlug } from "@/db";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
@@ -109,4 +109,5 @@ export async function DELETE(request: Request, context: RouteContext) {
   }
   return notFound(path);
 }
+
 

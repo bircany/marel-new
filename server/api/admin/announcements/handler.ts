@@ -1,4 +1,4 @@
-import { requireAdminApi } from "@/app/lib/admin-auth";
+import { requireAdminApi } from "@/lib/admin-auth";
 import { ensureDatabase, getDb, listAnnouncements } from "@/db";
 
 function slugify(value: string) {
@@ -170,3 +170,4 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
   if ((result.meta?.changes ?? 0) === 0) return Response.json({ error: "Blog yazısı bulunamadı." }, { status: 404 });
   return Response.json({ ok: true });
 }
+

@@ -3,8 +3,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { addToServerCart, formatMoney } from "@/app/lib/commerce";
-import { trackCommerceEvent } from "@/app/lib/google-ads";
+import { addToServerCart, formatMoney } from "@/lib/commerce";
+import { trackCommerceEvent } from "@/lib/google-ads";
 import type { CatalogProduct } from "@/db";
 
 export type FilterState = {
@@ -363,3 +363,4 @@ export function CatalogBrowser({
     </div>
   );
 }
+

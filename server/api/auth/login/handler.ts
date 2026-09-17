@@ -1,6 +1,6 @@
-import { checkRateLimitAsync, clientKey, rateLimitHeaders } from "@/app/lib/security";
-import { laravel, setTokenCookie, getSessionId } from "@/app/lib/laravel-auth";
-import type { LaravelUser } from "@/app/lib/laravel-auth";
+import { checkRateLimitAsync, clientKey, rateLimitHeaders } from "@/lib/security";
+import { laravel, setTokenCookie, getSessionId } from "@/lib/laravel-auth";
+import type { LaravelUser } from "@/lib/laravel-auth";
 
 export async function POST(request: Request) {
   const body = (await request.json().catch(() => ({}))) as { email?: string; password?: string; website?: string };
@@ -105,3 +105,4 @@ export async function POST(request: Request) {
   await setTokenCookie(result.data.access_token);
   return Response.json({ success: true, user: result.data.user });
 }
+

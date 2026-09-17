@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import "./globals.css";
-import { WhatsAppAdvisor } from "./components/whatsapp-advisor";
-import { GoogleTag } from "./components/google-tag";
-import { GoogleTagNoScript } from "./components/google-tag-noscript";
-import { ConsentBanner } from "./components/consent-banner";
-import { ScrollingTitle } from "./components/scrolling-title";
-import { PageTransitionLoader } from "./components/page-transition-loader";
-import { absoluteUrl, siteUrl } from "./lib/site";
+import "@/styles/globals.css";
+import { WhatsAppAdvisor } from "@/components/whatsapp-advisor";
+import { GoogleTag } from "@/components/google-tag";
+import { GoogleTagNoScript } from "@/components/google-tag-noscript";
+import { ConsentBanner } from "@/components/consent-banner";
+import { ScrollingTitle } from "@/components/scrolling-title";
+import { PageTransitionLoader } from "@/components/page-transition-loader";
+import { absoluteUrl, siteUrl } from "@/lib/site";
 
 const inter = Inter({
   variable: "--font-inter",

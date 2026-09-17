@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { SOFTRADE_API_URL } from "@/app/lib/softtrade";
+import { SOFTRADE_API_URL } from "@/lib/softtrade";
 
 export const TOKEN_COOKIE = "marel_token";
 export const SESSION_COOKIE = "marel_session";
@@ -211,3 +211,4 @@ export async function requireAdmin(): Promise<LaravelUser | null> {
 }
 
 export { laravel };
+

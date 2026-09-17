@@ -2,7 +2,7 @@
 
 import React from "react";
 import { AdminSidebar } from "./AdminSidebar";
-import type { LaravelUser } from "@/app/lib/laravel-auth";
+import type { LaravelUser } from "@/lib/laravel-auth";
 
 interface AdminShellProps {
   children: React.ReactNode;
@@ -20,3 +20,4 @@ export function AdminShell({ children, adminUser, pendingOrdersCount = 0 }: Admi
     </div>
   );
 }
+

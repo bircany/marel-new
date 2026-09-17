@@ -1,4 +1,4 @@
-import { laravel } from "@/app/lib/laravel-auth";
+import { laravel } from "@/lib/laravel-auth";
 
 export type CartItemPayload = {
   id: number;
@@ -68,3 +68,4 @@ export async function DELETE(request: Request) {
   }
   return Response.json(result.data ?? { success: true });
 }
+
