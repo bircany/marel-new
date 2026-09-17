@@ -134,5 +134,5 @@ ve `app/components` altında tutulur. Next/Vercel tarafından kökten aranan
 `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`,
 `eslint.config.mjs`, `next-env.d.ts` ve `vercel.json` kökte bırakılmıştır.
 
-Drizzle ayarı `config/drizzle.config.ts`, migrationlar ve Supabase kurulum
-dosyaları `db/` altındadır. `.env.local` yerelde kalır ve Git'e gönderilmez.
+Drizzle ayarı `db/drizzle.config.ts`, migrationlar ve Supabase kurulum dosyaları
+`db/` altındadır. `.env.local` yerelde kalır ve Git'e gönderilmez.
