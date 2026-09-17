@@ -1,8 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { QuoteBuilder } from "../../../components/quote-builder";
-import { SiteFooter } from "../../../components/site-footer";
-import { SiteHeader } from "../../../components/site-header";
+import { QuoteBuilder } from "@/app/components/quote-builder";
+import { SiteFooter } from "@/app/components/site-footer";
+import { SiteHeader } from "@/app/components/site-header";
 
 export const metadata = {
   title: "Diamond Series Plise Perde",
@@ -66,3 +66,4 @@ export default function DiamondProductPage() {
     </>
   );
 }
+
