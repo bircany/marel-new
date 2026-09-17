@@ -1,10 +1,10 @@
-import * as announcements from "@/app/api/admin/announcements/handler";
-import * as adminProducts from "@/app/api/admin/products/handler";
-import * as adminProduct from "@/app/api/admin/products/[id]/handler";
+import * as announcements from "@/server/api/admin/announcements/handler";
+import * as adminProducts from "@/server/api/admin/products/handler";
+import * as adminProduct from "@/server/api/admin/products/[id]/handler";
 import { duplicateProductRecord } from "@/db";
-import * as authLogin from "@/app/api/auth/login/handler";
-import * as cart from "@/app/api/cart/handler";
-import * as orders from "@/app/api/orders/handler";
+import * as authLogin from "@/server/api/auth/login/handler";
+import * as cart from "@/server/api/cart/handler";
+import * as orders from "@/server/api/orders/handler";
 import { requireAdminApi } from "@/app/lib/admin-auth";
 import { laravel, getSessionId, setTokenCookie } from "@/app/lib/laravel-auth";
 
@@ -96,3 +96,4 @@ export async function DELETE(request: Request, context: RouteContext) {
   }
   return notFound(path);
 }
+
