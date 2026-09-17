@@ -84,7 +84,6 @@ Tarayıcınızda **http://localhost:3000** adresini açabilirsiniz.
 | `npm run db:setup` | `db/setup-supabase.mjs` ile Supabase şemasını kurar |
 | `npm run db:generate` | `config/drizzle.config.ts` ile migration üretir |
 | `npm run lint` | ESLint ile kod standartlarını denetler |
-| `node test-e2e.mjs` | 21 adımlı E2E güvenlik, API, sipariş ve vitrin test paketini çalıştırır |
 
 ---
 
