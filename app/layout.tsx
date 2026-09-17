@@ -16,6 +16,7 @@ import { GoogleTag } from "./components/google-tag";
 import { GoogleTagNoScript } from "./components/google-tag-noscript";
 import { ConsentBanner } from "./components/consent-banner";
 import { ScrollingTitle } from "./components/scrolling-title";
+import { PageTransitionLoader } from "./components/page-transition-loader";
 import { absoluteUrl, siteUrl } from "./lib/site";
 
 const inter = Inter({
@@ -56,6 +57,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body className={inter.variable}>
         <GoogleTagNoScript />
         <ScrollingTitle text="Marel Plise Perde Elbistan" />
+        <PageTransitionLoader />
         {children}
         <WhatsAppAdvisor />
         <ConsentBanner />

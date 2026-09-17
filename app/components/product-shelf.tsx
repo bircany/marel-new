@@ -75,12 +75,13 @@ export function ProductShelf({ products }: { products: StoreProduct[] }) {
         <article className="shop-product-card" key={product.code}>
           <Link className="shop-product-image" href={product.href}>
             <Image
-              unoptimized
               src={product.image}
               alt={product.name}
               fill
               sizes="(max-width: 700px) 50vw, 25vw"
               style={{ objectPosition: product.imagePosition ?? "center" }}
+              loading="eager"
+              quality={72}
             />
             {product.badge ? <b>{product.badge}</b> : null}
             <span className="product-code" style={{ top: "auto", bottom: 8, right: 8, height: "auto", width: "auto" }}>{product.code}</span>

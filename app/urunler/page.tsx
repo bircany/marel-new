@@ -145,7 +145,7 @@ export default async function ProductsPage({
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           style={{ objectFit: "cover" }}
                           className="transition-transform duration-300 group-hover:scale-105"
-                          loading={index < 8 ? "eager" : "lazy"}
+                          loading="eager"
                           quality={72}
                         />
                         {/* Dark series tag on bottom-left */}
