@@ -10,7 +10,7 @@ export function ProductFilterSync() {
   const pathname = usePathname();
   useEffect(() => {
     if (pathname !== "/urunler") return;
-    const filter = normalize(params.get("filter") || params.get("q") || "");
+    const filter = normalize(params?.get("filter") || params?.get("q") || "");
     document.querySelectorAll<HTMLElement>("[data-product-card]").forEach((card) => {
       const haystack = normalize(card.dataset.productCard || "");
       card.style.display = !filter || haystack.includes(filter) ? "" : "none";

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { SiteFooter } from "@/app/components/site-footer";
 import { SiteHeader } from "@/app/components/site-header";
 import { absoluteUrl } from "@/app/lib/site";
-import { listAnnouncements } from "@/db";
 
 export const metadata = {
   title: "Duyurular & Bilgilendirme | Marel Perde ve Sineklik Sistemleri",
@@ -11,8 +10,7 @@ export const metadata = {
   alternates: { canonical: absoluteUrl("/duyurular") },
 };
 
-export default async function AnnouncementsPage() {
-  const announcements = await listAnnouncements(true).catch(() => []);
+export default function AnnouncementsPage({ announcements }: { announcements: any[] }) {
 
   return (
     <>

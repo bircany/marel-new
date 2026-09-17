@@ -102,7 +102,7 @@ export function AdminConsole({
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const tabParam = searchParams.get("tab") as Tab | null;
+  const tabParam = searchParams?.get("tab") as Tab | null;
   const [tab, setTab] = useState<Tab>(tabParam && ["dashboard", "products", "orders", "cargo", "coupons", "customers", "settings", "reviews", "announcements", "contacts"].includes(tabParam) ? tabParam : "dashboard");
 
   const [isAdminSidebarOpen, setIsAdminSidebarOpen] = useState(false);

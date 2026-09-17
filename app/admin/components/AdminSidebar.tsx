@@ -147,9 +147,10 @@ export function AdminSidebar({ adminUser, pendingOrdersCount = 0 }: AdminSidebar
       {/* Nav Menu */}
       <nav className="admin-sidebar-nav">
         {navItems.filter((item) => item.label === "Ürün Yönetimi").map((item) => {
+          const currentPath = pathname ?? "";
           const isActive = item.exact
-            ? pathname === item.href
-            : pathname.startsWith(item.href);
+            ? currentPath === item.href
+            : currentPath.startsWith(item.href);
 
           return (
             <Link

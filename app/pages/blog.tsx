@@ -3,7 +3,6 @@ import Image from "next/image";
 import { SiteHeader } from "@/app/components/site-header";
 import { SiteFooter } from "@/app/components/site-footer";
 import { absoluteUrl } from "@/app/lib/site";
-import { listAnnouncements } from "@/db";
 
 export const metadata = {
   title: "Marel Plise Perde | Blog, Ölçü Rehberleri ve İpuçları",
@@ -37,8 +36,7 @@ export const metadata = {
   },
 };
 
-export default async function BlogPage() {
-  const blogPosts = await listAnnouncements(true);
+export default function BlogPage({ blogPosts }: { blogPosts: any[] }) {
 
   return (
     <>
