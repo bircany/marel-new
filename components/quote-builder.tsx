@@ -23,7 +23,7 @@ export function QuoteBuilder() {
     "Merhaba Marel, Diamond Series için teklif almak istiyorum.", "",
     `Kumaş rengi: ${fabric}`, `Kasa rengi: ${frame}`,
     `Ölçü: ${width || "Belirtilmedi"} cm x ${height || "Belirtilmedi"} cm`,
-    `Adet: ${quantity || "1"}`, "", "Ürün sayfası: marelpliseperde.com/urunler/plise-perde/diamond-serisi",
+    `Adet: ${quantity || "1"}`, "", "Ürün sayfası: marelpliseperde.com/urunler?filter=diamond",
   ].join("\n"), [fabric, frame, width, height, quantity]);
 
   const openWhatsApp = () => window.open(`https://wa.me/905467356602?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");

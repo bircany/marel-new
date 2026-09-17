@@ -12,11 +12,6 @@ const categoryNotes: Record<string, { title: string; text: string; rootCategory:
     text: "Menteşeli, sabit, akordiyon, sürme ve evcil hayvan tüllü sistemler için Marel ürün akışına uygun kategori vitrini.",
     rootCategory: "Sineklikler",
   },
-  perdeler: {
-    title: "Perdeler",
-    text: "Marel katalog fotoğraflarındaki plise perde serileri burada ayrı ürünler olarak listelenir.",
-    rootCategory: "Perdeler",
-  },
   "plise-perdeler": {
     title: "Plise Perdeler",
     text: "Her seri klasöründeki her fotoğraf ayrı renk/model ürünü olarak tanımlandı.",
@@ -99,7 +94,7 @@ export function CategoryAliasPage({ slug }: { slug: keyof typeof categoryNotes }
         !pCat.includes("tül")
       );
     }
-    if (slug === "perdeler" || slug === "plise-perdeler") {
+    if (slug === "plise-perdeler") {
       return pRoot.includes("perde") || pRoot.includes("plise") || pCat.includes("perde") || pCat.includes("plise");
     }
 
@@ -108,7 +103,7 @@ export function CategoryAliasPage({ slug }: { slug: keyof typeof categoryNotes }
   // Some legacy catalog rows have no root/category metadata. The plise
   // catalog is still the intended content for these aliases, so do not show
   // an empty state when the source contains products but metadata is sparse.
-  const visibleProducts = products.length > 0 || (slug !== "perdeler" && slug !== "plise-perdeler")
+  const visibleProducts = products.length > 0 || slug !== "plise-perdeler"
     ? products
     : allProducts;
 

@@ -59,7 +59,7 @@ export default function ProductPage() {
           <nav className="pdp-breadcrumbs">
             <Link href="/">Ana Sayfa</Link>
             <span className="separator">›</span>
-            <Link href="/perdeler">Perdeler</Link>
+            <Link href="/plise-perdeler">Perdeler</Link>
             <span className="separator">›</span>
             <Link href="/plise-perdeler">Plise Perdeler</Link>
             <span className="separator">›</span>
