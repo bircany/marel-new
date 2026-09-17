@@ -1,5 +1,1 @@
-import { redirect } from "next/navigation";
-
-export default function TrackingPage() {
-  redirect("/");
-}
+export { default, metadata } from "@/app/pages/siparis-takip";
