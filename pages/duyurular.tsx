@@ -1,5 +1,5 @@
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
-import AnnouncementsPage from "@/app/pages/duyurular";
+import AnnouncementsPage from "@/app/components/page-views/duyurular";
 
 export const getStaticProps: GetStaticProps<{ announcements: unknown[] }> = async () => {
   try {
@@ -14,3 +14,5 @@ export const getStaticProps: GetStaticProps<{ announcements: unknown[] }> = asyn
 export default function AnnouncementsRoute({ announcements }: InferGetStaticPropsType<typeof getStaticProps>) {
   return <AnnouncementsPage announcements={announcements as any[]} />;
 }
+
+

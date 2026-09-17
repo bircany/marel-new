@@ -136,9 +136,9 @@ Repository: **https://github.com/bircany/marel-new**
 
 ## Dizin düzeni
 
-Next.js App Router kullandığımız için route girişleri `app/**/page.tsx` altında
-kalır. Yeniden kullanılabilir sayfa implementasyonları ve bileşenler `app/pages`
-ve `app/components` altında tutulur. Next/Vercel tarafından kökten aranan
+Public içerik route'ları `pages/` altında, admin/API ve DB'ye sıkı bağlı ürün
+route'ları `app/**/page.tsx` altında tutulur. Ortak sayfa görünümleri
+`pages/_views`, ortak bileşenler `app/components` altındadır. Next/Vercel tarafından kökten aranan
 `package.json`, `tsconfig.json`, `next.config.ts`, `postcss.config.mjs`,
 `eslint.config.mjs`, `next-env.d.ts` ve `vercel.json` kökte bırakılmıştır.
 

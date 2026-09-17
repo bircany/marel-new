@@ -1,5 +1,5 @@
 import type { GetStaticProps, InferGetStaticPropsType } from "next";
-import BlogPage from "@/app/pages/blog";
+import BlogPage from "@/app/components/page-views/blog";
 
 export const getStaticProps: GetStaticProps<{ blogPosts: unknown[] }> = async () => {
   try {
@@ -14,3 +14,5 @@ export const getStaticProps: GetStaticProps<{ blogPosts: unknown[] }> = async ()
 export default function BlogRoute({ blogPosts }: InferGetStaticPropsType<typeof getStaticProps>) {
   return <BlogPage blogPosts={blogPosts as any[]} />;
 }
+
+
