@@ -16,6 +16,11 @@ Marel'in plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri
 Proje, harici bir PHP, Laravel veya Docker sunucusu kurulumu gerektirmeksizin **tamamen bağımsız (self-contained)** bir BFF mimarisine sahiptir.
 Next.js içerisindeki `/api/*` uç noktaları doğrudan Supabase PostgreSQL veritabanı ile konuşur.
 
+API yönlendirmesi tek merkezden `app/api/api.ts` içinde yapılır. Next.js'in
+endpoint'i tanıması için `app/api/[...path]/route.ts` yalnızca bu merkezi
+metotları dışa aktaran ince adaptördür; sepet, sipariş, auth ve admin CRUD
+işlemleri bu dispatch katmanından yönetilir.
+
 ### Neler Dahil?
 1. **Sipariş & Kargo Motoru:** Dinamik MRL-XXXXXX sipariş numarası üretimi, kalemler, kargo takip linki oluşturma ve durum geçmişi.
 2. **Katalog & Konfigüratör:** 227 hazır ürün ve görseli, özel en/boy ölçü hesaplayıcısı, kumaş ve profil opsiyonları.
