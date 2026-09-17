@@ -18,11 +18,12 @@ Next/Vercel yapılandırmaları (`package.json`, `tsconfig.json`, `next.config.t
 `postcss.config.mjs`, `eslint.config.mjs`, `next-env.d.ts`, `vercel.json`) kökte
 kalmalıdır. Drizzle yapılandırması `db/drizzle.config.ts` içindedir.
 
-API, `api.ts` içindeki merkezi metotlar ve `pages/api/[...path].ts` adaptörü üzerinden işlev modüllerine
+API, `server/api/api.ts` içindeki merkezi metotlar ve `pages/api/[...path].ts` adaptörü üzerinden işlev modüllerine
 dağıtılır; yeni endpoint eklerken Vercel function sayısını artırmamaya dikkat
 edin. Gizli değerleri yalnızca `.env.local` içinde tutun.
 
 `public/images/products` canlı katalog serileri için ayrılmıştır; silme öncesi
 `db/generated-catalog.ts` ve uygulama referansları kontrol edilmelidir. Yerel
 bağımlılıklar ve `*.tsbuildinfo` Git dışında tutulur.
+
 
