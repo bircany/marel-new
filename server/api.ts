@@ -13,6 +13,24 @@ import { stListReviews, stListContactMessages } from "@/lib/softtrade";
 type RouteContext = { params: Promise<{ path?: string[] }> };
 type ProductContext = { params: Promise<{ id: string }> };
 
+/** Public response contract used by the cart UI. */
+export type OrderPayload = {
+  id: number | string;
+  order_number: string;
+  status: string;
+  payment_status: string;
+  payment_method: string;
+  subtotal: number;
+  discount_amount: number;
+  shipping_cost: number;
+  total: number;
+  formatted_total: string;
+  shipping_address: Record<string, unknown> | null;
+  items?: Array<Record<string, unknown>>;
+  notes: string | null;
+  created_at: string;
+};
+
 /** Central auth registration method. The route adapter delegates /api/auth/register here. */
 async function register(request: Request) {
   const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;

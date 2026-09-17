@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { fetchServerCart, formatMoney, type ServerCart, type ServerCartItem } from "@/lib/commerce";
 import { trackAdsConversion, trackCommerceEvent } from "@/lib/google-ads";
 import type { LaravelUser } from "@/lib/laravel-auth";
-import type { OrderPayload } from "@/server/api/orders/handler";
+import type { OrderPayload } from "@/server/api";
 import { getPaymentSettingsSync, whatsappPaymentUrl, type PaymentSettings } from "@/lib/payment";
 
 function kurus(tl: number): number {
