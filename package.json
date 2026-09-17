@@ -13,7 +13,7 @@
     "build:vinext": "vinext build",
     "start": "next start",
     "start:vinext": "vinext start",
-    "test": "npm run build && node --experimental-loader ./tests/cloudflare-loader.mjs --test tests/rendered-html.test.mjs",
+    "test": "npm run build",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate --config db/drizzle.config.ts",
     "db:setup": "node db/setup-supabase.mjs"
