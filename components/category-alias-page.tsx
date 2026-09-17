@@ -1,8 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { CatalogBrowser } from "@/components/catalog-browser";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { listProducts } from "@/db";
+import { useEffect, useMemo, useState } from "react";
 
 const categoryNotes: Record<string, { title: string; text: string; rootCategory: string }> = {
   sineklikler: {
@@ -57,15 +59,14 @@ const categoryNotes: Record<string, { title: string; text: string; rootCategory:
   },
 };
 
-export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryNotes }) {
+export function CategoryAliasPage({ slug }: { slug: keyof typeof categoryNotes }) {
   const config = categoryNotes[slug] || { title: slug, text: "", rootCategory: slug };
-  // Category landing pages should still show catalog items when an older
-  // product record has not yet had its active flag backfilled.
-  const allProducts = await listProducts(slug === "perdeler" || slug === "plise-perdeler");
+  const [allProducts, setAllProducts] = useState<any[]>([]);
+  useEffect(() => { fetch("/api/products").then((r) => r.json()).then((d) => setAllProducts(d.products || [])).catch(() => setAllProducts([])); }, []);
 
   // Filter by rootCategory or category text match
   const targetRoot = config.rootCategory.toLowerCase();
-  const products = allProducts.filter((p) => {
+  const products = useMemo(() => allProducts.filter((p) => {
     const pRoot = ((p as any).rootCategory || "").toLowerCase();
     const pCat = (p.category || "").toLowerCase();
 
@@ -103,7 +104,7 @@ export async function CategoryAliasPage({ slug }: { slug: keyof typeof categoryN
     }
 
     return pRoot === targetRoot || pCat.includes(targetRoot);
-  });
+  }), [allProducts, slug, targetRoot]);
   // Some legacy catalog rows have no root/category metadata. The plise
   // catalog is still the intended content for these aliases, so do not show
   // an empty state when the source contains products but metadata is sparse.
