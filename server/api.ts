@@ -7,7 +7,8 @@ import * as cart from "@/server/api/cart/handler";
 import * as orders from "@/server/api/orders/handler";
 import { requireAdminApi } from "@/lib/admin-auth";
 import { laravel, getSessionId, setTokenCookie } from "@/lib/laravel-auth";
-import { getProductBySlug, listProducts, listAnnouncements, getAnnouncementBySlug } from "@/db";
+import { getProductBySlug, listProducts, listAnnouncements, getAnnouncementBySlug, listOrdersWithDetails, listCouponsFromDb, getSettingsFromDb, listCustomersFromDb } from "@/db";
+import { stListReviews, stListContactMessages } from "@/lib/softtrade";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 type ProductContext = { params: Promise<{ id: string }> };
@@ -58,6 +59,12 @@ export async function GET(request: Request, context: RouteContext) {
   if (path.length === 1 && path[0] === "orders") return orders.GET();
   if (path.length === 2 && path[0] === "admin" && path[1] === "announcements") return announcements.GET();
   if (path.length === 2 && path[0] === "admin" && path[1] === "products") return adminProducts.GET();
+  if (path.length === 2 && path[0] === "admin" && path[1] === "dashboard") {
+    const admin = await requireAdminApi();
+    if (admin instanceof Response) return admin;
+    const [products, orders, reviews, announcementRows, contacts, coupons, settings, customers] = await Promise.all([listProducts(true), listOrdersWithDetails(), stListReviews(), listAnnouncements(false), stListContactMessages(), listCouponsFromDb(), getSettingsFromDb(), listCustomersFromDb()]);
+    return Response.json({ admin, products, orders, reviews, announcements: announcementRows, contacts, coupons, settings, customers });
+  }
 
   return notFound(path);
 }

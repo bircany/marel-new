@@ -1,9 +1,9 @@
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { absoluteUrl } from "@/lib/site";
-import { ensureDatabase, getDb, listProducts } from "@/db";
 
 export const metadata = {
   title: "Marel Plise Perde | Özel Ölçü Plise Perde Sistemleri",
@@ -11,76 +11,22 @@ export const metadata = {
     "Marel Plise Perde - Diamond, Blackout, Honeycomb, Touch ve 17 farklı seride özel ölçüye göre kaliteli plise perde üretimi.",
 };
 
-const POPULAR_DIAMOND = [
-  { code: "DIAMOND - 100", name: "Diamond Beyaz Plise Perde", price: "550.00₺", image: "/images/yaren/diamond100.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 108", name: "Diamond Krem Plise Perde", price: "550.00₺", image: "/images/yaren/diamond108.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 102", name: "Diamond Gri Plise Perde", price: "550.00₺", image: "/images/yaren/diamond102.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 103", name: "Diamond Ara-Gri Plise Perde", price: "550.00₺", image: "/images/yaren/diamond103.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 109", name: "Diamond Açık-Gri Plise Perde", price: "550.00₺", image: "/images/yaren/diamond109.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 110", name: "Diamond Antrasit Plise Perde", price: "550.00₺", image: "/images/yaren/diamond110.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 113", name: "Diamond Kahve Plise Perde", price: "550.00₺", image: "/images/yaren/diamond113.png", slug: "diamond-series-plise-perde" },
-  { code: "DIAMOND - 111", name: "Diamond Siyah Plise Perde", price: "550.00₺", image: "/images/yaren/diamond111.png", slug: "diamond-series-plise-perde" },
-];
+export default function Home() {
+  const [dbProducts, setDbProducts] = useState<any[]>([]);
+  const [blogPosts, setBlogPosts] = useState<any[]>([]);
+  useEffect(() => {
+    Promise.all([fetch("/api/products").then((r) => r.json()), fetch("/api/announcements").then((r) => r.json())])
+      .then(([catalog, announcements]) => {
+        setDbProducts(catalog.products || []);
+        if (announcements.announcements?.length) setBlogPosts(announcements.announcements.slice(0, 3));
+      })
+      .catch(() => undefined);
+  }, []);
 
-const POPULAR_BLACKOUT = [
-  { code: "BLACKOUT - 01 KREM", name: "Blackout Krem Plise Perde", price: "1,166.00₺", image: "/images/yaren/BLACOUT-KREM.png", slug: "blackout-series-plise-perde" },
-  { code: "BLACKOUT - 03 ANTRASİT", name: "Blackout Antrasit Plise Perde", price: "1,166.00₺", image: "/images/yaren/BLACOUT-ANTRASIT.png", slug: "blackout-series-plise-perde" },
-  { code: "BLACKOUT - SİYAH", name: "Blackout Siyah Plise Perde", price: "1,166.00₺", image: "/images/yaren/BLACOUT-SIYAH.png", slug: "blackout-series-plise-perde" },
-  { code: "BLACKOUT - 02 GRİ", name: "Blackout Gri Plise Perde", price: "1,166.00₺", image: "/images/yaren/BLACOUT-GRI.png", slug: "blackout-series-plise-perde" },
-];
-
-const POPULAR_HONEYCOMB = [
-  { code: "HONEYCOMB SERIES - 001", name: "Honeycomb Beyaz Plise Perde", price: "1,166.00₺", image: "/images/yaren/HONEY-001.png", slug: "honeycomb-series-plise-perde" },
-  { code: "HONEYCOMB SERIES - 002", name: "Honeycomb Krem Plise Perde", price: "1,166.00₺", image: "/images/yaren/HONEY-002.png", slug: "honeycomb-series-plise-perde" },
-  { code: "HONEYCOMB SERIES - 003", name: "Honeycomb Gri Plise Perde", price: "1,166.00₺", image: "/images/yaren/HONEY-003.png", slug: "honeycomb-series-plise-perde" },
-  { code: "HONEYCOMB SERIES - 006", name: "Honeycomb Siyah Plise Perde", price: "1,166.00₺", image: "/images/yaren/HONEY-005.png", slug: "honeycomb-series-plise-perde" },
-];
-
-const FALLBACK_BLOGS = [
-  {
-    id: "ann-1",
-    slug: "olcuye-ozel-uretim-rehberi",
-    title: "Ölçüye özel üretim nasıl ilerliyor?",
-    summary: "Ölçü teyidinden üretim ve teslimata kadar Marel sipariş sürecini adım adım keşfedin.",
-    image_url: "/images/real/diamond-beyaz-siyah-ip.jpeg",
-  },
-  {
-    id: "ann-2",
-    slug: "honeycomb-isi-yalitimi",
-    title: "Honeycomb ile dört mevsim konfor",
-    summary: "Hücresel kumaş yapısının ışık ve ısı kontrolüne katkısını yakından inceleyin.",
-    image_url: "/images/hero/marel-honeycomb-hero-v3.png",
-  },
-  {
-    id: "ann-3",
-    slug: "whatsapp-olcu-destegi",
-    title: "Fotoğrafınızı gönderin, sistemi birlikte seçelim",
-    summary: "Perde, sineklik veya kapı sistemi seçiminde Marel danışmanından hızlı destek alın.",
-    image_url: "/images/catalog/diamond.webp",
-  },
-];
-
-export default async function Home() {
-  await ensureDatabase();
-  const db = getDb();
-  const dbProducts = await listProducts();
-  let blogPosts: any[] = [];
-  try {
-    const raw = await db.prepare("SELECT * FROM announcements WHERE published = 1 ORDER BY created_at DESC LIMIT 3").all();
-    blogPosts = raw.results || [];
-  } catch (err) {
-    console.error("Home blog fetch error:", err);
-  }
-
-  if (!blogPosts || blogPosts.length === 0) {
-    blogPosts = FALLBACK_BLOGS;
-  }
-
-  const cardProducts = (category: string, fallback: typeof POPULAR_DIAMOND) => {
+  const cardProducts = (category: string, limit: number) => {
     const matches = dbProducts
       .filter((product) => product.active !== 0 && product.category.toLowerCase().includes(category.toLowerCase()))
-      .slice(0, fallback.length);
-    if (!matches.length) return fallback;
+      .slice(0, limit);
     return matches.map((product) => ({
       code: product.sku || product.name,
       name: product.name,
@@ -89,9 +35,9 @@ export default async function Home() {
       slug: product.slug,
     }));
   };
-  const popularDiamond = cardProducts("Diamond", POPULAR_DIAMOND);
-  const popularBlackout = cardProducts("Blackout", POPULAR_BLACKOUT);
-  const popularHoneycomb = cardProducts("Honeycomb", POPULAR_HONEYCOMB);
+  const popularDiamond = cardProducts("Diamond", 8);
+  const popularBlackout = cardProducts("Blackout", 4);
+  const popularHoneycomb = cardProducts("Honeycomb", 4);
 
   return (
     <>
@@ -496,7 +442,7 @@ export default async function Home() {
                   >
                     <div style={{ position: "relative", height: 200, background: "#e2e8f0" }}>
                       <Image
-                        src={post.image_url || "/images/real/diamond-beyaz-siyah-ip.jpeg"}
+                        src={post.image_url || post.imageUrl || "/images/real/diamond-beyaz-siyah-ip.jpeg"}
                         alt={post.title}
                         fill
                         style={{ objectFit: "cover" }}

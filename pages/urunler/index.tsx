@@ -1,12 +1,10 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
 import Image from "next/image";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { listProducts } from "@/db";
 import { absoluteUrl } from "@/lib/site";
-import { ProductFilterSync } from "@/components/product-filter-sync";
-
-export const dynamic = "force-static";
 
 export const metadata = {
   title: "Marel Ürünleri | Plise Perde Sistemleri",
@@ -38,13 +36,11 @@ const CATEGORY_LIST = [
 
 const normalizeFilter = (value: string) => value.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
 
-export default async function ProductsPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ kategori?: string; q?: string; filter?: string; sort?: string }>;
-}) {
-  const params = await searchParams;
-  const rawProducts = await listProducts(false);
+export default function ProductsPage() {
+  const router = useRouter();
+  const [rawProducts, setRawProducts] = useState<any[]>([]);
+  useEffect(() => { fetch("/api/products").then((r) => r.json()).then((data) => setRawProducts(data.products || [])).catch(() => setRawProducts([])); }, []);
+  const params = router.query as { kategori?: string; q?: string; filter?: string; sort?: string };
 
   const query = params?.filter || params?.q;
   const normalizedQuery = query ? normalizeFilter(query) : "";
@@ -65,7 +61,6 @@ export default async function ProductsPage({
   return (
     <>
       <SiteHeader />
-      <ProductFilterSync />
       <main style={{ backgroundColor: "#fcfbf7", minHeight: "100vh", padding: "40px 20px 80px" }}>
         <div style={{ maxWidth: "1240px", margin: "0 auto" }}>
           

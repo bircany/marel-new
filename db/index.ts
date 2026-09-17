@@ -3,7 +3,6 @@ import fs from "node:fs";
 import path from "node:path";
 import { GENERATED_SEEDS } from "./generated-catalog";
 import { GENERATED_PLISE_SEEDS } from "./generated-plise";
-import { DEFAULT_BLOG_POSTS } from "@/data/default-blogs";
 
 const ALL_FALLBACK_PRODUCTS: CatalogProduct[] = [...(GENERATED_SEEDS as any), ...(GENERATED_PLISE_SEEDS as any)];
 
@@ -1070,34 +1069,6 @@ export async function listAnnouncements(publishedOnly = true): Promise<Announcem
   // the one-time bootstrap. Re-run the idempotent catalog seed here so newly
   // published SEO posts appear without requiring a manual DB reset.
   await seedAnnouncements(db);
-  try {
-    const count = await db.prepare("SELECT COUNT(*) AS total FROM announcements").first<{ total: number }>();
-    if (!count || count.total === 0) {
-      for (const p of DEFAULT_BLOG_POSTS) {
-        await db
-          .prepare(
-            "INSERT OR IGNORE INTO announcements (id, slug, title, summary, body, image_url, published, featured, published_at, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-          )
-          .bind(
-            p.id,
-            p.slug,
-            p.title,
-            p.summary,
-            p.body,
-            p.image_url,
-            p.published,
-            p.featured,
-            p.published_at,
-            p.created_at,
-            p.created_at
-          )
-          .run();
-      }
-    }
-  } catch (err) {
-    console.error("Announcement seed check error:", err);
-  }
-
   const where = publishedOnly ? "WHERE published = 1" : "";
   const { results } = await db
     .prepare(
@@ -1117,34 +1088,9 @@ export async function getAnnouncementBySlug(slug: string): Promise<AnnouncementR
       )
       .bind(slug)
       .first<AnnouncementRecord>();
-    if (item) {
-      // Upgrade legacy three-line seed records with the maintained SEO article
-      // when they predate the richer content library. Admin-authored long-form
-      // posts remain untouched.
-      const fallback = DEFAULT_BLOG_POSTS.find((p) => p.slug === slug);
-      if (fallback && (!item.body || item.body.length < 500) && fallback.body.length > item.body.length) {
-        return { ...item, title: fallback.title, summary: fallback.summary, body: fallback.body, imageUrl: fallback.image_url, publishedAt: fallback.published_at };
-      }
-      return item;
-    }
+    if (item) return item;
   } catch (err) {
     console.error("Error fetching announcement by slug:", err);
-  }
-  const fallback = DEFAULT_BLOG_POSTS.find((p) => p.slug === slug);
-  if (fallback) {
-    return {
-      id: fallback.id,
-      slug: fallback.slug,
-      title: fallback.title,
-      summary: fallback.summary,
-      body: fallback.body,
-      imageUrl: fallback.image_url,
-      published: fallback.published,
-      featured: fallback.featured,
-      publishedAt: fallback.published_at,
-      createdAt: fallback.created_at,
-      updatedAt: fallback.created_at,
-    };
   }
   return null;
 }

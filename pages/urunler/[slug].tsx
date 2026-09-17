@@ -1,58 +1,23 @@
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ProductConfigurator } from "@/components/product-configurator";
 
 import { ProductViewTracker } from "@/components/product-view-tracker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { CategoryLanding } from "@/components/category-landing";
-import { getCategoryPage } from "@/data";
-import { stGetProductBySlug } from "@/lib/softtrade";
 import { absoluteUrl } from "@/lib/site";
-
-export const dynamic = "force-static";
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const category = getCategoryPage(slug);
-  if (category) {
-    return {
-      title: `${category.title} Modelleri ve Fiyatları`,
-      description: category.description,
-      alternates: { canonical: absoluteUrl(`/urunler/${category.slug}`) },
-      openGraph: {
-        title: `${category.title} Modelleri ve Fiyatları`,
-        description: category.description,
-        type: "website" as const,
-        url: absoluteUrl(`/urunler/${category.slug}`),
-        images: category.image ? [absoluteUrl(category.image)] : undefined,
-      },
-    };
-  }
-  const product = await stGetProductBySlug(slug);
-  return product
-    ? {
-        title: `${product.name} | Ölçüye Özel Plise Perde`,
-        description: product.description,
-        alternates: { canonical: absoluteUrl(`/urunler/${product.slug}`) },
-        openGraph: {
-          title: product.name,
-          description: product.description,
-          type: "website" as const,
-          url: absoluteUrl(`/urunler/${product.slug}`),
-          images: [absoluteUrl(product.image)],
-        },
-      }
-    : { title: "Ürün bulunamadı", robots: { index: false, follow: false } };
-}
-
-export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
-  const category = getCategoryPage(slug);
-  if (category) return <CategoryLanding config={category} />;
-
-  const product = await stGetProductBySlug(slug);
-  if (!product) notFound();
+export default function ProductPage() {
+  const router = useRouter();
+  const slug = typeof router.query.slug === "string" ? router.query.slug : "";
+  const [product, setProduct] = useState<any | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    if (!slug) return;
+    fetch(`/api/products/${encodeURIComponent(slug)}`).then((r) => r.ok ? r.json() : null).then((data) => setProduct(data?.product || null)).finally(() => setLoaded(true));
+  }, [slug]);
+  if (!loaded) return <main className="commerce-main shop-container" style={{ padding: 80 }}>Ürün yükleniyor…</main>;
+  if (!product) return <main className="commerce-main shop-container" style={{ padding: 80 }}>Ürün bulunamadı.</main>;
 
   const effectivePrice = product.salePrice ?? product.price ?? 59900;
 
