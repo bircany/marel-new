@@ -16,7 +16,7 @@ Marel'in plise perde, jaluzi, zip perde, sineklik ve sürgülü kapı sistemleri
 Proje, harici bir PHP, Laravel veya Docker sunucusu kurulumu gerektirmeksizin **tamamen bağımsız (self-contained)** bir BFF mimarisine sahiptir.
 Next.js içerisindeki `/api/*` uç noktaları doğrudan Supabase PostgreSQL veritabanı ile konuşur.
 
-API yönlendirmesi tek merkezden `app/api/api.ts` içinde yapılır. Next.js'in
+API yönlendirmesi tek merkezden `app/api.ts` içinde yapılır. Next.js'in
 endpoint'i tanıması için `app/api/[...path]/route.ts` yalnızca bu merkezi
 metotları dışa aktaran ince adaptördür; sepet, sipariş, auth ve admin CRUD
 işlemleri bu dispatch katmanından yönetilir.
@@ -144,3 +144,4 @@ route'ları `app/**/page.tsx` altında tutulur. Ortak sayfa görünümleri
 
 Drizzle ayarı `db/drizzle.config.ts`, migrationlar ve Supabase kurulum dosyaları
 `db/` altındadır. `.env.local` yerelde kalır ve Git'e gönderilmez.
+

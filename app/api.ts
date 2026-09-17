@@ -6,9 +6,28 @@ import * as authLogin from "@/app/api/auth/login/handler";
 import * as cart from "@/app/api/cart/handler";
 import * as orders from "@/app/api/orders/handler";
 import { requireAdminApi } from "@/app/lib/admin-auth";
+import { laravel, getSessionId, setTokenCookie } from "@/app/lib/laravel-auth";
 
 type RouteContext = { params: Promise<{ path?: string[] }> };
 type ProductContext = { params: Promise<{ id: string }> };
+
+/** Central auth registration method. The route adapter delegates /api/auth/register here. */
+async function register(request: Request) {
+  const body = (await request.json().catch(() => ({}))) as Record<string, unknown>;
+  const email = String(body.email ?? "").trim().toLowerCase();
+  const password = String(body.password ?? "");
+  const name = String(body.name ?? body.full_name ?? "").trim();
+  if (!email.includes("@") || password.length < 6 || !name) {
+    return Response.json({ error: "Ad, geçerli e-posta ve en az 6 karakterli şifre gereklidir." }, { status: 400 });
+  }
+  const result = await laravel<{ user: unknown; access_token?: string }>("/auth/register", {
+    method: "POST",
+    body: JSON.stringify({ name, email, password, password_confirmation: password, session_id: await getSessionId() }),
+  });
+  if (!result.ok) return Response.json({ error: result.message }, { status: result.status });
+  if (result.data.access_token) await setTokenCookie(result.data.access_token);
+  return Response.json({ success: true, user: result.data.user }, { status: 201 });
+}
 
 async function getPath(context: RouteContext): Promise<string[]> {
   const { path } = await context.params;
@@ -36,6 +55,7 @@ export async function POST(request: Request, context: RouteContext) {
   if (path.length === 1 && path[0] === "cart") return cart.POST(request);
   if (path.length === 1 && path[0] === "orders") return orders.POST(request);
   if (path.length === 2 && path[0] === "auth" && path[1] === "login") return authLogin.POST(request);
+  if (path.length === 2 && path[0] === "auth" && path[1] === "register") return register(request);
   if (path.length === 2 && path[0] === "admin" && path[1] === "announcements") return announcements.POST(request);
   if (path.length === 2 && path[0] === "admin" && path[1] === "products") return adminProducts.POST(request);
   if (path.length === 4 && path[0] === "admin" && path[1] === "products" && path[3] === "duplicate") {
