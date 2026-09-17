@@ -47,6 +47,25 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <link rel="apple-touch-icon" href="/favicon.png" />
       </head>
       <body className={inter.variable}>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "LocalBusiness",
+              "@id": `${siteUrl}/#business`,
+              name: "Marel Plise Perde",
+              url: siteUrl,
+              logo: `${siteUrl}/images/marel-logo.png`,
+              image: `${siteUrl}/images/hero/marel-honeycomb-hero-v3.png`,
+              telephone: "+90 546 735 66 02",
+              priceRange: "₺₺",
+              address: { "@type": "PostalAddress", addressLocality: "Elbistan", addressRegion: "Kahramanmaraş", addressCountry: "TR" },
+              areaServed: "TR",
+              sameAs: ["https://www.instagram.com/", "https://www.youtube.com/"],
+            }).replace(/</g, "\\u003c"),
+          }}
+        />
         <GoogleTagNoScript />
         <ScrollingTitle text="Marel Plise Perde Elbistan" />
         <PageTransitionLoader />

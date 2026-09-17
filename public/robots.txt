@@ -4,3 +4,4 @@ Disallow: /admin
 Disallow: /api/
 Disallow: /sepet
 Sitemap: https://www.marelpliseperde.com.tr/sitemap.xml
+Host: https://www.marelpliseperde.com.tr
