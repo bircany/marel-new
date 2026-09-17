@@ -82,7 +82,7 @@ Tarayıcınızda **http://localhost:3000** adresini açabilirsiniz.
 | `npm run build` | Üretim derlemesini çalıştırır (TypeScript & Turbopack doğrulaması) |
 | `npm run start` | Derlenmiş üretim sürümünü sunar |
 | `npm run db:setup` | `db/setup-supabase.mjs` ile Supabase şemasını kurar |
-| `npm run db:generate` | `config/drizzle.config.ts` ile migration üretir |
+| `npm run db:generate` | `db/drizzle.config.ts` ile migration üretir |
 | `npm run lint` | ESLint ile kod standartlarını denetler |
 
 ---
