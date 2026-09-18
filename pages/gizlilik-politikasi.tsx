@@ -88,8 +88,8 @@ export default function PrivacyPolicyPage() {
             <section>
               <h2>4. Çerez (Cookie) Kullanımı ve Analitik</h2>
               <p>
-                Web sitemizde, kullanıcı deneyiminizi geliştirmek, sepetinizdeki ürünleri hatırlamak, sayfa yüklenme
-                hızlarını optimize etmek ve tercihlerinizi kaydedebilmek adına zorunlu ve performans çerezleri
+                Web sitemizde, kullanıcı deneyiminizi geliştirmek, form ve görüntüleme tercihlerini hatırlamak, sayfa
+                yüklenme hızlarını optimize etmek ve tercihlerinizi kaydedebilmek adına zorunlu ve performans çerezleri
                 kullanılmaktadır. Tarayıcı ayarlarınız üzerinden çerez kullanımını dilediğiniz zaman engelleyebilir veya
                 silebilirsiniz.
               </p>

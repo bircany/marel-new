@@ -3,8 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { addToServerCart, formatMoney } from "@/lib/commerce";
-import { trackCommerceEvent } from "@/lib/google-ads";
+import { formatMoney } from "@/lib/commerce";
 import type { CatalogProduct } from "@/db";
 
 export type FilterState = {
@@ -48,8 +47,6 @@ export function CatalogBrowser({
 
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
-  const [addingId, setAddingId] = useState<string | null>(null);
-  const [addedToast, setAddedToast] = useState<string | null>(null);
 
   // Helper for color count
   const getProductColorText = (product: CatalogProduct) => {
@@ -158,35 +155,6 @@ export function CatalogBrowser({
       inStockOnly: false,
       sortBy: "recommended",
     });
-  };
-
-  const handleQuickAdd = async (product: CatalogProduct, e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (addingId === product.id) return;
-
-    setAddingId(product.id);
-    try {
-      await addToServerCart(product.id, 1);
-      const priceKurus = product.salePrice ?? product.price;
-      trackCommerceEvent("add_to_cart", priceKurus / 100, [
-        {
-          item_id: product.sku,
-          item_name: product.name,
-          item_brand: product.brand,
-          item_category: product.category,
-          price: priceKurus / 100,
-          quantity: 1,
-          google_business_vertical: "retail",
-        },
-      ]);
-      setAddedToast(product.name);
-      setTimeout(() => setAddedToast(null), 3000);
-    } catch {
-      alert("Ürün sepete eklenemedi.");
-    } finally {
-      setAddingId(null);
-    }
   };
 
   const hasActiveFilters =
@@ -323,7 +291,7 @@ export function CatalogBrowser({
                     <h3 className="k-card-title">{product.name}</h3>
                     <div className="k-card-stars">
                       <span className="stars">★★★★★</span>
-                      <span className="reviews">{Math.floor(Math.random() * 100) + 1} Yorum</span>
+                      <span className="reviews">{((index * 17) % 100) + 1} Yorum</span>
                     </div>
                     <div className="k-card-price">
                       {product.salePrice && product.salePrice < product.price ? (
@@ -349,17 +317,6 @@ export function CatalogBrowser({
         </div>
       </div>
 
-      {/* Floating Cart Toast */}
-      {addedToast ? (
-        <div className="catalog-cart-toast" role="status">
-          <span>✓</span>
-          <div>
-            <strong>Sepete eklendi</strong>
-            <small>{addedToast}</small>
-          </div>
-          <Link href="/sepet">Sepete Git →</Link>
-        </div>
-      ) : null}
     </div>
   );
 }

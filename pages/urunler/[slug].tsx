@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import Link from "next/link";
 import { ProductConfigurator } from "@/components/product-configurator";
 
@@ -41,6 +42,15 @@ export default function ProductPage() {
 
   return (
     <>
+      <Head>
+        <title>{product.name} | Marel Plise Perde</title>
+        <meta name="description" content={product.description || `${product.name} için özel ölçü, fiyat ve renk seçenekleri.`} />
+        <link rel="canonical" href={absoluteUrl(`/urunler/${product.slug}`)} />
+        <meta property="og:type" content="product" />
+        <meta property="og:title" content={`${product.name} | Marel Plise Perde`} />
+        <meta property="og:description" content={product.description || "Özel ölçü plise perde."} />
+        {product.image && <meta property="og:image" content={absoluteUrl(product.image)} />}
+      </Head>
       <SiteHeader />
       <main className="commerce-main pdp-main-page">
         <script

@@ -2290,7 +2290,7 @@ export function AdminConsole({
               <div className="admin-page-header-left">
                 <span>PAZARLAMA & KAMPANYALAR</span>
                 <h1>Kupon & İndirim Yönetimi</h1>
-                <p>Müşterilerin sepette kullanabileceği yüzde veya sabit TL indirim kuponlarını yönetin.</p>
+                <p>Teklif ve satış kampanyalarında kullanılacak yüzde veya sabit TL indirim kuponlarını yönetin.</p>
               </div>
             </header>
 
@@ -2358,7 +2358,7 @@ export function AdminConsole({
                 </label>
 
                 <label>
-                  Minimum Sepet Tutarı (TL)
+                  Minimum Sipariş Tutarı (TL)
                   <input
                     name="minimumSubtotal"
                     type="number"
@@ -2408,7 +2408,7 @@ export function AdminConsole({
                         <th style={{ padding: "12px 10px" }}>KOD</th>
                         <th style={{ padding: "12px 10px" }}>İNDİRİM TÜRÜ</th>
                         <th style={{ padding: "12px 10px" }}>DEĞER</th>
-                        <th style={{ padding: "12px 10px" }}>MİN. SEPET</th>
+                        <th style={{ padding: "12px 10px" }}>MİN. SİPARİŞ</th>
                         <th style={{ padding: "12px 10px" }}>KULLANIM</th>
                         <th style={{ padding: "12px 10px" }}>DURUM</th>
                         <th style={{ padding: "12px 10px", textAlign: "right" }}>İŞLEM</th>
@@ -2607,7 +2607,7 @@ export function AdminConsole({
                   <label>
                     Ücretsiz Kargo Limiti (TL)
                     <input name="free_shipping_threshold" type="number" defaultValue={settings.free_shipping_threshold || "2000"} required />
-                    <small style={{ color: "var(--admin-text-dim)", fontSize: "0.72rem" }}>Bu tutar ve üzeri sepetlerde kargo bedava olur.</small>
+                    <small style={{ color: "var(--admin-text-dim)", fontSize: "0.72rem" }}>Bu tutar ve üzerindeki siparişlerde kargo bedava olur.</small>
                   </label>
                   <label>
                     Varsayılan Kargo Firması

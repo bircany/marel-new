@@ -642,7 +642,7 @@ export function AdminProductEditorModal({
                         <option value={9}>Peşin Fiyatına 9 Taksit</option>
                         <option value={12}>Peşin Fiyatına 12 Taksit</option>
                       </select>
-                      <span className="admin-field-hint">Ürün kartında ve sepette taksit rozeti olarak vurgulanır.</span>
+                      <span className="admin-field-hint">Ürün kartında taksit rozeti olarak vurgulanır.</span>
                     </div>
 
                     <div className="admin-field-group">

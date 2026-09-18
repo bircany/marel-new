@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /admin
 Disallow: /api/
-Disallow: /sepet
+Disallow: /admin/
 Sitemap: https://www.marelpliseperde.com.tr/sitemap.xml
-Host: https://www.marelpliseperde.com.tr

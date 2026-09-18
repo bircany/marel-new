@@ -233,15 +233,16 @@ export function getDb(): D1Database {
         return stmt;
       },
       async batch(statements: D1PreparedStatement[]) {
-        const results = [];
-        for (const s of statements) {
+        // D1 has a native batch operation. The PostgreSQL adapter does not, so
+        // execute independent statements concurrently instead of adding one
+        // network round-trip per seed row.
+        return Promise.all(statements.map(async (statement) => {
           try {
-            results.push(await s.run());
+            return await statement.run();
           } catch {
-            results.push({ success: false });
+            return { success: false };
           }
-        }
-        return results;
+        }));
       },
     };
   }
@@ -273,6 +274,15 @@ export function getProductImagesBucket(): R2Bucket {
 
 let dbReady = false;
 let initialization: Promise<void> | null = null;
+let announcementSeed: Promise<void> | null = null;
+
+function ensureAnnouncementSeed(db: D1Database): Promise<void> {
+  if (!announcementSeed) announcementSeed = seedAnnouncements(db).catch((error) => {
+    announcementSeed = null;
+    throw error;
+  });
+  return announcementSeed;
+}
 
 export async function ensureDatabase(): Promise<void> {
   const sql = getPostgresClient();
@@ -315,8 +325,6 @@ async function initializeDatabase(): Promise<void> {
     db.prepare("CREATE INDEX IF NOT EXISTS idx_products_active_category ON products(active, category)"),
     db.prepare("CREATE TABLE IF NOT EXISTS product_images (id TEXT PRIMARY KEY NOT NULL, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, r2_key TEXT, source_url TEXT NOT NULL, alt_text TEXT NOT NULL DEFAULT '', sort_order INTEGER NOT NULL DEFAULT 0, created_at TEXT NOT NULL)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_product_images_product_sort ON product_images(product_id, sort_order)"),
-    db.prepare("CREATE TABLE IF NOT EXISTS cart_items (id TEXT PRIMARY KEY NOT NULL, user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, product_id TEXT NOT NULL REFERENCES products(id) ON DELETE CASCADE, quantity INTEGER NOT NULL DEFAULT 1, configuration TEXT NOT NULL DEFAULT '{}', created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
-    db.prepare("CREATE INDEX IF NOT EXISTS idx_cart_items_user ON cart_items(user_id)"),
     db.prepare("CREATE TABLE IF NOT EXISTS orders (id TEXT PRIMARY KEY NOT NULL, order_number TEXT NOT NULL, user_id TEXT REFERENCES users(id) ON DELETE SET NULL, email TEXT NOT NULL, customer_name TEXT NOT NULL, phone TEXT NOT NULL, status TEXT NOT NULL DEFAULT 'pending', payment_method TEXT NOT NULL DEFAULT 'bank_transfer', payment_status TEXT NOT NULL DEFAULT 'pending', subtotal INTEGER NOT NULL, shipping INTEGER NOT NULL DEFAULT 0, total INTEGER NOT NULL, currency TEXT NOT NULL DEFAULT 'TRY', city TEXT, district TEXT, shipping_address TEXT NOT NULL, notes TEXT NOT NULL DEFAULT '', cargo_company TEXT, tracking_number TEXT, tracking_url TEXT, created_at TEXT NOT NULL, updated_at TEXT NOT NULL)"),
     db.prepare("CREATE UNIQUE INDEX IF NOT EXISTS idx_orders_number ON orders(order_number)"),
     db.prepare("CREATE INDEX IF NOT EXISTS idx_orders_user_created ON orders(user_id, created_at)"),
@@ -375,7 +383,7 @@ async function initializeDatabase(): Promise<void> {
 
 
   await seedCatalog(db);
-  await seedAnnouncements(db);
+  await ensureAnnouncementSeed(db);
   await seedMockOrders(db);
   await seedContactMessages(db);
   await seedUsers(db);
@@ -1065,10 +1073,9 @@ export async function duplicateProductRecord(id: string): Promise<CatalogProduct
 export async function listAnnouncements(publishedOnly = true): Promise<AnnouncementRecord[]> {
   await ensureDatabase();
   const db = getDb();
-  // Existing databases may already be marked as initialized and therefore skip
-  // the one-time bootstrap. Re-run the idempotent catalog seed here so newly
-  // published SEO posts appear without requiring a manual DB reset.
-  await seedAnnouncements(db);
+  // Existing installations may skip bootstrap because their product table
+  // already exists. Seed once per runtime, not on every blog request.
+  await ensureAnnouncementSeed(db);
   const where = publishedOnly ? "WHERE published = 1" : "";
   const { results } = await db
     .prepare(

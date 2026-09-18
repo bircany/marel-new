@@ -7,57 +7,9 @@ import { GlobalSearch } from "./global-search";
 import { PLISE_13_CATEGORIES } from "@/lib/plise-categories";
 
 export function SiteHeader() {
-  const [cartCount, setCartCount] = useState(0);
-  const [cartPulse, setCartPulse] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPerdelerOpen, setIsPerdelerOpen] = useState(false);
   const dropdownRef = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    let pulseTimer: ReturnType<typeof setTimeout> | null = null;
-    let cancelled = false;
-    const refreshCount = async () => {
-      try {
-        const response = await fetch("/api/cart", { cache: "no-store" });
-        if (!response.ok) {
-          if (!cancelled) setCartCount(0);
-          return;
-        }
-        const cart = (await response.json()) as {
-          summary?: { total_quantity?: number };
-          items?: Array<{ quantity?: number }>;
-        };
-        if (!cancelled) {
-          const count =
-            !cart.items || cart.items.length === 0
-              ? 0
-              : cart.summary?.total_quantity ??
-                cart.items?.reduce((sum, item) => sum + (item.quantity ?? 0), 0) ??
-                0;
-          setCartCount(count);
-        }
-      } catch {
-        if (!cancelled) setCartCount(0);
-      }
-    };
-    const pulse = () => {
-      setCartPulse(false);
-      requestAnimationFrame(() => setCartPulse(true));
-      if (pulseTimer) clearTimeout(pulseTimer);
-      pulseTimer = setTimeout(() => setCartPulse(false), 700);
-    };
-    refreshCount();
-    const onCartUpdated = () => {
-      refreshCount();
-      pulse();
-    };
-    window.addEventListener("marel:cart-updated", onCartUpdated);
-    return () => {
-      cancelled = true;
-      window.removeEventListener("marel:cart-updated", onCartUpdated);
-      if (pulseTimer) clearTimeout(pulseTimer);
-    };
-  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -190,18 +142,6 @@ export function SiteHeader() {
               </svg>
             </a>
 
-            <Link
-              className={`cart-action${cartPulse ? " cart-pulse" : ""}`}
-              href="/sepet"
-              aria-label={`Sepet, ${cartCount} ürün`}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" width="22" height="22">
-                <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 0 1-8 0" />
-              </svg>
-              <b>{cartCount}</b>
-            </Link>
           </div>
 
           {/* Mobile Menu */}

@@ -180,17 +180,6 @@ async function laravel<T>(path: string, init: RequestInit & { token?: boolean; s
       return { ok: true, status: 200, data: [] as unknown as T };
     }
 
-    if (path.startsWith("/cart")) {
-      return {
-        ok: true,
-        status: rest.method === "POST" ? 201 : 200,
-        data: {
-          items: [],
-          summary: { item_count: 0, total_quantity: 0, subtotal: 0 },
-        } as unknown as T,
-      };
-    }
-
     return { ok: false, status: 503, message: "Servis geçici olarak kullanılamıyor (Dahili fallback)." };
   }
 }

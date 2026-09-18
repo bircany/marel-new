@@ -48,7 +48,7 @@ export default function KvkkPage() {
                 </li>
                 <li>
                   <strong>Müşteri İşlem Bilgileri:</strong> Özel sipariş ölçüleri (en x boy cm), kumaş ve profil rengi
-                  tercihleri, sepet içeriği, sipariş notları, fatura ve ödeme makbuz bilgileri.
+                  tercihleri, sipariş notları, fatura ve ödeme makbuz bilgileri.
                 </li>
                 <li>
                   <strong>İşlem Güvenliği ve Cihaz Bilgileri:</strong> IP adresi, site erişim logları, çerez kayıtları ve

@@ -38,8 +38,8 @@ export default function CookiePolicyPage() {
               <h2>2. Kullanılan Çerez Türleri ve Amaçları</h2>
               <ul>
                 <li>
-                  <strong>Zorunlu Çerezler:</strong> Alışveriş sepetinizin hatırlanması, kullanıcı oturumunun açık
-                  tutulması ve güvenli ödeme/sipariş adımlarının tamamlanması için teknik olarak zorunludur.
+                  <strong>Zorunlu Çerezler:</strong> Kullanıcı oturumunun açık tutulması, teklif/sipariş formlarının
+                  güvenli çalışması ve temel site işlevlerinin sürdürülmesi için teknik olarak zorunludur.
                 </li>
                 <li>
                   <strong>İşlevsel Çerezler:</strong> Dil tercihiniz, seçtiğiniz kumaş filtreleri ve son incelediğiniz
@@ -56,8 +56,8 @@ export default function CookiePolicyPage() {
               <h2>3. Çerez Tercihlerini Yönetme</h2>
               <p>
                 Tarayıcınızın ayarlarını değiştirerek çerezlere ilişkin tercihlerinizi dilediğiniz zaman
-                özelleştirebilirsiniz. Zorunlu çerezlerin kapatılması durumunda sepet ve sipariş adımlarında teknik
-                aksaklıklar yaşanabileceğini hatırlatırız.
+                özelleştirebilirsiniz. Zorunlu çerezlerin kapatılması durumunda site oturumu ve teklif/sipariş
+                formlarında teknik aksaklıklar yaşanabileceğini hatırlatırız.
               </p>
             </section>
           </article>

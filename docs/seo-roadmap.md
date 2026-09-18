@@ -4,8 +4,15 @@
 
 - Global `LocalBusiness` JSON-LD ve mevcut Product, Article, FAQPage şemaları.
 - Canonical, Open Graph, Twitter ve Türkçe locale metadata.
-- `robots.txt` ile admin/API/sepet engellemesi ve sitemap bildirimi.
-- Genişletilmiş sitemap ve LLM erişimi için `llms.txt`/`llm.txt`.
+- `robots.txt` ile admin/API engellemesi ve sitemap bildirimi.
+- Dinamik sitemap: ürün ve yayınlanmış blog URL'leri saatlik önbellekle `/sitemap.xml` üzerinden üretilir.
+- LLM erişimi için `llms.txt`/`llm.txt`.
+
+## Uygulama sonrası manuel işler
+
+- Google Search Console ve Bing Webmaster'a `https://www.marelpliseperde.com.tr/sitemap.xml` gönderin.
+- Google Business Profile'daki NAP (ad, adres, telefon) ile sitedeki bilgileri eşitleyin.
+- Search Console'da ürün, blog ve kategori URL'leri için URL Inspection ile ilk indeksleme talebini gönderin.
 
 ## On-page ve AEO
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { formatMoney } from "@/lib/commerce";
 
 interface ConfiguratorProps {
@@ -18,13 +18,12 @@ export function ProductConfigurator({ product }: ConfiguratorProps) {
   const [quantity, setQuantity] = useState<number>(1);
   const [profileColor, setProfileColor] = useState<string>("Beyaz (Standart)");
   const [fabricColor, setFabricColor] = useState<string>("");
-  const [totalPrice, setTotalPrice] = useState<number>(0);
 
   // Parse colors & options if any
   let parsedFabricColors: string[] = [];
   try {
     parsedFabricColors = JSON.parse(product.colors || "[]");
-  } catch (e) {}
+  } catch {}
 
   const profileOptions = [
     "Beyaz (Standart)",
@@ -34,22 +33,10 @@ export function ProductConfigurator({ product }: ConfiguratorProps) {
     "Siyah"
   ];
 
-  // Fiyat Hesaplama
-  useEffect(() => {
-    const w = typeof width === "number" ? width : 0;
-    const h = typeof height === "number" ? height : 0;
-    
-    if (w > 0 && h > 0) {
-      let m2 = (w * h) / 10000;
-      // Genellikle minimum 1 m2 baz alınır
-      if (m2 < 1) m2 = 1;
-      
-      const total = m2 * (product.price / 100) * quantity;
-      setTotalPrice(total);
-    } else {
-      setTotalPrice(0);
-    }
-  }, [width, height, quantity, product.price]);
+  const widthValue = typeof width === "number" ? width : 0;
+  const heightValue = typeof height === "number" ? height : 0;
+  const squareMeters = widthValue > 0 && heightValue > 0 ? Math.max((widthValue * heightValue) / 10000, 1) : 0;
+  const totalPrice = squareMeters * (product.price / 100) * quantity;
 
   const handleWhatsapp = () => {
     if (!width || !height || typeof width !== "number" || typeof height !== "number") {

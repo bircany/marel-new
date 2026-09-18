@@ -49,16 +49,6 @@ export const productImages = sqliteTable("product_images", {
   createdAt: text("created_at").notNull(),
 }, (table) => [index("idx_product_images_product_sort").on(table.productId, table.sortOrder)]);
 
-export const cartItems = sqliteTable("cart_items", {
-  id: text("id").primaryKey(),
-  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  productId: text("product_id").notNull().references(() => products.id, { onDelete: "cascade" }),
-  quantity: integer("quantity").notNull().default(1),
-  configuration: text("configuration").notNull().default("{}"),
-  createdAt: text("created_at").notNull(),
-  updatedAt: text("updated_at").notNull(),
-}, (table) => [index("idx_cart_items_user").on(table.userId)]);
-
 export const orders = sqliteTable("orders", {
   id: text("id").primaryKey(),
   orderNumber: text("order_number").notNull(),

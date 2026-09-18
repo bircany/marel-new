@@ -29,7 +29,7 @@ const FAQS = [
   },
   {
     q: "Kargo ücreti ne kadar, ücretsiz kargo limiti var mı?",
-    a: "Belirlenen sepet limitinin (genellikle 1.500 ₺ ve üzeri) üzerindeki tüm Türkiye geneli siparişlerde kargo tamamen ücretsizdir. Altındaki siparişlerde sabit kargo ücreti uygulanmaktadır.",
+    a: "Belirlenen sipariş tutarının (genellikle 1.500 ₺ ve üzeri) üzerindeki tüm Türkiye geneli siparişlerde kargo tamamen ücretsizdir. Altındaki siparişlerde sabit kargo ücreti uygulanmaktadır.",
   },
   {
     q: "Ölçüye özel üretilen plise perdelerde iade koşulları nedir?",

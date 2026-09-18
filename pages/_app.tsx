@@ -18,9 +18,13 @@ export default function MarelApp({ Component, pageProps }: AppProps) {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="theme-color" content="#0b1736" />
         <title>Marel Plise Perde</title>
-        <meta name="description" content="Ölçüye özel plise perde sistemleri." />
+        <meta name="description" content="Elbistan'dan Türkiye geneline özel ölçü plise perde üretimi. Kumaş, renk, fiyat ve teklif seçeneklerini inceleyin." />
+        <meta property="og:site_name" content="Marel Plise Perde" />
+        <meta property="og:locale" content="tr_TR" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
         <link rel="icon" href="/favicon.png" />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@type": "LocalBusiness", name: "Marel Plise Perde", url: siteUrl, telephone: "+90 546 735 66 02", address: { "@type": "PostalAddress", addressLocality: "Elbistan", addressRegion: "Kahramanmaraş", addressCountry: "TR" } }).replace(/</g, "\\u003c") }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({ "@context": "https://schema.org", "@graph": [{ "@type": "HomeAndConstructionBusiness", "@id": `${siteUrl}/#organization`, name: "Marel Plise Perde", url: siteUrl, logo: `${siteUrl}/og.png`, image: `${siteUrl}/og.png`, telephone: "+90 546 735 66 02", priceRange: "₺₺", address: { "@type": "PostalAddress", addressLocality: "Elbistan", addressRegion: "Kahramanmaraş", addressCountry: "TR" }, areaServed: { "@type": "Country", name: "Türkiye" }, sameAs: ["https://www.instagram.com/marelpliseperde", "https://www.youtube.com/@marelpliseperde"], contactPoint: { "@type": "ContactPoint", telephone: "+90 546 735 66 02", contactType: "customer service", availableLanguage: "Turkish" } }, { "@type": "WebSite", "@id": `${siteUrl}/#website`, url: siteUrl, name: "Marel Plise Perde", inLanguage: "tr-TR" }] }).replace(/</g, "\\u003c") }} />
       </Head>
       <GoogleTagNoScript />
       <ScrollingTitle text="Marel Plise Perde Elbistan" />
